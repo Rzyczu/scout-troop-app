@@ -1,8 +1,12 @@
 // app.js
 const express = require('express');
+const bcrypt = require('bcryptjs');
+const jwt = require('jsonwebtoken');
 const Datastore = require('nedb');
 const app = express();
 app.use(express.json());
+
+const JWT_SECRET = 'supersecretkey'; // Klucz JWT do szyfrowania tokenów (zmień na bardziej bezpieczny klucz)
 
 // Enum dla funkcji harcerskich
 const ScoutFunctions = {
@@ -12,18 +16,125 @@ const ScoutFunctions = {
     PRZYBOCZNY: 'Przyboczny'
 };
 
+// Enum dla ról użytkownika
+const UserRoles = {
+    DRUZYNOWY: 'Drużynowy',
+    PRZYBOCZNY: 'Przyboczny',
+    ZASTĘPOWY: 'Zastępowy'
+};
+
 // Inicjalizacja baz danych
+const userDb = new Datastore({ filename: 'users.db', autoload: true });
 const troopDb = new Datastore({ filename: 'troop.db', autoload: true });
 const personalDataDb = new Datastore({ filename: 'personalData.db', autoload: true });
 const scoutInfoDb = new Datastore({ filename: 'scoutInfo.db', autoload: true });
 
-// Dodawanie zastępu (troop)
-app.post('/troop', (req, res) => {
+// Dodawanie użytkownika drużynowego (tylko raz, przy starcie serwera)
+const initializeAdminUser = async () => {
+    const adminUsername = 'admin';
+    const adminPassword = 'admin';
+    const adminEmail = 'admin@admin.adm';
+
+    // Sprawdzamy, czy użytkownik admin już istnieje
+    userDb.findOne({ username: adminUsername }, async (err, user) => {
+        if (err) return console.error('Database error:', err);
+
+        // Jeśli użytkownik nie istnieje, tworzymy go
+        if (!user) {
+            const hashedPassword = await bcrypt.hash(adminPassword, 10);
+            const newUser = {
+                username: adminUsername,
+                password: hashedPassword,
+                email: adminEmail,
+                role: UserRoles.DRUZYNOWY, // Rola drużynowego
+                troopId: null // Brak przypisania do konkretnego zastępu
+            };
+
+            userDb.insert(newUser, (err, user) => {
+                if (err) return console.error('Error adding admin user:', err);
+                console.log('Admin user created:', user);
+            });
+        } else {
+            console.log('Admin user already exists');
+        }
+    });
+};
+
+// Wywołanie funkcji tworzącej użytkownika drużynowego przy starcie serwera
+initializeAdminUser();
+
+// Middleware do sprawdzania tokena JWT i ustawiania req.user
+const authenticateToken = (req, res, next) => {
+    const token = req.headers['authorization'];
+    if (!token) return res.status(401).json({ error: 'Access denied, token missing' });
+
+    jwt.verify(token, JWT_SECRET, (err, user) => {
+        if (err) return res.status(403).json({ error: 'Invalid token' });
+        req.user = user;
+        next();
+    });
+};
+
+// Middleware do autoryzacji na podstawie roli
+const authorize = (roles) => (req, res, next) => {
+    if (!roles.includes(req.user.role)) {
+        return res.status(403).json({ error: 'Access denied, insufficient permissions' });
+    }
+    next();
+};
+
+// Rejestracja użytkownika (tylko dla drużynowego)
+app.post('/register', authenticateToken, authorize([UserRoles.DRUZYNOWY]), async (req, res) => {
+    const { username, password, email, role, troopId } = req.body;
+
+    if (!Object.values(UserRoles).includes(role)) {
+        return res.status(400).json({ error: 'Invalid role' });
+    }
+
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    const newUser = {
+        username,
+        password: hashedPassword,
+        email,
+        role,
+        troopId: role === UserRoles.ZASTĘPOWY ? troopId : null
+    };
+
+    userDb.insert(newUser, (err, user) => {
+        if (err) return res.status(500).json({ error: 'Database insertion error' });
+        res.status(201).json({ success: true, user });
+    });
+});
+
+// Logowanie użytkownika
+app.post('/login', (req, res) => {
+    const { username, password } = req.body;
+
+    userDb.findOne({ username }, async (err, user) => {
+        if (err || !user) return res.status(400).json({ error: 'Invalid credentials' });
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) return res.status(400).json({ error: 'Invalid credentials' });
+
+        const token = jwt.sign(
+            { id: user._id, role: user.role, troopId: user.troopId },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
+
+        res.json({ success: true, token });
+    });
+});
+
+// Dodawanie zastępu (troop) z początkowymi punktami
+app.post('/troop', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
     const troop = {
         name: req.body.name,
         description: req.body.description,
         color: req.body.color,
         song: req.body.song,
+        points: req.body.points || 0, // Wartość początkowa punktów
         members: [] // Lista ID uczestników, pusta na początku
     };
     troopDb.insert(troop, (err, newTroop) => {
@@ -33,7 +144,7 @@ app.post('/troop', (req, res) => {
 });
 
 // Dodawanie danych osobowych uczestnika (PersonalData)
-app.post('/personalData', (req, res) => {
+app.post('/personalData', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
     const personalData = {
         firstName: req.body.firstName,
         lastName: req.body.lastName,
@@ -49,7 +160,7 @@ app.post('/personalData', (req, res) => {
 });
 
 // Dodawanie informacji harcerskich uczestnika (ScoutInfo)
-app.post('/scoutInfo', (req, res) => {
+app.post('/scoutInfo', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
     const scoutFunction = req.body.function;
     if (!Object.values(ScoutFunctions).includes(scoutFunction)) {
         return res.status(400).json({ error: 'Invalid function value' });
@@ -57,10 +168,10 @@ app.post('/scoutInfo', (req, res) => {
 
     const scoutInfo = {
         function: scoutFunction || null,
-        troopId: req.body.troopId || null, // ID zastępu, jeśli przypisano
+        troopId: req.body.troopId || null,
         rankOpen: req.body.rankOpen,
         rankAchieved: req.body.rankAchieved,
-        personalDataId: req.body.personalDataId // ID obiektu PersonalData
+        personalDataId: req.body.personalDataId
     };
     scoutInfoDb.insert(scoutInfo, (err, newScoutInfo) => {
         if (err) return res.status(500).json({ error: 'Database insertion error' });
@@ -69,7 +180,7 @@ app.post('/scoutInfo', (req, res) => {
 });
 
 // Endpoint do edycji danych osobowych uczestnika
-app.put('/personalData/:id', (req, res) => {
+app.put('/personalData/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
     const updateData = req.body;
     personalDataDb.update({ _id: req.params.id }, { $set: updateData }, {}, (err, numUpdated) => {
         if (err) return res.status(500).json({ error: 'Database update error' });
@@ -79,7 +190,7 @@ app.put('/personalData/:id', (req, res) => {
 });
 
 // Endpoint do edycji informacji harcerskich uczestnika
-app.put('/scoutInfo/:id', (req, res) => {
+app.put('/scoutInfo/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
     const updateData = {};
     if (req.body.rankOpen) updateData.rankOpen = req.body.rankOpen;
     if (req.body.rankAchieved) updateData.rankAchieved = req.body.rankAchieved;
@@ -94,12 +205,13 @@ app.put('/scoutInfo/:id', (req, res) => {
     });
 });
 
-// Endpoint do edycji informacji o zastępie (description, color, song)
-app.put('/troop/:id', (req, res) => {
+// Endpoint do edycji informacji o zastępie (description, color, song, points)
+app.put('/troop/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY, UserRoles.ZASTĘPOWY]), (req, res) => {
     const updateData = {};
     if (req.body.description) updateData.description = req.body.description;
     if (req.body.color) updateData.color = req.body.color;
     if (req.body.song) updateData.song = req.body.song;
+    if (req.body.points !== undefined) updateData.points = req.body.points;
 
     troopDb.update({ _id: req.params.id }, { $set: updateData }, {}, (err, numUpdated) => {
         if (err) return res.status(500).json({ error: 'Database update error' });
@@ -109,7 +221,7 @@ app.put('/troop/:id', (req, res) => {
 });
 
 // Usuwanie uczestnika z zastępu
-app.post('/troop/:troopId/removeMember/:scoutInfoId', (req, res) => {
+app.post('/troop/:troopId/removeMember/:scoutInfoId', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
     const { troopId, scoutInfoId } = req.params;
 
     // Aktualizacja obiektu Troop (usunięcie scoutInfoId z listy members)
@@ -126,7 +238,7 @@ app.post('/troop/:troopId/removeMember/:scoutInfoId', (req, res) => {
 });
 
 // Usunięcie uczestnika (PersonalData i ScoutInfo)
-app.delete('/deleteMember/:id', (req, res) => {
+app.delete('/deleteMember/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY]), (req, res) => {
     const scoutInfoId = req.params.id;
 
     // Usunięcie obiektu ScoutInfo
@@ -145,44 +257,11 @@ app.delete('/deleteMember/:id', (req, res) => {
     });
 });
 
-
 // Pobieranie wszystkich zastępów z przypisanymi uczestnikami
-app.get('/troops', (req, res) => {
+app.get('/troops', authenticateToken, (req, res) => {
     troopDb.find({}, (err, troops) => {
         if (err) return res.status(500).json({ error: 'Database fetch error' });
         res.json({ troops });
-    });
-});
-
-// Pobieranie wszystkich danych osobowych
-app.get('/personalData', (req, res) => {
-    personalDataDb.find({}, (err, personalData) => {
-        if (err) return res.status(500).json({ error: 'Database fetch error' });
-        res.json({ personalData });
-    });
-});
-
-// Pobieranie wszystkich informacji harcerskich
-app.get('/scoutInfo', (req, res) => {
-    scoutInfoDb.find({}, (err, scoutInfo) => {
-        if (err) return res.status(500).json({ error: 'Database fetch error' });
-        res.json({ scoutInfo });
-    });
-});
-
-// Przypisywanie uczestnika do zastępu
-app.post('/assignMember', (req, res) => {
-    const { troopId, scoutInfoId } = req.body;
-
-    // Aktualizacja obiektu ScoutInfo (przypisanie troopId)
-    scoutInfoDb.update({ _id: scoutInfoId }, { $set: { troopId: troopId } }, {}, (err, numUpdated) => {
-        if (err) return res.status(500).json({ error: 'Assignment error in ScoutInfo' });
-
-        // Aktualizacja obiektu Troop (dodanie scoutInfoId do listy members)
-        troopDb.update({ _id: troopId }, { $push: { members: scoutInfoId } }, {}, (err, numUpdated) => {
-            if (err) return res.status(500).json({ error: 'Assignment error in Troop' });
-            res.json({ success: true, message: 'Member assigned to troop' });
-        });
     });
 });
 

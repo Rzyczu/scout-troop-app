@@ -18,7 +18,9 @@
   },
   "homepage": "https://github.com/Rzyczu/scout-troop-app#readme",
   "dependencies": {
+    "bcryptjs": "^2.4.3",
     "express": "^4.21.1",
+    "jsonwebtoken": "^9.0.2",
     "nedb": "^1.8.0"
   }
 }
