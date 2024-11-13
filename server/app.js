@@ -24,10 +24,10 @@ const UserRoles = {
 };
 
 // Inicjalizacja baz danych
-const userDb = new Datastore({ filename: 'users.db', autoload: true });
-const troopDb = new Datastore({ filename: 'troop.db', autoload: true });
-const personalDataDb = new Datastore({ filename: 'personalData.db', autoload: true });
-const scoutInfoDb = new Datastore({ filename: 'scoutInfo.db', autoload: true });
+const userDb = new Datastore({ filename: 'server/db/users.db', autoload: true });
+const troopDb = new Datastore({ filename: 'server/db/troop.db', autoload: true });
+const personalDataDb = new Datastore({ filename: 'server/db/personalData.db', autoload: true });
+const scoutInfoDb = new Datastore({ filename: 'server/db/scoutInfo.db', autoload: true });
 
 // Dodawanie użytkownika drużynowego (tylko raz, przy starcie serwera)
 const initializeAdminUser = async () => {

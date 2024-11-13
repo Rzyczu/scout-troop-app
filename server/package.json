@@ -1,22 +1,14 @@
 {
-  "name": "scout-troop-app",
+  "name": "server",
   "version": "1.0.0",
   "description": "",
-  "main": "index.js",
+  "main": "app.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Rzyczu/scout-troop-app.git"
   },
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/Rzyczu/scout-troop-app/issues"
-  },
-  "homepage": "https://github.com/Rzyczu/scout-troop-app#readme",
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "express": "^4.21.1",
