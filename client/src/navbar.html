@@ -1,0 +1,47 @@
+<!-- client/src/navbar.html -->
+<nav class="navbar navbar-expand-lg navbar-light bg-body-tertiary">
+    <div class="container">
+        <a class="navbar-brand" href="#">Scput App</a>
+        <button
+            data-mdb-collapse-init
+            class="navbar-toggler"
+            type="button"
+            data-mdb-target="#navbarTogglerDemo02"
+            aria-controls="navbarTogglerDemo02"
+            aria-expanded="false"
+            aria-label="Toggle navigation">
+            <i class="fas fa-bars"></i>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarTogglerDemo02">
+            <ul class="navbar-nav ms-4 me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" href="/dashboard">Dashboard</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/participants">Participants</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/members">Members</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/users">Users</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="/troops">Troops</a>
+                </li>
+            </ul>
+            <ul>
+                <li class="nav-item">
+                    <button class="btn btn-outline-danger" onclick="logout()">Logout</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<script>
+    function logout() {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+    }
+</script>

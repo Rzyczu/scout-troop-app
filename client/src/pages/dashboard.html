@@ -1,0 +1,52 @@
+<!-- client/src/pages/dashboard.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dashboard - Scout Troop App</title>
+    <link rel="stylesheet" href="/custom.css">
+</head>
+
+<body>
+    <header id="navbar"></header>
+    <div class="container">
+        <h1 class="text-center my-4">Dashboard</h1>
+        <div id="content" class="mt-4">
+            <!-- Treści związane z dashboardem -->
+        </div>
+    </div>
+    <script>
+        const token = localStorage.getItem('token');
+        if (!token) {
+            window.location.href = '/login'; // Przekierowanie do logowania, jeśli brak tokena
+        } else {
+            // Pobieranie danych z nowego endpointu /api/dashboard
+            fetch('/api/dashboard', {
+                method: 'GET',
+                headers: {
+                    'Authorization': token // Wysyłanie tokena w nagłówku
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        window.location.href = '/login';
+                    } else {
+                        console.log(data);
+                        document.getElementById('content').innerText = JSON.stringify(data, null, 2);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        }
+
+        // Ładowanie wspólnego menu nawigacji
+        fetch('/navbar.html').then(res => res.text()).then(html => {
+            document.getElementById('navbar').innerHTML = html;
+        });
+    </script>
+</body>
+
+</html>

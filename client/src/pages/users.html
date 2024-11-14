@@ -1,0 +1,125 @@
+<!-- client/src/pages/users.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Scout Troop App</title>
+    <link rel="stylesheet" href="/custom.css">
+</head>
+
+<body>
+    <header id="navbar"></header>
+    <div class="container">
+        <h1 class="text-center my-4">Users</h1>
+        <button class="btn btn-primary mb-3" onclick="showAddUserModal()">Add User</button>
+        <div id="userList" class="row"></div>
+
+        <!-- Modal for adding/editing users -->
+        <div class="modal" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addUserModalLabel">Add/Edit User</h5>
+                        <button type="button" class="btn-close" onclick="closeAddUserModal()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addUserForm">
+                            <div class="mb-3">
+                                <label for="username" class="form-label">Username</label>
+                                <input type="text" class="form-control" name="username" placeholder="Username" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="password" class="form-label">Password</label>
+                                <input type="password" class="form-control" name="password" placeholder="Password"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" placeholder="Email" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="role" class="form-label">Role</label>
+                                <select class="form-select" name="role" required>
+                                    <option value="Drużynowy">Drużynowy</option>
+                                    <option value="Przyboczny">Przyboczny</option>
+                                    <option value="Zastępowy">Zastępowy</option>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-success">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load the navigation bar
+        fetch('/navbar.html').then(res => res.text()).then(html => {
+            document.getElementById('navbar').innerHTML = html;
+        });
+
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/';
+
+        function loadUsers() {
+            fetch('/api/users', { headers: { 'Authorization': token } })
+                .then(res => res.json())
+                .then(users => {
+                    let userListHtml = '';
+                    users.forEach(user => {
+                        userListHtml += `
+                            <div class="col-md-4">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${user.username}</h5>
+                                        <p class="card-text">Email: ${user.email}</p>
+                                        <p class="card-text">Role: ${user.role}</p>
+                                        <button class="btn btn-danger" onclick="deleteUser('${user._id}')">Delete</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    document.getElementById('userList').innerHTML = userListHtml;
+                });
+        }
+
+        function showAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'block';
+            document.getElementById('addUserModal').classList.add('show');
+            document.getElementById('addUserModal').style.backgroundColor = 'rgba(0,0,0,0.5)';
+        }
+
+        function closeAddUserModal() {
+            document.getElementById('addUserModal').style.display = 'none';
+            document.getElementById('addUserModal').classList.remove('show');
+            document.getElementById('addUserForm').reset();
+        }
+
+        document.getElementById('addUserForm').onsubmit = function (event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/api/users', {
+                method: 'POST',
+                headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.fromEntries(formData))
+            }).then(() => {
+                loadUsers();
+                closeAddUserModal();
+            });
+        };
+
+        function deleteUser(id) {
+            fetch(`/api/users/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': token }
+            }).then(() => loadUsers());
+        }
+
+        loadUsers();
+    </script>
+</body>
+
+</html>

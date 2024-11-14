@@ -1,0 +1,127 @@
+<!-- client/src/pages/participants.html -->
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Participants - Scout Troop App</title>
+    <link rel="stylesheet" href="/custom.css">
+</head>
+
+<body>
+    <header id="navbar"></header>
+    <div class="container">
+        <h1 class="text-center my-4">Participants</h1>
+        <button class="btn btn-primary mb-3" onclick="showAddParticipantModal()">Add Participant</button>
+        <div id="participantList" class="row"></div>
+
+        <!-- Modal for adding/editing participants -->
+        <div class="modal" id="addParticipantModal" tabindex="-1" aria-labelledby="addParticipantModalLabel"
+            aria-hidden="true">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="addParticipantModalLabel">Add/Edit Participant</h5>
+                        <button type="button" class="btn-close" onclick="closeAddParticipantModal()"></button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="addParticipantForm">
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" name="firstName" placeholder="First Name"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" name="lastName" placeholder="Last Name"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="birthYear" class="form-label">Birth Year</label>
+                                <input type="number" class="form-control" name="birthYear" placeholder="Birth Year"
+                                    required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" name="email" placeholder="Email">
+                            </div>
+                            <button type="submit" class="btn btn-success">Save</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Load the navigation bar
+        fetch('/navbar.html').then(res => res.text()).then(html => {
+            document.getElementById('navbar').innerHTML = html;
+        });
+
+        const token = localStorage.getItem('token');
+        if (!token) window.location.href = '/login';
+
+        // Load participants and render with Bootstrap styling
+        function loadParticipants() {
+            fetch('/api/participants', { headers: { 'Authorization': token } })
+                .then(res => res.json())
+                .then(participants => {
+                    let participantListHtml = '';
+                    participants.forEach(p => {
+                        participantListHtml += `
+                            <div class="col-md-4">
+                                <div class="card mb-3">
+                                    <div class="card-body">
+                                        <h5 class="card-title">${p.firstName} ${p.lastName}</h5>
+                                        <p class="card-text">Birth Year: ${p.birthYear}</p>
+                                        <button class="btn btn-danger" onclick="deleteParticipant('${p._id}')">Delete</button>
+                                    </div>
+                                </div>
+                            </div>`;
+                    });
+                    document.getElementById('participantList').innerHTML = participantListHtml;
+                });
+        }
+
+        // Show and hide modal functions
+        function showAddParticipantModal() {
+            document.getElementById('addParticipantModal').style.display = 'block';
+            document.getElementById('addParticipantModal').classList.add('show');
+            document.getElementById('addParticipantModal').style.backgroundColor = 'rgba(0,0,0,0.5)';
+        }
+
+        function closeAddParticipantModal() {
+            document.getElementById('addParticipantModal').style.display = 'none';
+            document.getElementById('addParticipantModal').classList.remove('show');
+            document.getElementById('addParticipantForm').reset();
+        }
+
+        // Form submission to add a new participant
+        document.getElementById('addParticipantForm').onsubmit = function (event) {
+            event.preventDefault();
+            const formData = new FormData(event.target);
+            fetch('/api/participants', {
+                method: 'POST',
+                headers: { 'Authorization': token, 'Content-Type': 'application/json' },
+                body: JSON.stringify(Object.fromEntries(formData))
+            }).then(() => {
+                loadParticipants();
+                closeAddParticipantModal();
+            });
+        };
+
+        // Function to delete a participant
+        function deleteParticipant(id) {
+            fetch(`/api/participants/${id}`, {
+                method: 'DELETE',
+                headers: { 'Authorization': token }
+            }).then(() => loadParticipants());
+        }
+
+        loadParticipants();
+    </script>
+</body>
+
+</html>
