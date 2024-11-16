@@ -26,7 +26,7 @@
             fetch('/api/dashboard', {
                 method: 'GET',
                 headers: {
-                    'Authorization': token // Wysyłanie tokena w nagłówku
+                    'Authorization': `Bearer ${token}` // Wysyłanie tokena w nagłówku
                 }
             })
                 .then(response => response.json())

@@ -1,4 +1,3 @@
-<!-- client/src/pages/users.html -->
 <!DOCTYPE html>
 <html lang="en">
 
@@ -12,113 +11,173 @@
 <body>
     <header id="navbar"></header>
     <div class="container">
-        <h1 class="text-center my-4">Users</h1>
-        <button class="btn btn-primary mb-3" onclick="showAddUserModal()">Add User</button>
-        <div id="userList" class="row"></div>
+        <h1 class="text-center my-4">Manage Users</h1>
+        <div class="mb-4">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">Add User</button>
+        </div>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Role</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="userTableBody">
+                <!-- Users will be dynamically inserted here -->
+            </tbody>
+        </table>
+    </div>
 
-        <!-- Modal for adding/editing users -->
-        <div class="modal" id="addUserModal" tabindex="-1" aria-labelledby="addUserModalLabel" aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addUserModalLabel">Add/Edit User</h5>
-                        <button type="button" class="btn-close" onclick="closeAddUserModal()"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="addUserForm">
-                            <div class="mb-3">
-                                <label for="username" class="form-label">Username</label>
-                                <input type="text" class="form-control" name="username" placeholder="Username" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="password" class="form-label">Password</label>
-                                <input type="password" class="form-control" name="password" placeholder="Password"
-                                    required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" placeholder="Email" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="role" class="form-label">Role</label>
-                                <select class="form-select" name="role" required>
-                                    <option value="Drużynowy">Drużynowy</option>
-                                    <option value="Przyboczny">Przyboczny</option>
-                                    <option value="Zastępowy">Zastępowy</option>
-                                </select>
-                            </div>
-                            <button type="submit" class="btn btn-success">Save</button>
-                        </form>
-                    </div>
+    <!-- User Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel">Add/Edit User</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <input type="hidden" id="userId">
+                        <div class="mb-3">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" id="username" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="role" class="form-label">Role</label>
+                            <select class="form-select" id="role" required>
+                                <option value="Drużynowy">Drużynowy</option>
+                                <option value="Przyboczny">Przyboczny</option>
+                                <option value="Zastępowy">Zastępowy</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
-        // Load the navigation bar
-        fetch('/navbar.html').then(res => res.text()).then(html => {
-            document.getElementById('navbar').innerHTML = html;
-        });
-
         const token = localStorage.getItem('token');
-        if (!token) window.location.href = '/';
-
-        function loadUsers() {
-            fetch('/api/users', { headers: { 'Authorization': token } })
-                .then(res => res.json())
-                .then(users => {
-                    let userListHtml = '';
-                    users.forEach(user => {
-                        userListHtml += `
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${user.username}</h5>
-                                        <p class="card-text">Email: ${user.email}</p>
-                                        <p class="card-text">Role: ${user.role}</p>
-                                        <button class="btn btn-danger" onclick="deleteUser('${user._id}')">Delete</button>
-                                    </div>
-                                </div>
-                            </div>`;
-                    });
-                    document.getElementById('userList').innerHTML = userListHtml;
-                });
+        if (!token) {
+            window.location.href = '/login';
         }
 
-        function showAddUserModal() {
-            document.getElementById('addUserModal').style.display = 'block';
-            document.getElementById('addUserModal').classList.add('show');
-            document.getElementById('addUserModal').style.backgroundColor = 'rgba(0,0,0,0.5)';
-        }
-
-        function closeAddUserModal() {
-            document.getElementById('addUserModal').style.display = 'none';
-            document.getElementById('addUserModal').classList.remove('show');
-            document.getElementById('addUserForm').reset();
-        }
-
-        document.getElementById('addUserForm').onsubmit = function (event) {
-            event.preventDefault();
-            const formData = new FormData(event.target);
+        const fetchUsers = () => {
             fetch('/api/users', {
-                method: 'POST',
-                headers: { 'Authorization': token, 'Content-Type': 'application/json' },
-                body: JSON.stringify(Object.fromEntries(formData))
-            }).then(() => {
-                loadUsers();
-                closeAddUserModal();
+                headers: {
+                    'Authorization': `Bearer ${token}`
+                }
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                        window.location.href = '/login';
+                    } else {
+                        populateUserTable(data);
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        };
+
+        const populateUserTable = (users) => {
+            const tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = '';
+            users.forEach(user => {
+                const row = `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editUser('${user._id}', '${user.username}', '${user.email}', '${user.role}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser('${user._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `;
+                tableBody.innerHTML += row;
             });
         };
 
-        function deleteUser(id) {
-            fetch(`/api/users/${id}`, {
-                method: 'DELETE',
-                headers: { 'Authorization': token }
-            }).then(() => loadUsers());
-        }
+        const editUser = (id, username, email, role) => {
+            document.getElementById('userId').value = id;
+            document.getElementById('username').value = username;
+            document.getElementById('email').value = email;
+            document.getElementById('role').value = role;
+            document.getElementById('password').value = ''; // Password not shown for security
+            new bootstrap.Modal(document.getElementById('userModal')).show();
+        };
 
-        loadUsers();
+        const deleteUser = (id) => {
+            if (confirm('Are you sure you want to delete this user?')) {
+                fetch(`/api/users/${id}`, {
+                    method: 'DELETE',
+                    headers: {
+                        'Authorization': `Bearer ${token}`
+                    }
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data.error) {
+                            alert(data.error);
+                        } else {
+                            fetchUsers();
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        };
+
+        document.getElementById('userForm').addEventListener('submit', (event) => {
+            event.preventDefault();
+
+            const id = document.getElementById('userId').value;
+            const username = document.getElementById('username').value;
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const role = document.getElementById('role').value;
+
+            const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/users/${id}` : '/api/users';
+            const payload = { username, email, password, role };
+
+            fetch(url, {
+                method,
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(payload)
+            })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.error) {
+                        alert(data.error);
+                    } else {
+                        fetchUsers();
+                        new bootstrap.Modal(document.getElementById('userModal')).hide();
+                    }
+                })
+                .catch(error => console.error('Error:', error));
+        });
+
+        fetchUsers();
+
+        fetch('/navbar.html').then(res => res.text()).then(html => {
+            document.getElementById('navbar').innerHTML = html;
+        });
     </script>
 </body>
 

@@ -6,7 +6,8 @@ const jwt = require('jsonwebtoken');
 const Datastore = require('nedb');
 const app = express();
 app.use(express.json());
-
+const cookieParser = require('cookie-parser');
+app.use(cookieParser());
 const JWT_SECRET = 'supersecretkey';
 
 // Enums
@@ -49,11 +50,19 @@ const initializeAdminUser = async () => {
 initializeAdminUser();
 
 const authenticateToken = (req, res, next) => {
-    const token = req.headers['authorization'];
-    if (!token) return res.status(401).json({ error: 'Access denied, token missing' });
+    const authHeader = req.headers['authorization'];
+    const token = authHeader && authHeader.startsWith('Bearer ')
+        ? authHeader.split(' ')[1]
+        : req.query.token || req.cookies.token; // Sprawdzanie ciasteczek
+
+    if (!token) {
+        return res.status(401).json({ error: 'Access denied, token missing or invalid format' });
+    }
 
     jwt.verify(token, JWT_SECRET, (err, user) => {
-        if (err) return res.status(403).json({ error: 'Invalid token' });
+        if (err) {
+            return res.status(403).json({ error: 'Invalid token' });
+        }
         req.user = user;
         next();
     });
@@ -61,17 +70,30 @@ const authenticateToken = (req, res, next) => {
 
 // Authorization middleware
 const authorize = (roles) => (req, res, next) => {
-    if (!roles.includes(req.user.role)) return res.status(403).json({ error: 'Access denied' });
+    console.log('Rola użytkownika:', req.user.role);
+    if (!roles.includes(req.user.role)) {
+        console.log('Brak uprawnień, zwracam 403');
+        return res.status(403).json({ error: 'Access denied' });
+    }
     next();
 };
+
+app.use((req, res, next) => {
+    console.log(`Żądanie: ${req.method} ${req.url}`);
+    next();
+});
 
 // Route: HTML pages
 app.get('/', (req, res) => res.redirect('/login'));
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/src/pages/dashboard.html'));
-}); app.get('/users', authenticateToken, authorize([UserRoles.DRUZYNOWY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/users.html')));
+});
+app.get('/participants', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    console.log('Ładowanie pliku participants.html');
+    res.sendFile(path.join(__dirname, '../client/src/pages/participants.html'))
+});
+app.get('/users', authenticateToken, authorize([UserRoles.DRUZYNOWY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/users.html')));
 app.get('/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/members.html')));
-app.get('/participants', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/participants.html')));
 app.get('/troops', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/troops.html')));
 app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../client/src/login.html')));
 
@@ -90,6 +112,12 @@ app.post('/api/login', (req, res) => {
             JWT_SECRET,
             { expiresIn: '1h' }
         );
+
+        res.cookie('token', token, {
+            httpOnly: true,
+            secure: false, // Zmień na true w produkcji (HTTPS)
+            sameSite: 'strict'
+        });
 
         res.json({ success: true, token });
     });
