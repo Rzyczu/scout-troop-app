@@ -6,7 +6,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard - Scout Troop App</title>
-    <link rel="stylesheet" href="/custom.css">
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/bundle.js" defer></script>
 </head>
 
 <body>
@@ -25,9 +26,7 @@
             // Pobieranie danych z nowego endpointu /api/dashboard
             fetch('/api/dashboard', {
                 method: 'GET',
-                headers: {
-                    'Authorization': `Bearer ${token}` // Wysyłanie tokena w nagłówku
-                }
+                credentials: 'include' // Umożliwia wysyłanie ciasteczek z żądaniem
             })
                 .then(response => response.json())
                 .then(data => {
@@ -43,8 +42,14 @@
         }
 
         // Ładowanie wspólnego menu nawigacji
-        fetch('/navbar.html').then(res => res.text()).then(html => {
-            document.getElementById('navbar').innerHTML = html;
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/navbar.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('navbar').innerHTML = html;
+                });
+
+            loadTable();
         });
     </script>
 </body>

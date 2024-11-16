@@ -51,10 +51,10 @@ initializeAdminUser();
 
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.startsWith('Bearer ')
-        ? authHeader.split(' ')[1]
-        : req.query.token || req.cookies.token; // Sprawdzanie ciasteczek
-
+    const token = req.cookies.token || (req.headers['authorization']
+        ? req.headers['authorization'].split(' ')[1]
+        : null
+    );
     if (!token) {
         return res.status(401).json({ error: 'Access denied, token missing or invalid format' });
     }
