@@ -149,36 +149,34 @@ app.delete('/api/users/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY])
     userDb.remove({ _id: req.params.id }, {}, (err) => res.json(err ? { error: 'Database deletion error' } : { success: true }));
 });
 
-// API: Participants
-app.get('/api/participants', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    personalDataDb.find({}, (err, participants) => {
+// API: Participants - Personal Data
+app.get('/api/participants/personalData', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    personalDataDb.find({}, (err, personalData) => {
         if (err) return res.status(500).json({ error: 'Database fetch error' });
-        res.json(participants);
+        res.json(personalData);
     });
 });
-app.post('/api/participants', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    const newParticipant = { firstName: req.body.firstName, lastName: req.body.lastName, birthYear: req.body.birthYear, email: req.body.email };
-    personalDataDb.insert(newParticipant, (err, participant) => res.status(err ? 500 : 201).json(err ? { error: 'Database insertion error' } : participant));
-});
-app.delete('/api/participants/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    personalDataDb.remove({ _id: req.params.id }, {}, (err) => res.json(err ? { error: 'Database deletion error' } : { success: true }));
+
+app.delete('/api/participants/personalData/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    personalDataDb.remove({ _id: req.params.id }, {}, (err) => {
+        if (err) return res.status(500).json({ error: 'Database deletion error' });
+        res.json({ success: true });
+    });
 });
 
-// API: Scout Info for Participants
-app.get('/api/scoutInfo', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    scoutInfoDb.find({}, (err, scoutInfo) => res.json(err ? { error: 'Database fetch error' } : scoutInfo));
+// API: Participants - Scout Info
+app.get('/api/participants/scoutInfo', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    scoutInfoDb.find({}, (err, scoutInfo) => {
+        if (err) return res.status(500).json({ error: 'Database fetch error' });
+        res.json(scoutInfo);
+    });
 });
-app.post('/api/scoutInfo', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    const newScoutInfo = {
-        function: req.body.function,
-        rankOpen: req.body.rankOpen,
-        rankAchieved: req.body.rankAchieved,
-        personalDataId: req.body.personalDataId
-    };
-    scoutInfoDb.insert(newScoutInfo, (err, scoutInfo) => res.status(err ? 500 : 201).json(err ? { error: 'Database insertion error' } : scoutInfo));
-});
-app.delete('/api/scoutInfo/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    scoutInfoDb.remove({ _id: req.params.id }, {}, (err) => res.json(err ? { error: 'Database deletion error' } : { success: true }));
+
+app.delete('/api/participants/scoutInfo/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    scoutInfoDb.remove({ _id: req.params.id }, {}, (err) => {
+        if (err) return res.status(500).json({ error: 'Database deletion error' });
+        res.json({ success: true });
+    });
 });
 
 // API: Troops

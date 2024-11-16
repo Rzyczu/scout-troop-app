@@ -12,103 +12,177 @@
     <header id="navbar"></header>
     <div class="container">
         <h1 class="text-center my-4">Participants</h1>
-        <button class="btn btn-primary mb-3" onclick="showAddParticipantModal()">Add Participant</button>
-        <div id="participantList" class="row">
-            <p class="text-center text-muted" id="noParticipantsMessage" style="display:none;">No participants found.
-            </p>
+        <div class="d-flex justify-content-between mb-4">
+            <button class="btn btn-primary" onclick="showAddParticipantModal()">Add Participant</button>
+            <div>
+                <button class="btn btn-outline-secondary" onclick="showPersonalData()">Personal Data</button>
+                <button class="btn btn-outline-secondary" onclick="showScoutInfo()">Scout Info</button>
+            </div>
         </div>
+        <table class="table table-striped">
+            <thead id="tableHeader">
+                <!-- Dynamically populated headers -->
+            </thead>
+            <tbody id="tableBody">
+                <!-- Dynamically populated rows -->
+            </tbody>
+        </table>
+    </div>
 
-        <div class="modal fade" id="addParticipantModal" tabindex="-1" aria-labelledby="addParticipantModalLabel"
-            aria-hidden="true">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title" id="addParticipantModalLabel">Add/Edit Participant</h5>
-                        <button type="button" class="btn-close" onclick="closeAddParticipantModal()"></button>
-                    </div>
-                    <div class="modal-body">
-                        <form id="addParticipantForm">
+    <!-- Modal for adding/editing participants -->
+    <div class="modal fade" id="participantModal" tabindex="-1" aria-labelledby="participantModalLabel"
+        aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="participantModalLabel">Add/Edit Participant</h5>
+                    <button type="button" class="btn-close" onclick="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="participantForm">
+                        <input type="hidden" id="participantId">
+                        <div id="personalDataFields">
                             <div class="mb-3">
                                 <label for="firstName" class="form-label">First Name</label>
-                                <input type="text" class="form-control" name="firstName" placeholder="First Name"
-                                    required>
+                                <input type="text" class="form-control" id="firstName" required>
                             </div>
                             <div class="mb-3">
                                 <label for="lastName" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" name="lastName" placeholder="Last Name"
-                                    required>
+                                <input type="text" class="form-control" id="lastName" required>
                             </div>
                             <div class="mb-3">
                                 <label for="birthYear" class="form-label">Birth Year</label>
-                                <input type="number" class="form-control" name="birthYear" placeholder="Birth Year"
-                                    required>
+                                <input type="number" class="form-control" id="birthYear" required>
                             </div>
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" name="email" placeholder="Email">
+                                <input type="email" class="form-control" id="email">
                             </div>
-                            <button type="submit" class="btn btn-success">Save</button>
-                        </form>
-                    </div>
+                        </div>
+                        <div id="scoutInfoFields" style="display: none;">
+                            <div class="mb-3">
+                                <label for="function" class="form-label">Function</label>
+                                <select class="form-select" id="function">
+                                    <option value="Zastępowy">Zastępowy</option>
+                                    <option value="Podzastępowy">Podzastępowy</option>
+                                    <option value="Drużynowy">Drużynowy</option>
+                                    <option value="Przyboczny">Przyboczny</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="rankOpen" class="form-label">Rank Open</label>
+                                <input type="text" class="form-control" id="rankOpen">
+                            </div>
+                            <div class="mb-3">
+                                <label for="rankAchieved" class="form-label">Rank Achieved</label>
+                                <input type="text" class="form-control" id="rankAchieved">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Save</button>
+                    </form>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        let isShowingPersonalData = true;
+
         document.addEventListener('DOMContentLoaded', () => {
-            fetch('/api/participants', {
-                method: 'GET',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                credentials: 'include' // Włącz obsługę ciasteczek
-            })
-                .then(response => {
-                    if (response.status === 401) {
-                        alert('Unauthorized. Redirecting to login.');
-                        window.location.href = '/login';
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    const participantList = document.getElementById('participantList');
-                    const noParticipantsMessage = document.getElementById('noParticipantsMessage');
-                    if (data.length === 0) {
-                        noParticipantsMessage.style.display = 'block';
-                    } else {
-                        noParticipantsMessage.style.display = 'none';
-                        participantList.innerHTML = data.map(p => `
-                            <div class="col-md-4">
-                                <div class="card mb-3">
-                                    <div class="card-body">
-                                        <h5 class="card-title">${p.firstName} ${p.lastName}</h5>
-                                        <p class="card-text">Birth Year: ${p.birthYear}</p>
-                                        <button class="btn btn-danger" onclick="deleteParticipant('${p._id}')">Delete</button>
-                                    </div>
-                                </div>
-                            </div>
-                        `).join('');
-                    }
-                })
-                .catch(error => console.error('Error loading participants:', error));
+            fetch('/navbar.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('navbar').innerHTML = html;
+                });
+
+            loadTable();
         });
 
-        function deleteParticipant(id) {
-            fetch(`/api/participants/${id}`, {
+        const loadTable = () => {
+            const url = isShowingPersonalData ? '/api/participants/personalData' : '/api/participants/scoutInfo';
+            fetch(url, {
+                method: 'GET',
+                credentials: 'include'
+            })
+                .then(response => response.json())
+                .then(data => {
+                    populateTable(data);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        };
+
+        const populateTable = (data) => {
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+
+            tableHeader.innerHTML = isShowingPersonalData
+                ? `<tr><th>Name</th><th>Birth Year</th><th>Email</th><th>Actions</th></tr>`
+                : `<tr><th>Name</th><th>Function</th><th>Rank Open</th><th>Rank Achieved</th><th>Actions</th></tr>`;
+
+            tableBody.innerHTML = data
+                .map(item => {
+                    const name = `${item.firstName || ''} ${item.lastName || ''}`;
+                    if (isShowingPersonalData) {
+                        return `<tr>
+                                    <td>${name}</td>
+                                    <td>${item.birthYear || ''}</td>
+                                    <td>${item.email || ''}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editParticipant('${item._id}')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteParticipant('${item._id}')">Delete</button>
+                                    </td>
+                                </tr>`;
+                    } else {
+                        return `<tr>
+                                    <td>${name}</td>
+                                    <td>${item.function || ''}</td>
+                                    <td>${item.rankOpen || ''}</td>
+                                    <td>${item.rankAchieved || ''}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-warning" onclick="editParticipant('${item._id}')">Edit</button>
+                                        <button class="btn btn-sm btn-danger" onclick="deleteParticipant('${item._id}')">Delete</button>
+                                    </td>
+                                </tr>`;
+                    }
+                })
+                .join('');
+        };
+
+        const showPersonalData = () => {
+            isShowingPersonalData = true;
+            loadTable();
+        };
+
+        const showScoutInfo = () => {
+            isShowingPersonalData = false;
+            loadTable();
+        };
+
+        const showAddParticipantModal = () => {
+            document.getElementById('participantModal').classList.add('show');
+            document.getElementById('participantModal').style.display = 'block';
+        };
+
+        const closeModal = () => {
+            document.getElementById('participantModal').classList.remove('show');
+            document.getElementById('participantModal').style.display = 'none';
+        };
+
+        const deleteParticipant = (id) => {
+            const url = isShowingPersonalData ? `/api/participants/personalData/${id}` : `/api/participants/scoutInfo/${id}`;
+            fetch(url, {
                 method: 'DELETE',
                 credentials: 'include'
             })
                 .then(response => {
                     if (response.ok) {
-                        alert('Participant deleted successfully');
-                        location.reload();
+                        loadTable();
                     } else {
                         alert('Failed to delete participant');
                     }
                 })
                 .catch(error => console.error('Error deleting participant:', error));
-        }
+        };
     </script>
 </body>
 
