@@ -39,7 +39,6 @@
             });
             const result = await response.json();
             if (response.ok) {
-                alert('Login successful');
                 window.location.href = '/dashboard'; // Przejdź do dashboard
             } else {
                 alert(result.error || 'Login failed');
