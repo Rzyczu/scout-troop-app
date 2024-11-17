@@ -31,19 +31,30 @@
     <script>
         document.getElementById('loginForm').onsubmit = async function (event) {
             event.preventDefault();
+
             const formData = new FormData(event.target);
-            const response = await fetch('/api/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(Object.fromEntries(formData))
-            });
-            const result = await response.json();
-            if (response.ok) {
-                window.location.href = '/dashboard'; // Przejdź do dashboard
-            } else {
-                alert(result.error || 'Login failed');
+            const payload = JSON.stringify(Object.fromEntries(formData));
+
+            try {
+                const response = await fetch('/api/login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: payload,
+                });
+
+                const result = await response.json();
+                if (response.ok) {
+                    alert('Login successful');
+                    window.location.href = '/dashboard';
+                } else {
+                    alert(result.error || 'Login failed');
+                }
+            } catch (err) {
+                console.error('Error during login:', err);
+                alert('An error occurred during login. Please try again.');
             }
         };
+
     </script>
 </body>
 

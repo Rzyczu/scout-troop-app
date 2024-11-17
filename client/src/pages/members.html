@@ -16,15 +16,12 @@
         <div class="d-flex justify-content-between mb-4">
             <button class="btn btn-primary" onclick="showAddMemberModal()">Add Member</button>
             <div>
-                <button id="btnPersonalData" class="btn btn-outline-secondary"
-                    onclick="switchView('personalData')">Personal Data</button>
-                <button id="btnScoutInfo" class="btn btn-outline-secondary" onclick="switchView('scoutInfo')">Scout
+                <button id="btnPersonalData" class="btn btn-outline-secondary" onclick="showPersonalData()">Personal
+                    Data</button>
+                <button id="btnScoutInfo" class="btn btn-outline-secondary" onclick="showScoutInfo()">Scout
                     Info</button>
-                <button id="btnMerged" class="btn btn-outline-secondary active"
-                    onclick="switchView('merged')">Merged</button>
             </div>
         </div>
-
         <table class="table table-striped">
             <thead id="tableHeader">
                 <!-- Dynamically populated headers -->
@@ -62,6 +59,18 @@
                             <div class="mb-3">
                                 <label for="email" class="form-label">Email</label>
                                 <input type="email" class="form-control" id="email">
+                            </div>
+                            <div class="mb-3">
+                                <label for="phoneNumber" class="form-label">Phone Number</label>
+                                <input type="text" class="form-control" id="phoneNumber" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="fatherPhoneNumber" class="form-label">Father's Phone Number</label>
+                                <input type="text" class="form-control" id="fatherPhoneNumber">
+                            </div>
+                            <div class="mb-3">
+                                <label for="motherPhoneNumber" class="form-label">Mother's Phone Number</label>
+                                <input type="text" class="form-control" id="motherPhoneNumber">
                             </div>
                         </div>
                         <div id="scoutInfoFields">
@@ -114,7 +123,7 @@
     </div>
 
     <script>
-        let currentView = 'merged'; // Default view to show merged data
+        let isShowingPersonalData = true;
 
         document.addEventListener('DOMContentLoaded', () => {
             fetch('/navbar.html')
@@ -127,19 +136,13 @@
         });
 
         const loadTable = () => {
-            const url = `/api/members?view=${currentView}`;
-            console.log('Fetching URL:', url);
-            fetch(url, {
-                method: 'GET',
-                credentials: 'include'
-            })
+            const url = `/api/members?view=${isShowingPersonalData ? 'personalData' : 'scoutInfo'}`;
+            fetch(url, { method: 'GET', credentials: 'include' })
                 .then(response => {
                     if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
                     return response.json();
                 })
-                .then(data => {
-                    populateTable(data);
-                })
+                .then(data => populateTable(data))
                 .catch(error => console.error('Error fetching data:', error));
         };
 
@@ -147,98 +150,86 @@
             const tableHeader = document.getElementById('tableHeader');
             const tableBody = document.getElementById('tableBody');
 
-            if (currentView === 'personalData') {
-                tableHeader.innerHTML = `<tr><th>Name</th><th>Birth Year</th><th>Email</th><th>Actions</th></tr>`;
-                tableBody.innerHTML = data.map(item => `
-                    <tr>
-                        <td>${item.firstName || ''} ${item.lastName || ''}</td>
-                        <td>${item.birthYear || ''}</td>
-                        <td>${item.email || ''}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editMember('${item._id}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteMember('${item._id}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } else if (currentView === 'scoutInfo') {
-                tableHeader.innerHTML = `<tr><th>Name</th><th>Function</th><th>Rank Open</th><th>Rank Achieved</th><th>Instructor Rank</th><th>Actions</th></tr>`;
-                tableBody.innerHTML = data.map(item => `
-                    <tr>
-                        <td>${item.firstName || ''} ${item.lastName || ''}</td>
-                        <td>${item.function || ''}</td>
-                        <td>${item.rankOpen || ''}</td>
-                        <td>${item.rankAchieved || ''}</td>
-                        <td>${item.instructorRank || ''}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editMember('${item._id}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteMember('${item._id}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-            } else {
-                tableHeader.innerHTML = `<tr><th>Name</th><th>Birth Year</th><th>Email</th><th>Function</th><th>Rank Open</th><th>Rank Achieved</th><th>Instructor Rank</th><th>Actions</th></tr>`;
-                tableBody.innerHTML = data.map(item => `
-                    <tr>
-                        <td>${item.firstName || ''} ${item.lastName || ''}</td>
-                        <td>${item.birthYear || ''}</td>
-                        <td>${item.email || ''}</td>
-                        <td>${item.function || ''}</td>
-                        <td>${item.rankOpen || ''}</td>
-                        <td>${item.rankAchieved || ''}</td>
-                        <td>${item.instructorRank || ''}</td>
-                        <td>
-                            <button class="btn btn-sm btn-warning" onclick="editMember('${item._id}')">Edit</button>
-                            <button class="btn btn-sm btn-danger" onclick="deleteMember('${item._id}')">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
-            }
+            tableHeader.innerHTML = isShowingPersonalData
+                ? `<tr>
+                    <th>Name</th>
+                    <th>Birth Year</th>
+                    <th>Phone</th>
+                    <th>Father's Phone</th>
+                    <th>Mother's Phone</th>
+                    <th>Actions</th>
+                   </tr>`
+                : `<tr>
+                    <th>Name</th>
+                    <th>Function</th>
+                    <th>Rank Open</th>
+                    <th>Rank Achieved</th>
+                    <th>Instructor Rank</th>
+                    <th>Actions</th>
+                   </tr>`;
+
+            tableBody.innerHTML = data
+                .map((item) => {
+                    const name = `${item.firstName || ''} ${item.lastName || ''}`;
+                    return isShowingPersonalData
+                        ? `<tr>
+                            <td>${name}</td>
+                            <td>${item.birthYear || ''}</td>
+                            <td>${item.phoneNumber || ''}</td>
+                            <td>${item.fatherPhoneNumber || ''}</td>
+                            <td>${item.motherPhoneNumber || ''}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="editMember('${item.id}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMember('${item.id}')">Delete</button>
+                            </td>
+                           </tr>`
+                        : `<tr>
+                            <td>${name}</td>
+                            <td>${item.function || ''}</td>
+                            <td>${item.rankOpen || ''}</td>
+                            <td>${item.rankAchieved || ''}</td>
+                            <td>${item.instructorRank || ''}</td>
+                            <td>
+                                <button class="btn btn-sm btn-warning" onclick="editMember('${item.id}')">Edit</button>
+                                <button class="btn btn-sm btn-danger" onclick="deleteMember('${item.id}')">Delete</button>
+                            </td>
+                           </tr>`;
+                })
+                .join('');
         };
 
-        const switchView = (view) => {
-            currentView = view;
-            document.getElementById('btnPersonalData').classList.toggle('active', view === 'personalData');
-            document.getElementById('btnScoutInfo').classList.toggle('active', view === 'scoutInfo');
-            document.getElementById('btnMerged').classList.toggle('active', view === 'merged');
-            loadTable();
-        };
-
-        function showAddMemberModal() {
-            const modal = document.getElementById('memberModal');
-            modal.classList.add('show');
-            modal.style.display = 'block';
-            modal.removeAttribute('aria-hidden');
-            document.querySelector('#memberModal input').focus();
-        }
-
-        const closeModal = () => {
-            const modal = document.getElementById('memberModal');
-            modal.classList.remove('show');
-            modal.style.display = 'none';
-            modal.setAttribute('aria-hidden', 'true');
-            document.getElementById('memberForm').reset();
-        };
-
-        document.getElementById('memberForm').onsubmit = (event) => {
+        document.getElementById('memberForm').addEventListener('submit', (event) => {
             event.preventDefault();
 
-            const id = document.getElementById('memberId').value;
+            const id = document.getElementById('memberId').value; // Only used for edits
+            const firstName = document.getElementById('firstName').value;
+            const lastName = document.getElementById('lastName').value;
+            const birthYear = document.getElementById('birthYear').value;
+            const email = document.getElementById('email').value;
+            const phoneNumber = document.getElementById('phoneNumber').value;
+            const fatherPhoneNumber = document.getElementById('fatherPhoneNumber').value || null;
+            const motherPhoneNumber = document.getElementById('motherPhoneNumber').value || null;
+            const scoutFunction = document.getElementById('function').value;
+            const rankOpen = document.getElementById('rankOpen').value;
+            const rankAchieved = document.getElementById('rankAchieved').value;
+            const instructorRank = document.getElementById('instructorRank').value;
+
             const payload = {
-                firstName: document.getElementById('firstName').value,
-                lastName: document.getElementById('lastName').value,
-                birthYear: document.getElementById('birthYear').value,
-                email: document.getElementById('email').value,
-                function: document.getElementById('function').value,
-                rankOpen: document.getElementById('rankOpen').value,
-                rankAchieved: document.getElementById('rankAchieved').value,
-                instructorRank: document.getElementById('instructorRank').value,
+                firstName,
+                lastName,
+                birthYear,
+                email,
+                phoneNumber,
+                fatherPhoneNumber,
+                motherPhoneNumber,
+                scoutFunction,
+                rankOpen,
+                rankAchieved,
+                instructorRank
             };
 
-            const url = id
-                ? `/api/members/${id}` // For updating existing records
-                : '/api/members'; // For creating new records
-
             const method = id ? 'PUT' : 'POST';
+            const url = id ? `/api/members/${id}` : '/api/members';
 
             fetch(url, {
                 method,
@@ -248,20 +239,73 @@
                 body: JSON.stringify(payload),
                 credentials: 'include',
             })
-                .then(response => {
-                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
-                    return response.json();
+                .then((response) => {
+                    if (response.ok) {
+                        alert('Member saved successfully');
+                        closeModal();
+                        loadTable();
+                    } else {
+                        throw new Error('Failed to save member');
+                    }
                 })
-                .then(data => {
-                    closeModal();
-                    loadTable(); // Reload the table to reflect the new data
-                })
-                .catch(error => {
-                    console.error('Error saving member:', error);
-                    alert('Failed to save the member. Please try again.');
-                });
-        };
+                .catch((error) => console.error('Error saving member:', error));
+        });
 
+
+        function editMember(id) {
+            fetch(`/api/members/${id}`, { method: 'GET', credentials: 'include' })
+                .then(response => response.json())
+                .then(member => {
+                    document.getElementById('memberId').value = member.id;
+                    document.getElementById('firstName').value = member.firstName;
+                    document.getElementById('lastName').value = member.lastName;
+                    document.getElementById('birthYear').value = member.birthYear;
+                    document.getElementById('email').value = member.email;
+                    document.getElementById('phoneNumber').value = member.phoneNumber;
+                    document.getElementById('fatherPhoneNumber').value = member.fatherPhoneNumber;
+                    document.getElementById('motherPhoneNumber').value = member.motherPhoneNumber;
+                    document.getElementById('function').value = member.functionShort;
+                    document.getElementById('rankOpen').value = member.rankOpenShort;
+                    document.getElementById('rankAchieved').value = member.rankAchievedShort;
+                    document.getElementById('instructorRank').value = member.instructorRankShort;
+
+                    showAddMemberModal();
+                })
+                .catch(error => console.error('Error loading member data:', error));
+        }
+
+        function deleteMember(id) {
+            if (confirm('Are you sure you want to delete this member?')) {
+                fetch(`/api/members/${id}`, { method: 'DELETE', credentials: 'include' })
+                    .then(() => loadTable())
+                    .catch(error => console.error('Error deleting member:', error));
+            }
+        }
+
+        function showPersonalData() {
+            isShowingPersonalData = true;
+            loadTable();
+        }
+
+        function showScoutInfo() {
+            isShowingPersonalData = false;
+            loadTable();
+        }
+
+        function showAddMemberModal() {
+            const modal = document.getElementById('memberModal');
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            modal.removeAttribute('aria-hidden');
+        }
+
+        function closeModal() {
+            const modal = document.getElementById('memberModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            document.getElementById('memberForm').reset();
+        }
     </script>
 </body>
 

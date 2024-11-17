@@ -1,83 +1,72 @@
-// server/app.js
 const express = require('express');
 const path = require('path');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const Datastore = require('nedb');
+const { Pool } = require('pg');
+const cookieParser = require('cookie-parser');
+const { UserRoles, ScoutFunctions, ScoutRanks, InstructorRanks, mapEnum } = require('./enums');
+
 const app = express();
 app.use(express.json());
-const cookieParser = require('cookie-parser');
 app.use(cookieParser());
+
+// PostgreSQL Configuration
+const dbConfig = {
+    user: 'postgres.tyqwqeqmzxpzuucjywjr',
+    host: 'aws-0-eu-central-1.pooler.supabase.com',
+    database: 'postgres',
+    password: 'qZQbVq*GC.27XQU',
+    port: 6543,
+};
+const pool = new Pool(dbConfig);
+
+// JWT Secret
 const JWT_SECRET = 'supersecretkey';
 
-// Enums
-const UserRoles = {
-    DRUZYNOWY: 'Drużynowy',
-    PRZYBOCZNY: 'Przyboczny',
-    ZASTĘPOWY: 'Zastępowy'
-};
-
-const ScoutFunctions = {
-    ZASTĘPOWY: 'Zastępowy',
-    PODZASTĘPOWY: 'Podzastępowy',
-    DRUZYNOWY: 'Drużynowy',
-    PRZYBOCZNY: 'Przyboczny'
-};
-
-const ScoutRanks = {
-    NONE: { short: '', full: 'None' },
-    ML: { short: 'mł.', full: 'Młodzik' },
-    WYW: { short: 'wyw.', full: 'Wywiadowca' },
-    CW: { short: 'ćw.', full: 'Ćwik' },
-    HO: { short: 'HO.', full: 'Harcerz Orli' },
-    HR: { short: 'HR', full: 'Harcerz Rzeczypospolitej' }
-};
-
-const InstructorRanks = {
-    NONE: { short: '', full: 'None' },
-    PWD: { short: 'pwd.', full: 'Przewodnik' },
-    PHM: { short: 'phm.', full: 'Podharcmistrz' },
-    HM: { short: 'hm.', full: 'Harcmistrz' }
-};
-
-// Databases
-const userDb = new Datastore({ filename: path.join(__dirname, 'db/users.db'), autoload: true });
-const troopDb = new Datastore({ filename: path.join(__dirname, 'db/troop.db'), autoload: true });
-const personalDataDb = new Datastore({ filename: path.join(__dirname, 'db/personalData.db'), autoload: true });
-const scoutInfoDb = new Datastore({ filename: path.join(__dirname, 'db/scoutInfo.db'), autoload: true });
-
-// Auto-incrementing PK for personalData
-let personalDataCounter = 0;
-personalDataDb.find({}).sort({ _id: -1 }).limit(1).exec((err, docs) => {
-    if (!err && docs.length > 0) {
-        personalDataCounter = docs[0]._id || 0;
-    }
+// Map member data for client-friendly representation
+const mapMemberData = (member) => ({
+    ...member,
+    role: mapEnum(UserRoles, member.role).full,
+    function: mapEnum(ScoutFunctions, member.function).full,
+    rankOpen: mapEnum(ScoutRanks, member.rankOpen).full,
+    rankAchieved: mapEnum(ScoutRanks, member.rankAchieved).full,
+    instructorRank: mapEnum(InstructorRanks, member.instructorRank).full,
 });
 
-// Static files
-app.use(express.static(path.join(__dirname, '../client/dist')));
-app.use(express.static(path.join(__dirname, '../client/src')));
+// Utility to map to enum key
+const mapToKey = (enumType, value) =>
+    Object.keys(enumType).find(key => enumType[key] === value) || value;
 
-// Initialize default admin user
+// Initialize admin user in the database
 const initializeAdminUser = async () => {
     const admin = {
         username: 'admin',
-        password: await bcrypt.hash('admin', 10),
+        password: await bcrypt.hash('admin', 10), // Hash the admin password here
         email: 'admin@admin.adm',
-        role: UserRoles.DRUZYNOWY,
-        troopId: null
+        role: 1, // Drużynowy
     };
-    userDb.findOne({ username: admin.username }, (err, user) => {
-        if (!user) userDb.insert(admin, (err) => err && console.error('Admin user creation error:', err));
-    });
+
+    try {
+        const result = await pool.query('SELECT * FROM users WHERE username = $1', [admin.username]);
+        if (result.rows.length === 0) {
+            // Insert admin user with hashed password
+            await pool.query(
+                'INSERT INTO users (username, password, email, role) VALUES ($1, $2, $3, $4)',
+                [admin.username, admin.password, admin.email, admin.role]
+            );
+            console.log('Admin user initialized');
+        } else {
+            console.log('Admin user already exists.');
+        }
+    } catch (err) {
+        console.error('Error initializing admin user:', err.message);
+    }
 };
 initializeAdminUser();
 
+// Middleware for authentication
 const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = req.cookies.token || (req.headers['authorization']
-        ? req.headers['authorization'].split(' ')[1]
-        : null);
+    const token = req.cookies.token || (req.headers.authorization?.split(' ')[1] || null);
     if (!token) {
         return res.status(401).json({ error: 'Access denied, token missing or invalid format' });
     }
@@ -91,211 +80,277 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Authorization middleware
+
+// Middleware for authorization
 const authorize = (roles) => (req, res, next) => {
-    console.log('Rola użytkownika:', req.user.role);
-    if (!roles.includes(req.user.role)) {
-        console.log('Brak uprawnień, zwracam 403');
+    const userRole = parseInt(req.user.role, 10); // Convert role to integer if stored as number
+    if (!roles.includes(userRole)) {
         return res.status(403).json({ error: 'Access denied' });
     }
     next();
 };
 
+// Middleware for logging
 app.use((req, res, next) => {
-    console.log(`Żądanie: ${req.method} ${req.url}`);
+    console.log(`Request: ${req.method} ${req.url}`);
     next();
 });
 
-// Route: HTML pages
-app.get('/', (req, res) => res.redirect('/login'));
-app.get('/dashboard', (req, res) => {
-    res.sendFile(path.join(__dirname, '../client/src/pages/dashboard.html'));
-});
-app.get('/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    console.log('Ładowanie pliku members.html');
-    res.sendFile(path.join(__dirname, '../client/src/pages/members.html'))
-});
-app.get('/users', authenticateToken, authorize([UserRoles.DRUZYNOWY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/users.html')));
-app.get('/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/members.html')));
-app.get('/troops', authenticateToken, (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/troops.html')));
-app.get('/login', (req, res) => res.sendFile(path.join(__dirname, '../client/src/login.html')));
+// Static files
+app.use(express.static(path.join(__dirname, '../client/dist')));
+app.use(express.static(path.join(__dirname, '../client/src')));
 
-// API: Login
-app.post('/api/login', (req, res) => {
+// Routes
+app.get('/', (req, res) => res.redirect('/login'));
+app.get('/dashboard', authenticateToken, (req, res) =>
+    res.sendFile(path.join(__dirname, '../client/src/pages/dashboard.html'))
+);
+app.get('/members', authenticateToken, authorize([1, 2]), (req, res) =>
+    res.sendFile(path.join(__dirname, '../client/src/pages/members.html'))
+);
+app.get('/users', authenticateToken, authorize([1]), (req, res) =>
+    res.sendFile(path.join(__dirname, '../client/src/pages/users.html'))
+);
+app.get('/login', (req, res) =>
+    res.sendFile(path.join(__dirname, '../client/src/login.html'))
+);
+
+app.post('/api/login', async (req, res) => {
     const { username, password } = req.body;
 
-    userDb.findOne({ username }, async (err, user) => {
-        if (err || !user) return res.status(400).json({ error: 'Invalid credentials' });
+    try {
+        if (!username || !password) {
+            return res.status(400).json({ error: 'Username and password are required' });
+        }
+
+        console.log('Attempting login for username:', username);
+
+        const result = await pool.query('SELECT id, password, role FROM users WHERE username = $1', [username]);
+        const user = result.rows[0];
+
+        if (!user) {
+            console.error('No user found for username:', username);
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) return res.status(400).json({ error: 'Invalid credentials' });
+        if (!isPasswordValid) {
+            console.error('Invalid password for username:', username);
+            return res.status(400).json({ error: 'Invalid credentials' });
+        }
 
-        const token = jwt.sign(
-            { id: user._id, role: user.role, troopId: user.troopId },
-            JWT_SECRET,
-            { expiresIn: '1h' }
-        );
+        const token = jwt.sign({ id: user.id, role: user.role }, JWT_SECRET, { expiresIn: '1h' });
 
         res.cookie('token', token, {
             httpOnly: true,
-            secure: false, // Zmień na true w produkcji (HTTPS)
-            sameSite: 'strict'
+            secure: false,
+            sameSite: 'strict',
         });
 
-        res.json({ success: true, token });
-    });
+        console.log('User logged in successfully:', username);
+
+        res.json({ success: true, role: mapEnum(UserRoles, user.role) });
+    } catch (err) {
+        console.error('Login error:', err.message);
+        res.status(500).json({ error: 'Database error' });
+    }
 });
+
 
 // API: Dashboard
 app.get('/api/dashboard', authenticateToken, (req, res) => {
-    // Przykładowe dane dashboardu
-    const dashboardData = {
-        message: `Witaj ${req.user.role}!`,
-        troopId: req.user.troopId || null
-    };
-    res.json(dashboardData);
+    try {
+        // Example data for the dashboard
+        const dashboardData = {
+            message: `Witaj ${mapEnum(UserRoles, req.user.role).full}!`,
+            troopId: req.user.troopId || null, // Example field
+        };
+        res.json(dashboardData);
+    } catch (err) {
+        console.error('Error fetching dashboard data:', err);
+        res.status(500).json({ error: 'Failed to fetch dashboard data' });
+    }
 });
 
 // API: Users
-app.get('/api/users', authenticateToken, authorize([UserRoles.DRUZYNOWY]), (req, res) => {
-    userDb.find({}, (err, users) => {
-        if (err) return res.status(500).json({ error: 'Database fetch error' });
+
+// Get all users
+app.get('/api/users', authenticateToken, authorize([1]), async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT u.id, u.username, u.email, u.role, u.troop_id, t.name AS troop_name
+            FROM users u
+            LEFT JOIN troops t ON u.troop_id = t.id
+        `);
+        const users = result.rows.map(user => ({
+            ...user,
+            role: mapEnum(UserRoles, user.role).full, // Map role ID to full name
+            troop: user.troop_name || 'No troop assigned' // Display troop name or fallback
+        }));
         res.json(users);
-    });
-});
-app.post('/api/users', authenticateToken, authorize([UserRoles.DRUZYNOWY]), async (req, res) => {
-    const { username, password, email, role } = req.body;
-    const newUser = { username, password: await bcrypt.hash(password, 10), email, role };
-    userDb.insert(newUser, (err, user) => res.status(err ? 500 : 201).json(err ? { error: 'Database insertion error' } : user));
-});
-app.delete('/api/users/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY]), (req, res) => {
-    userDb.remove({ _id: req.params.id }, {}, (err) => res.json(err ? { error: 'Database deletion error' } : { success: true }));
+    } catch (err) {
+        console.error('Error fetching users:', err);
+        res.status(500).json({ error: 'Failed to fetch users' });
+    }
 });
 
-// API: Members - Personal Data
-// API: Add Member
-app.post('/api/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    const { firstName, lastName, birthYear, email, function: scoutFunction, rankOpen, rankAchieved, instructorRank } = req.body;
 
-    // Create `personalData` entry
-    const newPersonalData = {
-        _id: ++personalDataCounter, // Auto-incrementing ID
-        firstName,
-        lastName,
-        birthYear,
-        email
-    };
-
-    personalDataDb.insert(newPersonalData, (err, insertedPersonalData) => {
-        if (err) return res.status(500).json({ error: 'Failed to save personal data' });
-
-        // Create `scoutInfo` entry using the ID from `personalData`
-        const newScoutInfo = {
-            personalDataId: insertedPersonalData._id,
-            function: scoutFunction,
-            rankOpen,
-            rankAchieved,
-            instructorRank
-        };
-
-        scoutInfoDb.insert(newScoutInfo, (err, insertedScoutInfo) => {
-            if (err) return res.status(500).json({ error: 'Failed to save scout info' });
-
-            res.status(201).json({ personalData: insertedPersonalData, scoutInfo: insertedScoutInfo });
+// Add a user
+app.post('/api/users', authenticateToken, authorize([1]), async (req, res) => {
+    const { username, password, email, role, troop_id } = req.body;
+    try {
+        const hashedPassword = await bcrypt.hash(password, 10);
+        const result = await pool.query(
+            `INSERT INTO users (username, email, password, role, troop_id)
+             VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, role, troop_id`,
+            [username, email, hashedPassword, role, troop_id || null]
+        );
+        res.status(201).json({
+            ...result.rows[0],
+            role: mapEnum(UserRoles, result.rows[0].role).full
         });
-    });
+    } catch (err) {
+        console.error('Error adding user:', err);
+        res.status(500).json({ error: 'Failed to add user' });
+    }
 });
 
-// API: Update Member
-app.put('/api/members/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    const memberId = parseInt(req.params.id, 10);
-    const { firstName, lastName, birthYear, email, function: scoutFunction, rankOpen, rankAchieved, instructorRank } = req.body;
-
-    // Update `personalData`
-    personalDataDb.update(
-        { _id: memberId },
-        { $set: { firstName, lastName, birthYear, email } },
-        {},
-        (err) => {
-            if (err) return res.status(500).json({ error: 'Failed to update personal data' });
-
-            // Update `scoutInfo`
-            scoutInfoDb.update(
-                { personalDataId: memberId },
-                { $set: { function: scoutFunction, rankOpen, rankAchieved, instructorRank } },
-                {},
-                (err) => {
-                    if (err) return res.status(500).json({ error: 'Failed to update scout info' });
-
-                    res.status(200).json({ message: 'Member updated successfully' });
-                }
+// Update a user
+app.put('/api/users/:id', authenticateToken, authorize([1]), async (req, res) => {
+    const userId = parseInt(req.params.id, 10);
+    const { username, email, role, password } = req.body;
+    try {
+        if (password) {
+            const hashedPassword = await bcrypt.hash(password, 10);
+            await pool.query(
+                'UPDATE users SET username = $1, email = $2, role = $3, password = $4 WHERE id = $5',
+                [username, email, role, hashedPassword, userId]
+            );
+        } else {
+            await pool.query(
+                'UPDATE users SET username = $1, email = $2, role = $3 WHERE id = $4',
+                [username, email, role, userId]
             );
         }
-    );
+        res.status(200).json({ message: 'User updated successfully' });
+    } catch (err) {
+        console.error('Error updating user:', err);
+        res.status(500).json({ error: 'Failed to update user' });
+    }
 });
 
-// API: Fetch Members with Join
-app.get('/api/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    personalDataDb.find({}, (err, personalData) => {
-        if (err) return res.status(500).json({ error: 'Database fetch error' });
-
-        scoutInfoDb.find({}, (err, scoutInfo) => {
-            if (err) return res.status(500).json({ error: 'Database fetch error' });
-
-            // Merge data
-            const mergedData = personalData.map((data) => {
-                const scoutData = scoutInfo.find(info => info.personalDataId === data._id);
-                return { ...data, ...scoutData };
-            });
-
-            res.json(mergedData);
-        });
-    });
+// Delete a user
+app.delete('/api/users/:id', authenticateToken, authorize([1]), async (req, res) => {
+    const userId = parseInt(req.params.id, 10);
+    try {
+        await pool.query('DELETE FROM users WHERE id = $1', [userId]);
+        res.status(200).json({ message: 'User deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting user:', err);
+        res.status(500).json({ error: 'Failed to delete user' });
+    }
 });
 
-// API: Delete Member
-app.delete('/api/members/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+
+// API: Members
+app.post('/api/members', authenticateToken, authorize([1, 2]), async (req, res) => {
+    const {
+        firstName, lastName, birthYear, email, phoneNumber, fatherPhoneNumber, motherPhoneNumber,
+        scoutFunction, rankOpen, rankAchieved, instructorRank,
+    } = req.body;
+
+    try {
+        const personalDataResult = await pool.query(
+            `INSERT INTO personal_data 
+            (first_name, last_name, birth_year, email, phone_number, father_phone_number, mother_phone_number)
+            VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id`,
+            [firstName, lastName, birthYear, email, phoneNumber, fatherPhoneNumber, motherPhoneNumber]
+        );
+
+        const personalDataId = personalDataResult.rows[0].id;
+
+        await pool.query(
+            `INSERT INTO scout_info 
+            (personal_data_id, function, rank_open, rank_achieved, instructor_rank)
+            VALUES ($1, $2, $3, $4, $5)`,
+            [personalDataId, scoutFunction, rankOpen, rankAchieved, instructorRank]
+        );
+
+        res.status(201).json({ message: 'Member added successfully' });
+    } catch (err) {
+        console.error('Error adding member:', err);
+        res.status(500).json({ error: 'Failed to add member' });
+    }
+});
+
+// API: Fetch all members
+app.get('/api/members', authenticateToken, authorize([1, 2]), async (req, res) => {
+    try {
+        const result = await pool.query(`
+            SELECT pd.id, pd.first_name, pd.last_name, pd.birth_year, pd.email, 
+                   pd.phone_number, pd.father_phone_number, pd.mother_phone_number,
+                   si.function, si.rank_open, si.rank_achieved, si.instructor_rank
+            FROM personal_data pd
+            LEFT JOIN scout_info si ON pd.id = si.personal_data_id
+        `);
+
+        const members = result.rows.map(mapMemberData);
+        res.json(members);
+    } catch (err) {
+        console.error('Error fetching members:', err);
+        res.status(500).json({ error: 'Failed to fetch members' });
+    }
+});
+
+// Fetch a single member by ID
+app.get('/api/members/:id', authenticateToken, authorize([1, 2]), async (req, res) => {
     const memberId = parseInt(req.params.id, 10);
 
-    personalDataDb.remove({ _id: memberId }, {}, (err) => {
-        if (err) return res.status(500).json({ error: 'Failed to delete personal data' });
+    try {
+        const result = await pool.query(`
+            SELECT pd.id, pd.first_name, pd.last_name, pd.birth_year, pd.email, pd.phone_number,
+                   pd.father_phone_number, pd.mother_phone_number, si.function, si.rank_open,
+                   si.rank_achieved, si.instructor_rank
+            FROM personal_data pd
+            LEFT JOIN scout_info si ON pd.id = si.personal_data_id
+            WHERE pd.id = $1
+        `, [memberId]);
 
-        scoutInfoDb.remove({ personalDataId: memberId }, {}, (err) => {
-            if (err) return res.status(500).json({ error: 'Failed to delete scout info' });
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'Member not found' });
+        }
 
-            res.json({ success: true });
-        });
-    });
+        res.status(200).json(mapMemberData(result.rows[0]));
+    } catch (err) {
+        console.error('Error fetching member:', err);
+        res.status(500).json({ error: 'Failed to fetch member' });
+    }
+});
+
+// Delete a member
+app.delete('/api/members/:id', authenticateToken, authorize([1, 2]), async (req, res) => {
+    const memberId = parseInt(req.params.id, 10);
+
+    try {
+        await pool.query('DELETE FROM scout_info WHERE personal_data_id = $1', [memberId]);
+        await pool.query('DELETE FROM personal_data WHERE id = $1', [memberId]);
+
+        res.json({ success: true, message: 'Member deleted successfully' });
+    } catch (err) {
+        console.error('Error deleting member:', err);
+        res.status(500).json({ error: 'Failed to delete member' });
+    }
 });
 
 // API: Troops
-app.get('/api/troops', authenticateToken, (req, res) => {
-    const query = req.user.role === UserRoles.ZASTĘPOWY ? { _id: req.user.troopId } : {};
-    troopDb.find(query, (err, troops) => res.json(err ? { error: 'Database fetch error' } : troops));
-});
-app.post('/api/troops', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    const newTroop = { name: req.body.name, description: req.body.description, color: req.body.color, song: req.body.song, points: 0, members: [] };
-    troopDb.insert(newTroop, (err, troop) => res.status(err ? 500 : 201).json(err ? { error: 'Database insertion error' } : troop));
-});
-app.delete('/api/troops/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    troopDb.remove({ _id: req.params.id }, {}, (err) => res.json(err ? { error: 'Database deletion error' } : { success: true }));
-});
-
-// API: Members (Scouts within Troops)
-app.get('/api/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    scoutInfoDb.find({}, (err, members) => res.json(err ? { error: 'Database fetch error' } : members));
-});
-app.post('/api/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    const newMember = {
-        function: req.body.function,
-        rankOpen: req.body.rankOpen,
-        rankAchieved: req.body.rankAchieved,
-        personalDataId: req.body.personalDataId
-    };
-    scoutInfoDb.insert(newMember, (err, member) => res.status(err ? 500 : 201).json(err ? { error: 'Database insertion error' } : member));
-});
-app.delete('/api/members/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    scoutInfoDb.remove({ _id: req.params.id }, {}, (err) => res.json(err ? { error: 'Database deletion error' } : { success: true }));
+app.get('/api/troops', authenticateToken, async (req, res) => {
+    try {
+        const result = await pool.query('SELECT id, name FROM troops');
+        res.json(result.rows);
+    } catch (err) {
+        console.error('Error fetching troops:', err);
+        res.status(500).json({ error: 'Failed to fetch troops' });
+    }
 });
 
 // Server start
