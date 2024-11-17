@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members - Scout Troop App</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/bundle.js" defer></script>
+</head>
+
+<body>
+    <header id="navbar"></header>
+    <div class="container">
+        <h1 class="text-center my-4">Members</h1>
+        <div class="d-flex justify-content-between mb-4">
+            <button class="btn btn-primary" onclick="showAddMemberModal()">Add Member</button>
+            <div>
+                <button id="btnPersonalData" class="btn btn-outline-secondary"
+                    onclick="switchView('personalData')">Personal Data</button>
+                <button id="btnScoutInfo" class="btn btn-outline-secondary" onclick="switchView('scoutInfo')">Scout
+                    Info</button>
+                <button id="btnMerged" class="btn btn-outline-secondary active"
+                    onclick="switchView('merged')">Merged</button>
+            </div>
+        </div>
+
+        <table class="table table-striped">
+            <thead id="tableHeader">
+                <!-- Dynamically populated headers -->
+            </thead>
+            <tbody id="tableBody">
+                <!-- Dynamically populated rows -->
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Modal for adding/editing members -->
+    <div class="modal fade" id="memberModal" tabindex="-1" aria-labelledby="memberModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="memberModalLabel">Add/Edit Member</h5>
+                    <button type="button" class="btn-close" onclick="closeModal()"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="memberForm">
+                        <input type="hidden" id="memberId">
+                        <div id="personalDataFields">
+                            <div class="mb-3">
+                                <label for="firstName" class="form-label">First Name</label>
+                                <input type="text" class="form-control" id="firstName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="lastName" class="form-label">Last Name</label>
+                                <input type="text" class="form-control" id="lastName" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="birthYear" class="form-label">Birth Year</label>
+                                <input type="number" class="form-control" id="birthYear" required>
+                            </div>
+                            <div class="mb-3">
+                                <label for="email" class="form-label">Email</label>
+                                <input type="email" class="form-control" id="email">
+                            </div>
+                        </div>
+                        <div id="scoutInfoFields">
+                            <div class="mb-3">
+                                <label for="function" class="form-label">Function</label>
+                                <select class="form-select" id="function">
+                                    <option value="Zastępowy">Zastępowy</option>
+                                    <option value="Podzastępowy">Podzastępowy</option>
+                                    <option value="Drużynowy">Drużynowy</option>
+                                    <option value="Przyboczny">Przyboczny</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="rankOpen" class="form-label">Rank Open</label>
+                                <select class="form-select" id="rankOpen">
+                                    <option value="">None</option>
+                                    <option value="mł.">Młodzik</option>
+                                    <option value="wyw.">Wywiadowca</option>
+                                    <option value="ćw.">Ćwik</option>
+                                    <option value="HO.">Harcerz Orli</option>
+                                    <option value="HR">Harcerz Rzeczypospolitej</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="rankAchieved" class="form-label">Rank Achieved</label>
+                                <select class="form-select" id="rankAchieved">
+                                    <option value="">None</option>
+                                    <option value="mł.">Młodzik</option>
+                                    <option value="wyw.">Wywiadowca</option>
+                                    <option value="ćw.">Ćwik</option>
+                                    <option value="HO.">Harcerz Orli</option>
+                                    <option value="HR">Harcerz Rzeczypospolitej</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="instructorRank" class="form-label">Instructor Rank</label>
+                                <select class="form-select" id="instructorRank">
+                                    <option value="">None</option>
+                                    <option value="pwd.">Przewodnik</option>
+                                    <option value="phm.">Podharcmistrz</option>
+                                    <option value="hm.">Harcmistrz</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-success">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentView = 'merged'; // Default view to show merged data
+
+        document.addEventListener('DOMContentLoaded', () => {
+            fetch('/navbar.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('navbar').innerHTML = html;
+                });
+
+            loadTable();
+        });
+
+        const loadTable = () => {
+            const url = `/api/members?view=${currentView}`;
+            console.log('Fetching URL:', url);
+            fetch(url, {
+                method: 'GET',
+                credentials: 'include'
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    populateTable(data);
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        };
+
+        const populateTable = (data) => {
+            const tableHeader = document.getElementById('tableHeader');
+            const tableBody = document.getElementById('tableBody');
+
+            if (currentView === 'personalData') {
+                tableHeader.innerHTML = `<tr><th>Name</th><th>Birth Year</th><th>Email</th><th>Actions</th></tr>`;
+                tableBody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.firstName || ''} ${item.lastName || ''}</td>
+                        <td>${item.birthYear || ''}</td>
+                        <td>${item.email || ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editMember('${item._id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMember('${item._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else if (currentView === 'scoutInfo') {
+                tableHeader.innerHTML = `<tr><th>Name</th><th>Function</th><th>Rank Open</th><th>Rank Achieved</th><th>Instructor Rank</th><th>Actions</th></tr>`;
+                tableBody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.firstName || ''} ${item.lastName || ''}</td>
+                        <td>${item.function || ''}</td>
+                        <td>${item.rankOpen || ''}</td>
+                        <td>${item.rankAchieved || ''}</td>
+                        <td>${item.instructorRank || ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editMember('${item._id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMember('${item._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            } else {
+                tableHeader.innerHTML = `<tr><th>Name</th><th>Birth Year</th><th>Email</th><th>Function</th><th>Rank Open</th><th>Rank Achieved</th><th>Instructor Rank</th><th>Actions</th></tr>`;
+                tableBody.innerHTML = data.map(item => `
+                    <tr>
+                        <td>${item.firstName || ''} ${item.lastName || ''}</td>
+                        <td>${item.birthYear || ''}</td>
+                        <td>${item.email || ''}</td>
+                        <td>${item.function || ''}</td>
+                        <td>${item.rankOpen || ''}</td>
+                        <td>${item.rankAchieved || ''}</td>
+                        <td>${item.instructorRank || ''}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editMember('${item._id}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteMember('${item._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `).join('');
+            }
+        };
+
+        const switchView = (view) => {
+            currentView = view;
+            document.getElementById('btnPersonalData').classList.toggle('active', view === 'personalData');
+            document.getElementById('btnScoutInfo').classList.toggle('active', view === 'scoutInfo');
+            document.getElementById('btnMerged').classList.toggle('active', view === 'merged');
+            loadTable();
+        };
+
+        function showAddMemberModal() {
+            const modal = document.getElementById('memberModal');
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            modal.removeAttribute('aria-hidden');
+            document.querySelector('#memberModal input').focus();
+        }
+
+        const closeModal = () => {
+            const modal = document.getElementById('memberModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            document.getElementById('memberForm').reset();
+        };
+
+        document.getElementById('memberForm').onsubmit = (event) => {
+            event.preventDefault();
+
+            const id = document.getElementById('memberId').value;
+            const payload = {
+                firstName: document.getElementById('firstName').value,
+                lastName: document.getElementById('lastName').value,
+                birthYear: document.getElementById('birthYear').value,
+                email: document.getElementById('email').value,
+                function: document.getElementById('function').value,
+                rankOpen: document.getElementById('rankOpen').value,
+                rankAchieved: document.getElementById('rankAchieved').value,
+                instructorRank: document.getElementById('instructorRank').value,
+            };
+
+            const url = id
+                ? `/api/members/${id}` // For updating existing records
+                : '/api/members'; // For creating new records
+
+            const method = id ? 'PUT' : 'POST';
+
+            fetch(url, {
+                method,
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify(payload),
+                credentials: 'include',
+            })
+                .then(response => {
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    return response.json();
+                })
+                .then(data => {
+                    closeModal();
+                    loadTable(); // Reload the table to reflect the new data
+                })
+                .catch(error => {
+                    console.error('Error saving member:', error);
+                    alert('Failed to save the member. Please try again.');
+                });
+        };
+
+    </script>
+</body>
+
+</html>

@@ -20,8 +20,24 @@ const UserRoles = {
 const ScoutFunctions = {
     ZASTĘPOWY: 'Zastępowy',
     PODZASTĘPOWY: 'Podzastępowy',
-    DRUŻYNOWY: 'Drużynowy',
+    DRUZYNOWY: 'Drużynowy',
     PRZYBOCZNY: 'Przyboczny'
+};
+
+const ScoutRanks = {
+    NONE: { short: '', full: 'None' },
+    ML: { short: 'mł.', full: 'Młodzik' },
+    WYW: { short: 'wyw.', full: 'Wywiadowca' },
+    CW: { short: 'ćw.', full: 'Ćwik' },
+    HO: { short: 'HO.', full: 'Harcerz Orli' },
+    HR: { short: 'HR', full: 'Harcerz Rzeczypospolitej' }
+};
+
+const InstructorRanks = {
+    NONE: { short: '', full: 'None' },
+    PWD: { short: 'pwd.', full: 'Przewodnik' },
+    PHM: { short: 'phm.', full: 'Podharcmistrz' },
+    HM: { short: 'hm.', full: 'Harcmistrz' }
 };
 
 // Databases
@@ -29,6 +45,14 @@ const userDb = new Datastore({ filename: path.join(__dirname, 'db/users.db'), au
 const troopDb = new Datastore({ filename: path.join(__dirname, 'db/troop.db'), autoload: true });
 const personalDataDb = new Datastore({ filename: path.join(__dirname, 'db/personalData.db'), autoload: true });
 const scoutInfoDb = new Datastore({ filename: path.join(__dirname, 'db/scoutInfo.db'), autoload: true });
+
+// Auto-incrementing PK for personalData
+let personalDataCounter = 0;
+personalDataDb.find({}).sort({ _id: -1 }).limit(1).exec((err, docs) => {
+    if (!err && docs.length > 0) {
+        personalDataCounter = docs[0]._id || 0;
+    }
+});
 
 // Static files
 app.use(express.static(path.join(__dirname, '../client/dist')));
@@ -53,8 +77,7 @@ const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = req.cookies.token || (req.headers['authorization']
         ? req.headers['authorization'].split(' ')[1]
-        : null
-    );
+        : null);
     if (!token) {
         return res.status(401).json({ error: 'Access denied, token missing or invalid format' });
     }
@@ -88,9 +111,9 @@ app.get('/', (req, res) => res.redirect('/login'));
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, '../client/src/pages/dashboard.html'));
 });
-app.get('/participants', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    console.log('Ładowanie pliku participants.html');
-    res.sendFile(path.join(__dirname, '../client/src/pages/participants.html'))
+app.get('/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    console.log('Ładowanie pliku members.html');
+    res.sendFile(path.join(__dirname, '../client/src/pages/members.html'))
 });
 app.get('/users', authenticateToken, authorize([UserRoles.DRUZYNOWY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/users.html')));
 app.get('/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => res.sendFile(path.join(__dirname, '../client/src/pages/members.html')));
@@ -149,33 +172,99 @@ app.delete('/api/users/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY])
     userDb.remove({ _id: req.params.id }, {}, (err) => res.json(err ? { error: 'Database deletion error' } : { success: true }));
 });
 
-// API: Participants - Personal Data
-app.get('/api/participants/personalData', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+// API: Members - Personal Data
+// API: Add Member
+app.post('/api/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    const { firstName, lastName, birthYear, email, function: scoutFunction, rankOpen, rankAchieved, instructorRank } = req.body;
+
+    // Create `personalData` entry
+    const newPersonalData = {
+        _id: ++personalDataCounter, // Auto-incrementing ID
+        firstName,
+        lastName,
+        birthYear,
+        email
+    };
+
+    personalDataDb.insert(newPersonalData, (err, insertedPersonalData) => {
+        if (err) return res.status(500).json({ error: 'Failed to save personal data' });
+
+        // Create `scoutInfo` entry using the ID from `personalData`
+        const newScoutInfo = {
+            personalDataId: insertedPersonalData._id,
+            function: scoutFunction,
+            rankOpen,
+            rankAchieved,
+            instructorRank
+        };
+
+        scoutInfoDb.insert(newScoutInfo, (err, insertedScoutInfo) => {
+            if (err) return res.status(500).json({ error: 'Failed to save scout info' });
+
+            res.status(201).json({ personalData: insertedPersonalData, scoutInfo: insertedScoutInfo });
+        });
+    });
+});
+
+// API: Update Member
+app.put('/api/members/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    const memberId = parseInt(req.params.id, 10);
+    const { firstName, lastName, birthYear, email, function: scoutFunction, rankOpen, rankAchieved, instructorRank } = req.body;
+
+    // Update `personalData`
+    personalDataDb.update(
+        { _id: memberId },
+        { $set: { firstName, lastName, birthYear, email } },
+        {},
+        (err) => {
+            if (err) return res.status(500).json({ error: 'Failed to update personal data' });
+
+            // Update `scoutInfo`
+            scoutInfoDb.update(
+                { personalDataId: memberId },
+                { $set: { function: scoutFunction, rankOpen, rankAchieved, instructorRank } },
+                {},
+                (err) => {
+                    if (err) return res.status(500).json({ error: 'Failed to update scout info' });
+
+                    res.status(200).json({ message: 'Member updated successfully' });
+                }
+            );
+        }
+    );
+});
+
+// API: Fetch Members with Join
+app.get('/api/members', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
     personalDataDb.find({}, (err, personalData) => {
         if (err) return res.status(500).json({ error: 'Database fetch error' });
-        res.json(personalData);
+
+        scoutInfoDb.find({}, (err, scoutInfo) => {
+            if (err) return res.status(500).json({ error: 'Database fetch error' });
+
+            // Merge data
+            const mergedData = personalData.map((data) => {
+                const scoutData = scoutInfo.find(info => info.personalDataId === data._id);
+                return { ...data, ...scoutData };
+            });
+
+            res.json(mergedData);
+        });
     });
 });
 
-app.delete('/api/participants/personalData/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    personalDataDb.remove({ _id: req.params.id }, {}, (err) => {
-        if (err) return res.status(500).json({ error: 'Database deletion error' });
-        res.json({ success: true });
-    });
-});
+// API: Delete Member
+app.delete('/api/members/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
+    const memberId = parseInt(req.params.id, 10);
 
-// API: Participants - Scout Info
-app.get('/api/participants/scoutInfo', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    scoutInfoDb.find({}, (err, scoutInfo) => {
-        if (err) return res.status(500).json({ error: 'Database fetch error' });
-        res.json(scoutInfo);
-    });
-});
+    personalDataDb.remove({ _id: memberId }, {}, (err) => {
+        if (err) return res.status(500).json({ error: 'Failed to delete personal data' });
 
-app.delete('/api/participants/scoutInfo/:id', authenticateToken, authorize([UserRoles.DRUZYNOWY, UserRoles.PRZYBOCZNY]), (req, res) => {
-    scoutInfoDb.remove({ _id: req.params.id }, {}, (err) => {
-        if (err) return res.status(500).json({ error: 'Database deletion error' });
-        res.json({ success: true });
+        scoutInfoDb.remove({ personalDataId: memberId }, {}, (err) => {
+            if (err) return res.status(500).json({ error: 'Failed to delete scout info' });
+
+            res.json({ success: true });
+        });
     });
 });
 
