@@ -1,5 +1,6 @@
 import './custom.scss'; // Importuj style z SCSS
-import 'bootstrap/dist/js/bootstrap.bundle';
+import * as bootstrap from 'bootstrap';
+window.bootstrap = bootstrap;
 
 // Globalne ustawienia
 document.addEventListener('DOMContentLoaded', () => {

@@ -173,83 +173,116 @@ app.get('/api/dashboard', authenticateToken, (req, res) => {
 });
 
 // API: Users
-
-// Get all users
+// API: Fetch all users
 app.get('/api/users', authenticateToken, authorize([1]), async (req, res) => {
     try {
         const result = await pool.query(`
-            SELECT u.id, u.username, u.email, u.role, u.troop_id, t.name AS troop_name
+            SELECT u.id, u.username, u.email, u.role, t.name as troop
             FROM users u
             LEFT JOIN troops t ON u.troop_id = t.id
         `);
-        const users = result.rows.map(user => ({
-            ...user,
-            role: mapEnum(UserRoles, user.role).full, // Map role ID to full name
-            troop: user.troop_name || 'No troop assigned' // Display troop name or fallback
-        }));
-        res.json(users);
+        res.json(result.rows);
     } catch (err) {
         console.error('Error fetching users:', err);
         res.status(500).json({ error: 'Failed to fetch users' });
     }
 });
 
-
-// Add a user
+// API: Create a new user
 app.post('/api/users', authenticateToken, authorize([1]), async (req, res) => {
-    const { username, password, email, role, troop_id } = req.body;
+    const { username, email, password, role, troop } = req.body;
+
+    if (!password) {
+        return res.status(400).json({ error: 'Password is required for new users' });
+    }
+
     try {
         const hashedPassword = await bcrypt.hash(password, 10);
-        const result = await pool.query(
-            `INSERT INTO users (username, email, password, role, troop_id)
-             VALUES ($1, $2, $3, $4, $5) RETURNING id, username, email, role, troop_id`,
-            [username, email, hashedPassword, role, troop_id || null]
-        );
-        res.status(201).json({
-            ...result.rows[0],
-            role: mapEnum(UserRoles, result.rows[0].role).full
-        });
+        const result = await pool.query(`
+            INSERT INTO users (username, email, password, role, troop_id)
+            VALUES ($1, $2, $3, $4, $5)
+            RETURNING id
+        `, [username, email, hashedPassword, role, troop || null]);
+
+        res.status(201).json({ success: true, id: result.rows[0].id });
     } catch (err) {
-        console.error('Error adding user:', err);
-        res.status(500).json({ error: 'Failed to add user' });
+        console.error('Error creating user:', err);
+        res.status(500).json({ error: 'Failed to create user' });
     }
 });
 
-// Update a user
+
+// API: Update a user
 app.put('/api/users/:id', authenticateToken, authorize([1]), async (req, res) => {
     const userId = parseInt(req.params.id, 10);
-    const { username, email, role, password } = req.body;
+    const { username, email, role, troop, password } = req.body;
+
     try {
+        // Podstawowe zapytanie bez zmiany hasła
+        const baseQuery = `
+            UPDATE users 
+            SET username = $1, email = $2, role = $3, troop_id = $4
+            WHERE id = $5
+        `;
+
+        const baseValues = [username, email, role, troop || null, userId];
+
         if (password) {
+            // Hasło zostało podane - aktualizuj hasło
             const hashedPassword = await bcrypt.hash(password, 10);
             await pool.query(
-                'UPDATE users SET username = $1, email = $2, role = $3, password = $4 WHERE id = $5',
-                [username, email, role, hashedPassword, userId]
+                `${baseQuery}, password = $6`,
+                [...baseValues, hashedPassword]
             );
         } else {
-            await pool.query(
-                'UPDATE users SET username = $1, email = $2, role = $3 WHERE id = $4',
-                [username, email, role, userId]
-            );
+            // Hasło nie zostało podane - nie zmieniaj hasła
+            await pool.query(baseQuery, baseValues);
         }
-        res.status(200).json({ message: 'User updated successfully' });
+
+        res.json({ success: true });
     } catch (err) {
         console.error('Error updating user:', err);
         res.status(500).json({ error: 'Failed to update user' });
     }
 });
 
-// Delete a user
+
+// API: Delete a user
 app.delete('/api/users/:id', authenticateToken, authorize([1]), async (req, res) => {
     const userId = parseInt(req.params.id, 10);
+
     try {
         await pool.query('DELETE FROM users WHERE id = $1', [userId]);
-        res.status(200).json({ message: 'User deleted successfully' });
+        res.json({ success: true });
     } catch (err) {
         console.error('Error deleting user:', err);
         res.status(500).json({ error: 'Failed to delete user' });
     }
 });
+
+app.get('/api/users/:id', authenticateToken, authorize([1]), async (req, res) => {
+    const userId = parseInt(req.params.id, 10);
+
+    try {
+        // Pobierz użytkownika z bazy danych
+        const result = await pool.query(`
+            SELECT u.id, u.username, u.email, u.role, t.name as troop
+            FROM users u
+            LEFT JOIN troops t ON u.troop_id = t.id
+            WHERE u.id = $1
+        `, [userId]);
+
+        if (result.rows.length === 0) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.json(result.rows[0]);
+    } catch (err) {
+        console.error('Error fetching user:', err);
+        res.status(500).json({ error: 'Failed to fetch user' });
+    }
+});
+
 
 
 // API: Members
@@ -350,6 +383,17 @@ app.get('/api/troops', authenticateToken, async (req, res) => {
     } catch (err) {
         console.error('Error fetching troops:', err);
         res.status(500).json({ error: 'Failed to fetch troops' });
+    }
+});
+
+// API: Roles
+app.get('/api/roles', authenticateToken, (req, res) => {
+    try {
+        const roles = Object.entries(UserRoles).map(([id, name]) => ({ id, name }));
+        res.json(roles);
+    } catch (err) {
+        console.error('Error fetching roles:', err);
+        res.status(500).json({ error: 'Failed to fetch roles' });
     }
 });
 
