@@ -159,14 +159,20 @@
             loadTable();
         };
 
-        const showAddParticipantModal = () => {
-            document.getElementById('participantModal').classList.add('show');
-            document.getElementById('participantModal').style.display = 'block';
-        };
+        function showAddParticipantModal() {
+            const modal = document.getElementById('participantModal');
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            modal.removeAttribute('aria-hidden');
+            document.querySelector('#participantModal input').focus();
+        }
 
         const closeModal = () => {
-            document.getElementById('participantModal').classList.remove('show');
-            document.getElementById('participantModal').style.display = 'none';
+            const modal = document.getElementById('participantModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
+            document.getElementById('addParticipantForm').reset();
         };
 
         const deleteParticipant = (id) => {

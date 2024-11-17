@@ -13,9 +13,7 @@
     <header id="navbar"></header>
     <div class="container">
         <h1 class="text-center my-4">Manage Users</h1>
-        <div class="mb-4">
-            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#userModal">Add User</button>
-        </div>
+        <button class="btn btn-primary mb-4" onclick="showAddUserModal()">Add User</button>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -26,18 +24,18 @@
                 </tr>
             </thead>
             <tbody id="userTableBody">
-                <!-- Users will be dynamically inserted here -->
+                <!-- Dynamically populated rows -->
             </tbody>
         </table>
     </div>
 
-    <!-- User Modal -->
+    <!-- Modal for adding/editing users -->
     <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
         <div class="modal-dialog">
             <div class="modal-content">
                 <div class="modal-header">
                     <h5 class="modal-title" id="userModalLabel">Add/Edit User</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close" onclick="closeUserModal()"></button>
                 </div>
                 <div class="modal-body">
                     <form id="userForm">
@@ -52,7 +50,7 @@
                         </div>
                         <div class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" required>
+                            <input type="password" class="form-control" id="password">
                         </div>
                         <div class="mb-3">
                             <label for="role" class="form-label">Role</label>
@@ -62,7 +60,7 @@
                                 <option value="Zastępowy">Zastępowy</option>
                             </select>
                         </div>
-                        <button type="submit" class="btn btn-primary">Save</button>
+                        <button type="submit" class="btn btn-success">Save</button>
                     </form>
                 </div>
             </div>
@@ -77,33 +75,51 @@
                     document.getElementById('navbar').innerHTML = html;
                 });
 
-            loadTable();
+            loadUsers();
         });
 
-        const fetchUsers = () => {
+        const loadUsers = () => {
             fetch('/api/users', {
+                method: 'GET',
                 credentials: 'include',
             })
                 .then(response => response.json())
-                .then(data => {
-                    const tableBody = document.getElementById('userTableBody');
-                    tableBody.innerHTML = '';
-                    data.forEach(user => {
-                        const row = `
-                            <tr>
-                                <td>${user.username}</td>
-                                <td>${user.email}</td>
-                                <td>${user.role}</td>
-                                <td>
-                                    <button class="btn btn-sm btn-warning" data-bs-toggle="modal" data-bs-target="#userModal" onclick="editUser('${user._id}', '${user.username}', '${user.email}', '${user.role}')">Edit</button>
-                                    <button class="btn btn-sm btn-danger" onclick="deleteUser('${user._id}')">Delete</button>
-                                </td>
-                            </tr>
-                        `;
-                        tableBody.innerHTML += row;
-                    });
-                })
-                .catch(error => console.error('Error fetching users:', error));
+                .then(data => populateUserTable(data))
+                .catch(error => console.error('Error loading users:', error));
+        };
+
+        const populateUserTable = (users) => {
+            const tableBody = document.getElementById('userTableBody');
+            tableBody.innerHTML = users
+                .map(user => `
+                    <tr>
+                        <td>${user.username}</td>
+                        <td>${user.email}</td>
+                        <td>${user.role}</td>
+                        <td>
+                            <button class="btn btn-sm btn-warning" onclick="editUser('${user._id}', '${user.username}', '${user.email}', '${user.role}')">Edit</button>
+                            <button class="btn btn-sm btn-danger" onclick="deleteUser('${user._id}')">Delete</button>
+                        </td>
+                    </tr>
+                `)
+                .join('');
+        };
+
+        const showAddUserModal = () => {
+            document.getElementById('userId').value = '';
+            document.getElementById('userForm').reset();
+            const modal = document.getElementById('userModal');
+            modal.classList.add('show');
+            modal.style.display = 'block';
+            modal.removeAttribute('aria-hidden');
+            document.getElementById('username').focus();
+        };
+
+        const closeUserModal = () => {
+            const modal = document.getElementById('userModal');
+            modal.classList.remove('show');
+            modal.style.display = 'none';
+            modal.setAttribute('aria-hidden', 'true');
         };
 
         const editUser = (id, username, email, role) => {
@@ -111,7 +127,8 @@
             document.getElementById('username').value = username;
             document.getElementById('email').value = email;
             document.getElementById('role').value = role;
-            document.getElementById('password').value = ''; // Password not shown for security
+            document.getElementById('password').value = ''; // Do not prefill the password field
+            showAddUserModal();
         };
 
         document.getElementById('userForm').addEventListener('submit', (event) => {
@@ -138,9 +155,8 @@
                 .then(response => {
                     if (response.ok) {
                         alert('User saved successfully');
-                        fetchUsers();
-                        const modal = bootstrap.Modal.getInstance(document.getElementById('userModal'));
-                        modal.hide();
+                        closeUserModal();
+                        loadUsers();
                     } else {
                         alert('Error saving user');
                     }
@@ -157,7 +173,7 @@
                     .then(response => {
                         if (response.ok) {
                             alert('User deleted successfully');
-                            fetchUsers();
+                            loadUsers();
                         } else {
                             alert('Error deleting user');
                         }
@@ -165,10 +181,6 @@
                     .catch(error => console.error('Error deleting user:', error));
             }
         };
-
-        document.addEventListener('DOMContentLoaded', () => {
-            fetchUsers();
-        });
     </script>
 </body>
 

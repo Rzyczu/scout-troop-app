@@ -1,1 +1,12 @@
 {"username":"admin","password":"$2a$10$DLSpmaFMUE.y1eDteZuxremyWpLEjpzGMJ608bIyzdhiqplp.6QHG","email":"admin@admin.adm","role":"Drużynowy","troopId":null,"_id":"9KJCpThFMIcWRoaf"}
+{"username":"zastepowy","password":"$2a$10$2f6lfY7LHtvfop0mLWtOK.TYISjWUgGU2kzLaaXyRgoZ850I0B08K","email":"zast@zast.pl","role":"Zastępowy","_id":"BYI9mTaudGV2xHlK"}
+{"username":"a1","password":"$2a$10$Z7GPMSUSEz/9Z28XxKj44ufX2jNjHw/s9qo1r.NHjW/dNzunRAq4u","email":"mily.wot@gmail.com","role":"Drużynowy","_id":"DGNEDEi1xAFEeP26"}
+{"username":"przyboczny","password":"$2a$10$wxyPHrbXg3gcsmLm1WUGl./XyvqSGkOTMtE5518PVd2EuJNSj64UO","email":"abc@abc.abc","role":"Przyboczny","_id":"eeB73uDCQ63pl7T6"}
+{"username":"a4","password":"$2a$10$f/CIz.4QZu07YVtN9d2R2.6HRRJ8r4mY49FElC2DR3fJ6IsQPD6Au","email":"mily.wot@gmail.com","role":"Drużynowy","_id":"r7Ehvf4DchXGxnsc"}
+{"username":"aa","password":"$2a$10$W0Yq0.M/6EPZxotWwJ6qZeuHYsB.1pUtuG2uyXcaSQD443hDuGUNe","email":"abc@abc.abc","role":"Drużynowy","_id":"fH2EGKNOLdB1uhUj"}
+{"$$deleted":true,"_id":"r7Ehvf4DchXGxnsc"}
+{"$$deleted":true,"_id":"fH2EGKNOLdB1uhUj"}
+{"$$deleted":true,"_id":"eeB73uDCQ63pl7T6"}
+{"$$deleted":true,"_id":"DGNEDEi1xAFEeP26"}
+{"$$deleted":true,"_id":"BYI9mTaudGV2xHlK"}
+{"username":"zastepowy","password":"$2a$10$LBj1Y1xcslZr2P/TwXBK5Os2MQ1yM.mJ6iZ3MuaiCG374cRibsbs2","email":"zastepowy@zast.pl","role":"Zastępowy","_id":"Rc7DhSbbaodlKpNT"}
