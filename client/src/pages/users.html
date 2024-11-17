@@ -73,131 +73,119 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', async () => {
+            const api = {
+                fetchUsers: () => fetchJson('/api/users'),
+                fetchRoles: () => fetchJson('/api/roles'),
+                fetchTroops: () => fetchJson('/api/troops'),
+                fetchUser: (id) => fetchJson(`/api/users/${id}`),
+                createUser: (data) => fetchJson('/api/users', { method: 'POST', body: JSON.stringify(data) }),
+                updateUser: (id, data) =>
+                    fetchJson(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
+                deleteUser: (id) => fetch(`/api/users/${id}`, { method: 'DELETE' }),
+            };
+
+            fetch('/navbar.html')
+                .then(res => res.text())
+                .then(html => {
+                    document.getElementById('navbar').innerHTML = html;
+                });
+
             const usersTableBody = document.getElementById('usersTableBody');
             const userForm = document.getElementById('userForm');
-            const userModal = new bootstrap.Modal(document.getElementById('userModal'));
             const roleSelect = document.getElementById('role');
             const troopSelect = document.getElementById('troop');
             const passwordField = document.getElementById('passwordField');
             const userIdField = document.getElementById('userId');
+            const userModal = new bootstrap.Modal(document.getElementById('userModal'));
 
-            let roleMap = {}; // Map to store role ID to full name mapping
-
-            const fetchRolesAndTroops = async () => {
-                const roles = await fetch('/api/roles').then(res => res.json());
-                roleMap = roles.reduce((map, role) => {
-                    map[role.id] = role.name;
-                    return map;
-                }, {});
-
-                roles.forEach(role => {
-                    roleSelect.innerHTML += `<option value="${role.id}">${role.name}</option>`;
+            const fetchJson = async (url, options = {}) => {
+                const response = await fetch(url, {
+                    headers: { 'Content-Type': 'application/json' },
+                    ...options,
                 });
+                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                return response.json();
+            };
 
-                const troops = await fetch('/api/troops').then(res => res.json());
-                troops.forEach(troop => {
-                    troopSelect.innerHTML += `<option value="${troop.id}">${troop.name}</option>`;
+            const resetForm = () => {
+                userForm.reset();
+                userIdField.value = '';
+                passwordField.style.display = 'block';
+            };
+
+            const populateSelect = (selectElement, options, emptyOptionText = 'None') => {
+                selectElement.innerHTML = `<option value="">${emptyOptionText}</option>`;
+                options.forEach(opt => {
+                    selectElement.innerHTML += `<option value="${opt.id}">${opt.name}</option>`;
                 });
             };
 
             const loadUsers = async () => {
-                const users = await fetch('/api/users').then(res => res.json());
-                usersTableBody.innerHTML = users.map(user => `
-                    <tr>
-                        <td>${user.id}</td>
-                        <td>${user.username}</td>
-                        <td>${user.email}</td>
-                        <td>${roleMap[user.role] || 'Unknown Role'}</td>
-                        <td>${user.troop || 'None'}</td>
-                        <td>
-                            <button class="btn btn-secondary btn-sm editUserBtn" data-id="${user.id}">Edit</button>
-                            <button class="btn btn-danger btn-sm deleteUserBtn" data-id="${user.id}">Delete</button>
-                        </td>
-                    </tr>
-                `).join('');
+                const users = await api.fetchUsers();
+                usersTableBody.innerHTML = users
+                    .map(user => `
+                        <tr>
+                            <td>${user.id}</td>
+                            <td>${user.username}</td>
+                            <td>${user.email}</td>
+                            <td>${user.role}</td>
+                            <td>${user.troop || 'None'}</td>
+                            <td>
+                                <button class="btn btn-secondary btn-sm editUserBtn" data-id="${user.id}">Edit</button>
+                                <button class="btn btn-danger btn-sm deleteUserBtn" data-id="${user.id}">Delete</button>
+                            </td>
+                        </tr>
+                    `).join('');
             };
 
-            const fetchJson = async (url, options = {}) => {
-                const response = await fetch(url, options);
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status} - ${response.statusText}`);
-                }
-                return response.json();
+            const loadRolesAndTroops = async () => {
+                const roles = await api.fetchRoles();
+                const troops = await api.fetchTroops();
+                populateSelect(roleSelect, roles);
+                populateSelect(troopSelect, troops);
             };
 
-            usersTableBody.addEventListener('click', async (e) => {
-                const id = e.target.dataset.id;
+            usersTableBody.addEventListener('click', async (event) => {
+                const target = event.target;
+                const id = target.dataset.id;
 
-                if (e.target.classList.contains('editUserBtn')) {
-                    try {
-                        const user = await fetchJson(`/api/users/${id}`);
-                        userIdField.value = user.id;
-                        document.getElementById('username').value = user.username;
-                        document.getElementById('email').value = user.email;
-                        roleSelect.value = user.role;
-                        troopSelect.value = user.troop || '';
-                        passwordField.style.display = 'block';
-                        document.getElementById('password').placeholder = "Enter new password or leave blank";
-                        userModal.show();
-                    } catch (error) {
-                        console.error('Error fetching user data:', error.message);
-                        alert('Failed to load user data. Check console for details.');
-                    }
-                } else if (e.target.classList.contains('deleteUserBtn')) {
-                    const confirmDelete = confirm("Are you sure you want to delete this user?");
-                    if (confirmDelete) {
-                        try {
-                            await fetch(`/api/users/${id}`, { method: 'DELETE' });
-                            await loadUsers();
-                        } catch (error) {
-                            console.error('Error deleting user:', error.message);
-                            alert('Failed to delete user. Check console for details.');
-                        }
+                if (target.classList.contains('editUserBtn')) {
+                    const user = await api.fetchUser(id);
+                    userIdField.value = user.id;
+                    document.getElementById('username').value = user.username;
+                    document.getElementById('email').value = user.email;
+                    roleSelect.value = user.role;
+                    troopSelect.value = user.troop || '';
+                    userModal.show();
+                } else if (target.classList.contains('deleteUserBtn')) {
+                    if (confirm('Are you sure you want to delete this user?')) {
+                        await api.deleteUser(id);
+                        loadUsers();
                     }
                 }
             });
 
-            userForm.addEventListener('submit', async (e) => {
-                e.preventDefault();
-
-                const formData = {
+            userForm.addEventListener('submit', async (event) => {
+                event.preventDefault();
+                const data = {
                     username: document.getElementById('username').value,
                     email: document.getElementById('email').value,
-                    role: document.getElementById('role').value,
-                    troop: document.getElementById('troop').value,
+                    role: roleSelect.value,
+                    troop: troopSelect.value,
                 };
 
-                const password = document.getElementById('password').value;
-                if (password.trim()) {
-                    formData.password = password; // Add password only if it's not blank
-                }
-
                 if (userIdField.value) {
-                    await fetch(`/api/users/${userIdField.value}`, {
-                        method: 'PUT',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData),
-                    });
+                    await api.updateUser(userIdField.value, data);
                 } else {
-                    await fetch('/api/users', {
-                        method: 'POST',
-                        headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(formData),
-                    });
+                    await api.createUser(data);
                 }
-
                 userModal.hide();
                 loadUsers();
             });
 
-            document.getElementById('addUserBtn').addEventListener('click', () => {
-                userForm.reset();
-                userIdField.value = '';
-                passwordField.style.display = 'block';
-                document.getElementById('password').placeholder = ""; // No placeholder in "Add User" mode
-            });
+            document.getElementById('addUserBtn').addEventListener('click', resetForm);
 
-            await fetchRolesAndTroops();
+            await loadRolesAndTroops();
             await loadUsers();
         });
     </script>
