@@ -39,79 +39,57 @@
                 <div class="modal-body">
                     <form id="memberForm">
                         <input type="hidden" id="memberId">
-                        <div id="personalDataFields">
-                            <div class="mb-3">
-                                <label for="firstName" class="form-label">First Name</label>
-                                <input type="text" class="form-control" id="firstName" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="lastName" class="form-label">Last Name</label>
-                                <input type="text" class="form-control" id="lastName" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="birthYear" class="form-label">Birth Year</label>
-                                <input type="number" class="form-control" id="birthYear" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email">
-                            </div>
-                            <div class="mb-3">
-                                <label for="phoneNumber" class="form-label">Phone Number</label>
-                                <input type="text" class="form-control" id="phoneNumber" required>
-                            </div>
-                            <div class="mb-3">
-                                <label for="fatherPhoneNumber" class="form-label">Father's Phone</label>
-                                <input type="text" class="form-control" id="fatherPhoneNumber">
-                            </div>
-                            <div class="mb-3">
-                                <label for="motherPhoneNumber" class="form-label">Mother's Phone</label>
-                                <input type="text" class="form-control" id="motherPhoneNumber">
-                            </div>
+
+                        <!-- Personal Data Fields -->
+                        <h6>Personal Data</h6>
+                        <div class="mb-3">
+                            <label for="firstName" class="form-label">First Name</label>
+                            <input type="text" class="form-control" id="firstName" required>
                         </div>
-                        <div id="scoutInfoFields" class="d-none">
-                            <div class="mb-3">
-                                <label for="function" class="form-label">Function</label>
-                                <select class="form-select" id="function">
-                                    <option value="">None</option>
-                                    <option value="1">Zastępowy</option>
-                                    <option value="2">Podzastępowy</option>
-                                    <option value="3">Drużynowy</option>
-                                    <option value="4">Przyboczny</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="rankOpen" class="form-label">Rank Open</label>
-                                <select class="form-select" id="rankOpen">
-                                    <option value="">None</option>
-                                    <option value="1">Młodzik</option>
-                                    <option value="2">Wywiadowca</option>
-                                    <option value="3">Ćwik</option>
-                                    <option value="4">Harcerz Orli</option>
-                                    <option value="5">Harcerz Rzeczypospolitej</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="rankAchieved" class="form-label">Rank Achieved</label>
-                                <select class="form-select" id="rankAchieved">
-                                    <option value="">None</option>
-                                    <option value="1">Młodzik</option>
-                                    <option value="2">Wywiadowca</option>
-                                    <option value="3">Ćwik</option>
-                                    <option value="4">Harcerz Orli</option>
-                                    <option value="5">Harcerz Rzeczypospolitej</option>
-                                </select>
-                            </div>
-                            <div class="mb-3">
-                                <label for="instructorRank" class="form-label">Instructor Rank</label>
-                                <select class="form-select" id="instructorRank">
-                                    <option value="">None</option>
-                                    <option value="1">Przewodnik</option>
-                                    <option value="2">Podharcmistrz</option>
-                                    <option value="3">Harcmistrz</option>
-                                </select>
-                            </div>
+                        <div class="mb-3">
+                            <label for="lastName" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" id="lastName" required>
                         </div>
+                        <div class="mb-3">
+                            <label for="birthYear" class="form-label">Birth Year</label>
+                            <input type="number" class="form-control" id="birthYear" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                        <div class="mb-3">
+                            <label for="phoneNumber" class="form-label">Phone Number</label>
+                            <input type="text" class="form-control" id="phoneNumber" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fatherPhoneNumber" class="form-label">Father's Phone</label>
+                            <input type="text" class="form-control" id="fatherPhoneNumber">
+                        </div>
+                        <div class="mb-3">
+                            <label for="motherPhoneNumber" class="form-label">Mother's Phone</label>
+                            <input type="text" class="form-control" id="motherPhoneNumber">
+                        </div>
+
+                        <!-- Scout Info Fields -->
+                        <h6>Scout Info</h6>
+                        <div class="mb-3">
+                            <label for="function" class="form-label">Function</label>
+                            <select class="form-select" id="function"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rankOpen" class="form-label">Rank Open</label>
+                            <select class="form-select" id="rankOpen"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="rankAchieved" class="form-label">Rank Achieved</label>
+                            <select class="form-select" id="rankAchieved"></select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="instructorRank" class="form-label">Instructor Rank</label>
+                            <select class="form-select" id="instructorRank"></select>
+                        </div>
+
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>
                 </div>
@@ -123,7 +101,6 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const api = {
                 fetchMembers: (view) => fetchJson(`/api/members?view=${view}`),
-                fetchMember: (id) => fetchJson(`/api/members/${id}`),
                 createMember: (data) => fetchJson('/api/members', { method: 'POST', body: JSON.stringify(data) }),
                 updateMember: (id, data) =>
                     fetchJson(`/api/members/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
@@ -136,21 +113,60 @@
                     document.getElementById('navbar').innerHTML = html;
                 });
 
-            const membersTableBody = document.getElementById('membersTableBody');
-            const membersTableHeader = document.getElementById('membersTableHeader');
-            const memberForm = document.getElementById('memberForm');
-            const memberIdField = document.getElementById('memberId');
-            const personalDataFields = document.getElementById('personalDataFields');
-            const scoutInfoFields = document.getElementById('scoutInfoFields');
-            const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
-            let currentView = 'personalData';
 
             const fetchJson = async (url, options = {}) => {
-                const response = await fetch(url, {
-                    headers: { 'Content-Type': 'application/json' },
-                    ...options,
-                });
-                if (!response.ok) throw new Error(`HTTP error: ${response.status}`);
+                try {
+                    console.log('Fetching:', url, options); // Debug - wyświetl żądanie
+                    const response = await fetch(url, {
+                        headers: { 'Content-Type': 'application/json' },
+                        ...options,
+                    });
+
+                    if (!response.ok) {
+                        console.error(`HTTP error: ${response.status}`);
+                        throw new Error(`HTTP error: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    console.log('Response:', data); // Debug - wyświetl odpowiedź
+                    return data;
+                } catch (error) {
+                    console.error('Error in fetchJson:', error);
+                    throw error;
+                }
+            };
+
+
+            // Declare the enums globally so they're accessible
+            let scoutFunctions = [];
+            let scoutRanks = [];
+            let instructorRanks = [];
+
+            // Functions to fetch the enums
+            const fetchScoutFunctions = async () => {
+                const response = await fetch('/api/scout-functions');
+                if (!response.ok) {
+                    console.error('Failed to fetch scout functions:', response.status);
+                    return [];
+                }
+                return response.json();
+            };
+
+            const fetchScoutRanks = async () => {
+                const response = await fetch('/api/scout-ranks');
+                if (!response.ok) {
+                    console.error('Failed to fetch scout ranks:', response.status);
+                    return [];
+                }
+                return response.json();
+            };
+
+            const fetchInstructorRanks = async () => {
+                const response = await fetch('/api/instructor-ranks');
+                if (!response.ok) {
+                    console.error('Failed to fetch instructor ranks:', response.status);
+                    return [];
+                }
                 return response.json();
             };
 
@@ -158,6 +174,36 @@
                 memberForm.reset();
                 memberIdField.value = '';
             };
+
+            const loadEnums = async () => {
+                // Load enums before doing anything else
+                scoutFunctions = await fetchScoutFunctions();
+                scoutRanks = await fetchScoutRanks();
+                instructorRanks = await fetchInstructorRanks();
+
+                populateSelect(document.getElementById('function'), scoutFunctions);
+                populateSelect(document.getElementById('rankOpen'), scoutRanks);
+                populateSelect(document.getElementById('rankAchieved'), scoutRanks);
+                populateSelect(document.getElementById('instructorRank'), instructorRanks);
+            };
+
+            const populateSelect = (selectElement, options) => {
+                selectElement.innerHTML = options
+                    .map((option) => `<option value="${option.id}">${option.name}</option>`)
+                    .join('');
+            };
+
+            const membersTableBody = document.getElementById('membersTableBody');
+            const membersTableHeader = document.getElementById('membersTableHeader');
+            const memberForm = document.getElementById('memberForm');
+            const memberIdField = document.getElementById('memberId');
+            const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
+            const btnPersonalData = document.getElementById('btnPersonalData');
+            const btnScoutInfo = document.getElementById('btnScoutInfo');
+            let currentView = 'personalData';
+
+            btnPersonalData.classList.add('btn-primary');
+            btnPersonalData.classList.remove('btn-outline-secondary');
 
             const loadMembers = async () => {
                 const members = await api.fetchMembers(currentView);
@@ -167,7 +213,7 @@
             const populateTable = (members) => {
                 membersTableHeader.innerHTML =
                     currentView === 'personalData'
-                        ? `<tr><th>Name</th><th>Birth Year</th><th>Phone</th><th>Actions</th></tr>`
+                        ? `<tr><th>Name</th><th>Birth Year</th><th>E-mail</th><th>Phone</th><th>Father's Phone</th><th>Mother's Phone</th><th>Actions</th></tr>`
                         : `<tr><th>Name</th><th>Function</th><th>Rank Open</th><th>Rank Achieved</th><th>Instructor Rank</th><th>Actions</th></tr>`;
 
                 membersTableBody.innerHTML = members
@@ -176,10 +222,13 @@
                             ? `<tr>
                                 <td>${member.firstName} ${member.lastName}</td>
                                 <td>${member.birthYear}</td>
+                                <td>${member.email}</td>
                                 <td>${member.phoneNumber}</td>
+                                <td>${member.fatherPhoneNumber || ''}</td>
+                                <td>${member.motherPhoneNumber || ''}</td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" data-id="${member.id}" onclick="editMember(${member.id})">Edit</button>
-                                    <button class="btn btn-danger btn-sm" data-id="${member.id}" onclick="deleteMember(${member.id})">Delete</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="editMember(${member.id})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.id})">Delete</button>
                                 </td>
                             </tr>`
                             : `<tr>
@@ -189,46 +238,138 @@
                                 <td>${member.rankAchieved}</td>
                                 <td>${member.instructorRank}</td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" data-id="${member.id}" onclick="editMember(${member.id})">Edit</button>
-                                    <button class="btn btn-danger btn-sm" data-id="${member.id}" onclick="deleteMember(${member.id})">Delete</button>
+                                    <button class="btn btn-secondary btn-sm" onclick="editMember(${member.id})">Edit</button>
+                                    <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.id})">Delete</button>
                                 </td>
                             </tr>`
                     )
                     .join('');
             };
 
-            document.getElementById('btnPersonalData').addEventListener('click', () => {
-                currentView = 'personalData';
-                personalDataFields.classList.remove('d-none');
-                scoutInfoFields.classList.add('d-none');
-                loadMembers();
-            });
-
-            document.getElementById('btnScoutInfo').addEventListener('click', () => {
-                currentView = 'scoutInfo';
-                personalDataFields.classList.add('d-none');
-                scoutInfoFields.classList.remove('d-none');
-                loadMembers();
-            });
+            const mapNameToId = (name, options) => {
+                const match = options.find((option) => option.name.toLowerCase() === name.toLowerCase());
+                return match ? match.id : '';
+            };
 
             memberForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
-                const data = new FormData(memberForm);
-                const id = memberIdField.value;
 
-                const payload = Object.fromEntries(data.entries());
-                if (id) {
-                    await api.updateMember(id, payload);
+                try {
+                    const id = memberIdField.value;
+                    const payload = {
+                        firstName: document.getElementById('firstName').value,
+                        lastName: document.getElementById('lastName').value,
+                        birthYear: document.getElementById('birthYear').value,
+                        email: document.getElementById('email').value || null,
+                        phoneNumber: document.getElementById('phoneNumber').value,
+                        fatherPhoneNumber: document.getElementById('fatherPhoneNumber').value || null,
+                        motherPhoneNumber: document.getElementById('motherPhoneNumber').value || null,
+                        scoutFunction: document.getElementById('function').value || null,
+                        rankOpen: document.getElementById('rankOpen').value || null,
+                        rankAchieved: document.getElementById('rankAchieved').value || null,
+                        instructorRank: document.getElementById('instructorRank').value || null,
+                    };
+
+                    console.log('Payload before submit:', payload);
+
+                    if (id) {
+                        console.log('Updating member:', id);
+                        await api.updateMember(id, payload);
+                    } else {
+                        console.log('Creating new member');
+                        await api.createMember(payload);
+                    }
+
+                    memberModal.hide();
+                    await loadMembers();
+
+                } catch (error) {
+                    console.error('Error saving member:', error);
+                    alert('Failed to save member. Check console for details.');
+                }
+            });
+
+
+
+            const toggleActiveButton = () => {
+                if (currentView === 'personalData') {
+                    btnPersonalData.classList.add('btn-primary');
+                    btnPersonalData.classList.remove('btn-outline-secondary');
+                    btnScoutInfo.classList.remove('btn-primary');
+                    btnScoutInfo.classList.add('btn-outline-secondary');
                 } else {
-                    await api.createMember(payload);
+                    btnScoutInfo.classList.add('btn-primary');
+                    btnScoutInfo.classList.remove('btn-outline-secondary');
+                    btnPersonalData.classList.remove('btn-primary');
+                    btnPersonalData.classList.add('btn-outline-secondary');
+                }
+            };
+
+            window.editMember = async (id) => {
+                if (!scoutFunctions.length || !scoutRanks.length) {
+                    console.error('Enums not loaded before editing member');
+                    return;
                 }
 
-                memberModal.hide();
+                const membersPersonalData = await api.fetchMembers('personalData');
+                const membersScoutData = await api.fetchMembers('scoutInfo');
+
+                const personalData = membersPersonalData.find((item) => item.id === id);
+                const scoutData = membersScoutData.find((item) => item.id === id);
+
+                if (!personalData || !scoutData) {
+                    alert('Error loading data.');
+                    return;
+                }
+
+                // Ustaw dane w formularzu
+                memberIdField.value = id;
+                document.getElementById('firstName').value = personalData.firstName || '';
+                document.getElementById('lastName').value = personalData.lastName || '';
+                document.getElementById('birthYear').value = personalData.birthYear || '';
+                document.getElementById('email').value = personalData.email || '';
+                document.getElementById('phoneNumber').value = personalData.phoneNumber || '';
+                document.getElementById('fatherPhoneNumber').value = personalData.fatherPhoneNumber || '';
+                document.getElementById('motherPhoneNumber').value = personalData.motherPhoneNumber || '';
+
+                // Mapowanie danych dla scout info
+                const functionId = mapNameToId(scoutData.function, scoutFunctions);
+                const rankOpenId = mapNameToId(scoutData.rankOpen, scoutRanks);
+                const rankAchievedId = mapNameToId(scoutData.rankAchieved, scoutRanks);
+                const instructorRankId = mapNameToId(scoutData.instructorRank, instructorRanks);
+
+                console.log('Mapping results:', { functionId, rankOpenId, rankAchievedId, instructorRankId });
+
+                document.getElementById('function').value = functionId;
+                document.getElementById('rankOpen').value = rankOpenId;
+                document.getElementById('rankAchieved').value = rankAchievedId;
+                document.getElementById('instructorRank').value = instructorRankId;
+
+                memberModal.show();
+            };
+
+
+            // Delete Member
+            window.deleteMember = async (id) => {
+                if (confirm('Are you sure you want to delete this member?')) {
+                    await api.deleteMember(id);
+                    loadMembers();
+                }
+            };
+
+            document.getElementById('addMemberBtn').addEventListener('click', resetForm);
+            btnPersonalData.addEventListener('click', () => {
+                currentView = 'personalData';
+                toggleActiveButton();
+                loadMembers();
+            });
+            btnScoutInfo.addEventListener('click', () => {
+                currentView = 'scoutInfo';
+                toggleActiveButton();
                 loadMembers();
             });
 
-            document.getElementById('addMemberBtn').addEventListener('click', resetForm);
-
+            await loadEnums(); // Ensure enums are loaded before loading members
             await loadMembers();
         });
     </script>

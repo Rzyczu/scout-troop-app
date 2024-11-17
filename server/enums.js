@@ -6,6 +6,7 @@ const UserRoles = {
 };
 
 const ScoutFunctions = {
+    0: 'None',
     1: 'Zastępowy',
     2: 'Podzastępowy',
     3: 'Drużynowy',

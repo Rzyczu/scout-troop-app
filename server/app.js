@@ -304,7 +304,16 @@ app.get('/api/members', authenticateToken, authorize([1, 2]), async (req, res) =
                 FROM scout_info si
                 JOIN personal_data pd ON si.personal_data_id = pd.id
             `);
-            res.json(result.rows);
+
+            // Mapowanie danych do czytelnych nazw
+            const mappedData = result.rows.map((member) => ({
+                ...member,
+                function: mapEnum(ScoutFunctions, member.function),
+                rankOpen: mapEnum(ScoutRanks, member.rankOpen),
+                rankAchieved: mapEnum(ScoutRanks, member.rankAchieved),
+                instructorRank: mapEnum(InstructorRanks, member.instructorRank),
+            }));
+            res.json(mappedData);
         } else {
             res.status(400).json({ error: 'Invalid view type' });
         }
@@ -313,6 +322,7 @@ app.get('/api/members', authenticateToken, authorize([1, 2]), async (req, res) =
         res.status(500).json({ error: 'Failed to fetch members' });
     }
 });
+
 
 // Fetch a single member by ID
 app.get('/api/members/:id', authenticateToken, authorize([1, 2]), async (req, res) => {
@@ -346,21 +356,30 @@ app.post('/api/members', authenticateToken, authorize([1, 2]), async (req, res) 
     } = req.body;
 
     try {
-        // Insert personal data
+        // Walidacja wymaganych danych
+        if (!firstName || !lastName || !birthYear || !phoneNumber) {
+            return res.status(400).json({ error: 'Missing required fields: firstName, lastName, birthYear, or phoneNumber' });
+        }
+
+        // Wstaw dane do personal_data
         const personalDataResult = await pool.query(`
             INSERT INTO personal_data (first_name, last_name, birth_year, email, phone_number, father_phone_number, mother_phone_number)
             VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id
-        `, [firstName, lastName, birthYear, email, phoneNumber, fatherPhoneNumber, motherPhoneNumber]);
+        `, [firstName, lastName, birthYear, email || null, phoneNumber, fatherPhoneNumber || null, motherPhoneNumber || null]);
 
         const personalDataId = personalDataResult.rows[0].id;
 
-        // Insert scout info if provided
-        if (scoutFunction || rankOpen || rankAchieved || instructorRank) {
-            await pool.query(`
-                INSERT INTO scout_info (personal_data_id, function, rank_open, rank_achieved, instructor_rank)
-                VALUES ($1, $2, $3, $4, $5)
-            `, [personalDataId, scoutFunction, rankOpen, rankAchieved, instructorRank]);
-        }
+        // Wstaw dane do scout_info
+        await pool.query(`
+            INSERT INTO scout_info (personal_data_id, function, rank_open, rank_achieved, instructor_rank)
+            VALUES ($1, $2, $3, $4, $5)
+        `, [
+            personalDataId,
+            scoutFunction || 1, // Domyślnie 1
+            rankOpen || 0, // Domyślnie 0
+            rankAchieved || 0, // Domyślnie 0
+            instructorRank || 0 // Domyślnie 0
+        ]);
 
         res.status(201).json({ message: 'Member added successfully' });
     } catch (err) {
@@ -368,6 +387,8 @@ app.post('/api/members', authenticateToken, authorize([1, 2]), async (req, res) 
         res.status(500).json({ error: 'Failed to add member' });
     }
 });
+
+
 
 // Update a member
 app.put('/api/members/:id', authenticateToken, authorize([1, 2]), async (req, res) => {
@@ -377,7 +398,14 @@ app.put('/api/members/:id', authenticateToken, authorize([1, 2]), async (req, re
         scoutFunction, rankOpen, rankAchieved, instructorRank
     } = req.body;
 
+    console.log('Received payload:', req.body);
+
     try {
+        // Walidacja danych wejściowych
+        if (!scoutFunction) {
+            return res.status(400).json({ error: 'Scout function is required.' });
+        }
+
         // Update personal data
         await pool.query(`
             UPDATE personal_data
@@ -386,26 +414,24 @@ app.put('/api/members/:id', authenticateToken, authorize([1, 2]), async (req, re
             WHERE id = $8
         `, [firstName, lastName, birthYear, email, phoneNumber, fatherPhoneNumber, motherPhoneNumber, memberId]);
 
-        // Update scout info if provided
-        if (scoutFunction || rankOpen || rankAchieved || instructorRank) {
-            const result = await pool.query(`
-                SELECT id FROM scout_info WHERE personal_data_id = $1
-            `, [memberId]);
+        // Update scout info
+        const result = await pool.query(`
+            SELECT id FROM scout_info WHERE personal_data_id = $1
+        `, [memberId]);
 
-            if (result.rows.length > 0) {
-                // Update existing scout info
-                await pool.query(`
-                    UPDATE scout_info
-                    SET function = $1, rank_open = $2, rank_achieved = $3, instructor_rank = $4
-                    WHERE personal_data_id = $5
-                `, [scoutFunction, rankOpen, rankAchieved, instructorRank, memberId]);
-            } else {
-                // Insert new scout info
-                await pool.query(`
-                    INSERT INTO scout_info (personal_data_id, function, rank_open, rank_achieved, instructor_rank)
-                    VALUES ($1, $2, $3, $4, $5)
-                `, [memberId, scoutFunction, rankOpen, rankAchieved, instructorRank]);
-            }
+        if (result.rows.length > 0) {
+            // Update existing scout info
+            await pool.query(`
+                UPDATE scout_info
+                SET function = $1, rank_open = $2, rank_achieved = $3, instructor_rank = $4
+                WHERE personal_data_id = $5
+            `, [scoutFunction, rankOpen, rankAchieved, instructorRank, memberId]);
+        } else {
+            // Insert new scout info
+            await pool.query(`
+                INSERT INTO scout_info (personal_data_id, function, rank_open, rank_achieved, instructor_rank)
+                VALUES ($1, $2, $3, $4, $5)
+            `, [memberId, scoutFunction, rankOpen, rankAchieved, instructorRank]);
         }
 
         res.json({ message: 'Member updated successfully' });
@@ -449,6 +475,39 @@ app.get('/api/roles', authenticateToken, (req, res) => {
     } catch (err) {
         console.error('Error fetching roles:', err);
         res.status(500).json({ error: 'Failed to fetch roles' });
+    }
+});
+
+// API: Scout Functions
+app.get('/api/scout-functions', authenticateToken, (req, res) => {
+    try {
+        const scoutFunctions = Object.entries(ScoutFunctions).map(([id, name]) => ({ id: parseInt(id), name }));
+        res.json(scoutFunctions);
+    } catch (err) {
+        console.error('Error fetching scout functions:', err);
+        res.status(500).json({ error: 'Failed to fetch scout functions' });
+    }
+});
+
+// API: Scout Ranks
+app.get('/api/scout-ranks', authenticateToken, (req, res) => {
+    try {
+        const scoutRanks = Object.entries(ScoutRanks).map(([id, { full }]) => ({ id: parseInt(id), name: full }));
+        res.json(scoutRanks);
+    } catch (err) {
+        console.error('Error fetching scout ranks:', err);
+        res.status(500).json({ error: 'Failed to fetch scout ranks' });
+    }
+});
+
+// API: Instructor Ranks
+app.get('/api/instructor-ranks', authenticateToken, (req, res) => {
+    try {
+        const instructorRanks = Object.entries(InstructorRanks).map(([id, { full }]) => ({ id: parseInt(id), name: full }));
+        res.json(instructorRanks);
+    } catch (err) {
+        console.error('Error fetching instructor ranks:', err);
+        res.status(500).json({ error: 'Failed to fetch instructor ranks' });
     }
 });
 
