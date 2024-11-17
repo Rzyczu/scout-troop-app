@@ -214,38 +214,38 @@ app.post('/api/users', authenticateToken, authorize([1]), async (req, res) => {
 
 // API: Update a user
 app.put('/api/users/:id', authenticateToken, authorize([1]), async (req, res) => {
-    const userId = parseInt(req.params.id, 10);
+    const userId = req.params.id;
     const { username, email, role, troop, password } = req.body;
 
     try {
-        // Podstawowe zapytanie bez zmiany hasła
-        const baseQuery = `
-            UPDATE users 
-            SET username = $1, email = $2, role = $3, troop_id = $4
-            WHERE id = $5
-        `;
-
-        const baseValues = [username, email, role, troop || null, userId];
+        let query;
+        let values;
 
         if (password) {
-            // Hasło zostało podane - aktualizuj hasło
-            const hashedPassword = await bcrypt.hash(password, 10);
-            await pool.query(
-                `${baseQuery}, password = $6`,
-                [...baseValues, hashedPassword]
-            );
+            // Aktualizacja z hasłem
+            query = `
+                UPDATE users
+                SET username = $1, email = $2, role = $3, troop_id = $4, password = crypt($5, gen_salt('bf'))
+                WHERE id = $6
+            `;
+            values = [username, email, role, troop || null, password, userId];
         } else {
-            // Hasło nie zostało podane - nie zmieniaj hasła
-            await pool.query(baseQuery, baseValues);
+            // Aktualizacja bez hasła
+            query = `
+                UPDATE users
+                SET username = $1, email = $2, role = $3, troop_id = $4
+                WHERE id = $5
+            `;
+            values = [username, email, role, troop || null, userId];
         }
 
-        res.json({ success: true });
+        await pool.query(query, values);
+        res.json({ message: 'User updated successfully' });
     } catch (err) {
         console.error('Error updating user:', err);
         res.status(500).json({ error: 'Failed to update user' });
     }
 });
-
 
 // API: Delete a user
 app.delete('/api/users/:id', authenticateToken, authorize([1]), async (req, res) => {
