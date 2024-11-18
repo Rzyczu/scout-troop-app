@@ -74,7 +74,7 @@
         document.addEventListener('DOMContentLoaded', async () => {
             const api = {
                 fetchUsers: () => fetchJson('/api/users'),
-                fetchRoles: () => fetchJson('/api/roles'),
+                fetchRoles: () => fetchJson('/api/enums/roles'),
                 fetchTroops: () => fetchJson('/api/troops'),
                 fetchUser: (id) => fetchJson(`/api/users/${id}`),
                 createUser: (data) => fetchJson('/api/users', { method: 'POST', body: JSON.stringify(data) }),

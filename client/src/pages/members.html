@@ -144,7 +144,7 @@
 
             // Functions to fetch the enums
             const fetchScoutFunctions = async () => {
-                const response = await fetch('/api/scout-functions');
+                const response = await fetch('/api/enums/scout-functions');
                 if (!response.ok) {
                     console.error('Failed to fetch scout functions:', response.status);
                     return [];
@@ -153,7 +153,7 @@
             };
 
             const fetchScoutRanks = async () => {
-                const response = await fetch('/api/scout-ranks');
+                const response = await fetch('/api/enums/scout-ranks');
                 if (!response.ok) {
                     console.error('Failed to fetch scout ranks:', response.status);
                     return [];
@@ -162,7 +162,7 @@
             };
 
             const fetchInstructorRanks = async () => {
-                const response = await fetch('/api/instructor-ranks');
+                const response = await fetch('/api/enums/instructor-ranks');
                 if (!response.ok) {
                     console.error('Failed to fetch instructor ranks:', response.status);
                     return [];
@@ -247,6 +247,10 @@
             };
 
             const mapNameToId = (name, options) => {
+                if (!name || typeof name !== 'string') {
+                    console.warn('Invalid name passed to mapNameToId:', name); // Debugging
+                    return '';
+                }
                 const match = options.find((option) => option.name.toLowerCase() === name.toLowerCase());
                 return match ? match.id : '';
             };
@@ -322,7 +326,19 @@
                     return;
                 }
 
-                // Ustaw dane w formularzu
+                console.log('Scout Data:', scoutData);
+                console.log('Scout Functions:', scoutFunctions);
+                console.log('Scout Ranks:', scoutRanks);
+
+                // Map data to IDs
+                const functionId = mapNameToId(scoutData.function, scoutFunctions);
+                const rankOpenId = mapNameToId(scoutData.rankOpen, scoutRanks);
+                const rankAchievedId = mapNameToId(scoutData.rankAchieved, scoutRanks);
+                const instructorRankId = mapNameToId(scoutData.instructorRank, instructorRanks);
+
+                console.log('Mapping results:', { functionId, rankOpenId, rankAchievedId, instructorRankId });
+
+                // Populate form fields
                 memberIdField.value = id;
                 document.getElementById('firstName').value = personalData.firstName || '';
                 document.getElementById('lastName').value = personalData.lastName || '';
@@ -332,14 +348,7 @@
                 document.getElementById('fatherPhoneNumber').value = personalData.fatherPhoneNumber || '';
                 document.getElementById('motherPhoneNumber').value = personalData.motherPhoneNumber || '';
 
-                // Mapowanie danych dla scout info
-                const functionId = mapNameToId(scoutData.function, scoutFunctions);
-                const rankOpenId = mapNameToId(scoutData.rankOpen, scoutRanks);
-                const rankAchievedId = mapNameToId(scoutData.rankAchieved, scoutRanks);
-                const instructorRankId = mapNameToId(scoutData.instructorRank, instructorRanks);
-
-                console.log('Mapping results:', { functionId, rankOpenId, rankAchievedId, instructorRankId });
-
+                // Populate dropdowns
                 document.getElementById('function').value = functionId;
                 document.getElementById('rankOpen').value = rankOpenId;
                 document.getElementById('rankAchieved').value = rankAchievedId;
@@ -347,7 +356,6 @@
 
                 memberModal.show();
             };
-
 
             // Delete Member
             window.deleteMember = async (id) => {
