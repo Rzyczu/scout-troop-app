@@ -141,12 +141,15 @@
             const memberForm = document.getElementById('memberForm');
             const memberIdField = document.getElementById('memberId');
             const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
-            const btnPersonalData = document.getElementById('btnPersonalData');
-            const btnScoutInfo = document.getElementById('btnScoutInfo');
             const functionSelect = document.getElementById('function');
             const rankOpenSelect = document.getElementById('rankOpen');
             const rankAchievedSelect = document.getElementById('rankAchieved');
             const instructorRankSelect = document.getElementById('instructorRank');
+            const btnPersonalData = document.getElementById('btnPersonalData');
+            const btnScoutInfo = document.getElementById('btnScoutInfo');
+            const tableHeaders = document.querySelectorAll('.sortable');
+            let sortDirection = 1;
+            let sortColumn = 'name';
             let currentView = 'personalData';
 
             btnPersonalData.classList.add('btn-primary');
@@ -173,17 +176,33 @@
             const loadMembers = async () => {
                 const members = await api.fetchMembers(currentView);
                 populateTable(members);
-            };
+            }
 
             const populateTable = (members) => {
                 membersTableHeader.innerHTML =
                     currentView === 'personalData'
-                        ? `<tr><th>Name</th><th>Birth Year</th><th>E-mail</th><th>Phone</th><th>Father's Phone</th><th>Mother's Phone</th><th>Actions</th></tr>`
-                        : `<tr><th>Name</th><th>Function</th><th>Rank Open</th><th>Rank Achieved</th><th>Instructor Rank</th><th>Actions</th></tr>`;
+                        ? `<tr>
+                         <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="birthYear">Birth Year <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="email">E-mail <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="phone">Phone <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="fatherPhone">Father's Phone <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="motherPhone">Mother's Phone <span class="sort-icon"></span></th>
+                         <th>Actions</th>
+                       </tr>`
+                        : `<tr>
+                         <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="function">Function <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="rankOpen">Rank Open <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="rankAchieved">Rank Achieved <span class="sort-icon"></span></th>
+                         <th class="sortable" data-sort="instructorRank">Instructor Rank <span class="sort-icon"></span></th>
+                         <th>Actions</th>
+                       </tr>`;
+
 
                 membersTableBody.innerHTML = members
-                    .map((member) =>
-                        currentView === 'personalData'
+                    .map(member => {
+                        return currentView === 'personalData'
                             ? `<tr>
                                 <td>${member.firstName} ${member.lastName}</td>
                                 <td>${member.birthYear}</td>
@@ -192,8 +211,8 @@
                                 <td>${member.fatherPhoneNumber || ''}</td>
                                 <td>${member.motherPhoneNumber || ''}</td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" onclick="editMember(${member.id})">Edit</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.id})">Delete</button>
+                                    <button class="btn btn-secondary btn-sm">Edit</button>
+                                    <button class="btn btn-danger btn-sm">Delete</button>
                                 </td>
                             </tr>`
                             : `<tr>
@@ -203,15 +222,16 @@
                                 <td>${mapEnumFullName(ScoutRanks, member.rankAchieved)}</td>
                                 <td>${mapEnumFullName(InstructorRanks, member.instructorRank)}</td>
                                 <td>
-                                    <button class="btn btn-secondary btn-sm" onclick="editMember(${member.id})">Edit</button>
-                                    <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.id})">Delete</button>
+                                    <button class="btn btn-secondary btn-sm">Edit</button>
+                                    <button class="btn btn-danger btn-sm">Delete</button>
                                 </td>
-                            </tr>`
-                    )
+                            </tr>`;
+                    })
                     .join('');
+
+                attachSortingToHeaders(); // Dodaj zdarzenia sortowania
+
             };
-
-
             memberForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
 
@@ -245,22 +265,6 @@
                     alert('Failed to save member. Check console for details.');
                 }
             });
-
-
-
-            const toggleActiveButton = () => {
-                if (currentView === 'personalData') {
-                    btnPersonalData.classList.add('btn-primary');
-                    btnPersonalData.classList.remove('btn-outline-secondary');
-                    btnScoutInfo.classList.remove('btn-primary');
-                    btnScoutInfo.classList.add('btn-outline-secondary');
-                } else {
-                    btnScoutInfo.classList.add('btn-primary');
-                    btnScoutInfo.classList.remove('btn-outline-secondary');
-                    btnPersonalData.classList.remove('btn-primary');
-                    btnPersonalData.classList.add('btn-outline-secondary');
-                }
-            };
 
             window.editMember = async (id) => {
                 const membersPersonalData = await api.fetchMembers('personalData');
@@ -308,19 +312,62 @@
             };
 
             document.getElementById('addMemberBtn').addEventListener('click', resetForm);
-            btnPersonalData.addEventListener('click', () => {
-                currentView = 'personalData';
-                toggleActiveButton();
+
+            btnPersonalData.addEventListener('click', () => toggleView('personalData', btnPersonalData, btnScoutInfo));
+            btnScoutInfo.addEventListener('click', () => toggleView('scoutInfo', btnScoutInfo, btnPersonalData));
+
+            const toggleView = (view, activeBtn, inactiveBtn) => {
+                currentView = view;
+                activeBtn.classList.add('btn-primary');
+                activeBtn.classList.remove('btn-outline-secondary');
+                inactiveBtn.classList.add('btn-outline-secondary');
+                inactiveBtn.classList.remove('btn-primary');
                 loadMembers();
-            });
-            btnScoutInfo.addEventListener('click', () => {
-                currentView = 'scoutInfo';
-                toggleActiveButton();
-                loadMembers();
-            });
+                attachSortingToHeaders();
+            };
+
+            const attachSortingToHeaders = () => {
+                const headers = membersTableHeader.querySelectorAll('.sortable');
+
+                headers.forEach(header => {
+                    const icon = header.querySelector('.sort-icon');
+
+                    // Ustaw ikonę domyślnego sortowania
+                    if (header.dataset.sort === sortColumn) {
+                        icon.textContent = sortDirection === 1 ? '▲' : '▼';
+                        icon.classList.add('active');
+                    }
+
+                    header.addEventListener('click', () => {
+                        const columnSelector = `td:nth-child(${Array.from(headers).indexOf(header) + 1})`;
+
+                        if (sortColumn === columnSelector) {
+                            sortDirection *= -1; // Zmień kierunek sortowania
+                        } else {
+                            sortColumn = columnSelector;
+                            sortDirection = 1; // Ustaw kierunek na rosnący
+                        }
+
+                        // Reset ikon
+                        headers.forEach(h => {
+                            const i = h.querySelector('.sort-icon');
+                            i.textContent = '';
+                            i.classList.remove('active');
+                        });
+
+                        // Ustaw aktywną ikonę
+                        icon.textContent = sortDirection === 1 ? '▲' : '▼';
+                        icon.classList.add('active');
+
+                        // Sortowanie tabeli
+                        sortTable(membersTableBody, columnSelector, sortDirection);
+                    });
+                });
+            };
 
             await loadEnums(); // Ensure enums are loaded before loading members
             await loadMembers();
+            sortTable(membersTableBody, sortColumn, sortDirection); // Domyślne sortowanie
         });
     </script>
 </body>

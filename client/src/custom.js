@@ -8,6 +8,8 @@ window.InstructorRanks = InstructorRanks;
 window.ScoutFunctions = ScoutFunctions;
 window.mapEnumFullName = mapEnumFullName;
 window.mapEnumShortName = mapEnumShortName
+import { sortTable } from './utils/sortTable';
+window.sortTable = sortTable;
 
 // Globalne ustawienia
 document.addEventListener('DOMContentLoaded', () => {

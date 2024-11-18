@@ -18,11 +18,11 @@
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th>ID</th>
-                    <th>Username</th>
-                    <th>Email</th>
-                    <th>Role</th>
-                    <th>Troop</th>
+                    <th class="sortable" data-sort="id">ID <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="username">Username <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="email">Email <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="role">Role <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="troop">Troop <span class="sort-icon"></span></th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -96,7 +96,6 @@
             const passwordField = document.getElementById('password');
             const userIdField = document.getElementById('userId');
             const userModal = new bootstrap.Modal(document.getElementById('userModal'));
-            let rolesMap = {};
 
             const fetchJson = async (url, options = {}) => {
                 const response = await fetch(url, {
@@ -200,8 +199,53 @@
 
             document.getElementById('addUserBtn').addEventListener('click', resetForm);
 
+
+
+            const tableHeaders = document.querySelectorAll('.sortable');
+            let sortDirection = 1; // 1 = rosnąco, -1 = malejąco
+            let sortColumn = 'id'; // Domyślna kolumna sortowania
+
+            // Obsługa kliknięcia w nagłówki
+            tableHeaders.forEach(header => {
+                const icon = header.querySelector('.sort-icon');
+
+                // Ustaw ikonę domyślnego sortowania dla wybranej kolumny
+                if (header.dataset.sort === sortColumn) {
+                    icon.textContent = '▲'; // Domyślna ikona
+                    icon.classList.add('active');
+                }
+
+                header.addEventListener('click', () => {
+                    const columnSelector = `td:nth-child(${Array.from(tableHeaders).indexOf(header) + 1})`;
+
+                    if (sortColumn === columnSelector) {
+                        sortDirection *= -1; // Zmień kierunek sortowania
+                    } else {
+                        sortColumn = columnSelector;
+                        sortDirection = 1; // Ustaw kierunek na rosnący
+                    }
+
+                    // Reset ikon
+                    tableHeaders.forEach(h => {
+                        const i = h.querySelector('.sort-icon');
+                        i.textContent = '';
+                        i.classList.remove('active');
+                    });
+
+                    // Ustaw aktywną ikonę
+                    icon.textContent = sortDirection === 1 ? '▲' : '▼';
+                    icon.classList.add('active');
+
+                    // Sortowanie tabeli
+                    sortTable(usersTableBody, columnSelector, sortDirection);
+                });
+            });
+
+            // Inicjalizacja tabeli
             await loadRolesAndTroops();
             await loadUsers();
+
+            sortTable(usersTableBody, sortColumn, sortDirection); // Wstępne sortowanie przy załadowaniu
         });
     </script>
 </body>
