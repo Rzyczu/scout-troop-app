@@ -116,7 +116,7 @@
 
             const fetchJson = async (url, options = {}) => {
                 try {
-                    console.log('Fetching:', url, options); // Debug - wyświetl żądanie
+                    //console.log('Fetching:', url, options); // Debug - wyświetl żądanie
                     const response = await fetch(url, {
                         headers: { 'Content-Type': 'application/json' },
                         ...options,
@@ -128,69 +128,12 @@
                     }
 
                     const data = await response.json();
-                    console.log('Response:', data); // Debug - wyświetl odpowiedź
+                    //console.log('Response:', data); // Debug - wyświetl odpowiedź
                     return data;
                 } catch (error) {
                     console.error('Error in fetchJson:', error);
                     throw error;
                 }
-            };
-
-
-            // Declare the enums globally so they're accessible
-            let scoutFunctions = [];
-            let scoutRanks = [];
-            let instructorRanks = [];
-
-            // Functions to fetch the enums
-            const fetchScoutFunctions = async () => {
-                const response = await fetch('/api/enums/scout-functions');
-                if (!response.ok) {
-                    console.error('Failed to fetch scout functions:', response.status);
-                    return [];
-                }
-                return response.json();
-            };
-
-            const fetchScoutRanks = async () => {
-                const response = await fetch('/api/enums/scout-ranks');
-                if (!response.ok) {
-                    console.error('Failed to fetch scout ranks:', response.status);
-                    return [];
-                }
-                return response.json();
-            };
-
-            const fetchInstructorRanks = async () => {
-                const response = await fetch('/api/enums/instructor-ranks');
-                if (!response.ok) {
-                    console.error('Failed to fetch instructor ranks:', response.status);
-                    return [];
-                }
-                return response.json();
-            };
-
-            const resetForm = () => {
-                memberForm.reset();
-                memberIdField.value = '';
-            };
-
-            const loadEnums = async () => {
-                // Load enums before doing anything else
-                scoutFunctions = await fetchScoutFunctions();
-                scoutRanks = await fetchScoutRanks();
-                instructorRanks = await fetchInstructorRanks();
-
-                populateSelect(document.getElementById('function'), scoutFunctions);
-                populateSelect(document.getElementById('rankOpen'), scoutRanks);
-                populateSelect(document.getElementById('rankAchieved'), scoutRanks);
-                populateSelect(document.getElementById('instructorRank'), instructorRanks);
-            };
-
-            const populateSelect = (selectElement, options) => {
-                selectElement.innerHTML = options
-                    .map((option) => `<option value="${option.id}">${option.name}</option>`)
-                    .join('');
             };
 
             const membersTableBody = document.getElementById('membersTableBody');
@@ -200,10 +143,32 @@
             const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
             const btnPersonalData = document.getElementById('btnPersonalData');
             const btnScoutInfo = document.getElementById('btnScoutInfo');
+            const functionSelect = document.getElementById('function');
+            const rankOpenSelect = document.getElementById('rankOpen');
+            const rankAchievedSelect = document.getElementById('rankAchieved');
+            const instructorRankSelect = document.getElementById('instructorRank');
             let currentView = 'personalData';
 
             btnPersonalData.classList.add('btn-primary');
             btnPersonalData.classList.remove('btn-outline-secondary');
+
+            const resetForm = () => {
+                memberForm.reset();
+                memberIdField.value = '';
+            };
+
+            const populateSelect = (selectElement, enumData) => {
+                selectElement.innerHTML = Object.entries(enumData)
+                    .map(([key, value]) => `<option value="${key}">${value.full || value}</option>`)
+                    .join('');
+            };
+
+            const loadEnums = () => {
+                populateSelect(functionSelect, ScoutFunctions);
+                populateSelect(rankOpenSelect, ScoutRanks);
+                populateSelect(rankAchievedSelect, ScoutRanks);
+                populateSelect(instructorRankSelect, InstructorRanks);
+            };
 
             const loadMembers = async () => {
                 const members = await api.fetchMembers(currentView);
@@ -233,10 +198,10 @@
                             </tr>`
                             : `<tr>
                                 <td>${member.firstName} ${member.lastName}</td>
-                                <td>${member.function}</td>
-                                <td>${member.rankOpen}</td>
-                                <td>${member.rankAchieved}</td>
-                                <td>${member.instructorRank}</td>
+                                <td>${mapEnumFullName(ScoutFunctions, member.function)}</td>
+                                <td>${mapEnumFullName(ScoutRanks, member.rankOpen)}</td>
+                                <td>${mapEnumFullName(ScoutRanks, member.rankAchieved)}</td>
+                                <td>${mapEnumFullName(InstructorRanks, member.instructorRank)}</td>
                                 <td>
                                     <button class="btn btn-secondary btn-sm" onclick="editMember(${member.id})">Edit</button>
                                     <button class="btn btn-danger btn-sm" onclick="deleteMember(${member.id})">Delete</button>
@@ -246,14 +211,6 @@
                     .join('');
             };
 
-            const mapNameToId = (name, options) => {
-                if (!name || typeof name !== 'string') {
-                    console.warn('Invalid name passed to mapNameToId:', name); // Debugging
-                    return '';
-                }
-                const match = options.find((option) => option.name.toLowerCase() === name.toLowerCase());
-                return match ? match.id : '';
-            };
 
             memberForm.addEventListener('submit', async (event) => {
                 event.preventDefault();
@@ -274,13 +231,9 @@
                         instructorRank: document.getElementById('instructorRank').value || null,
                     };
 
-                    console.log('Payload before submit:', payload);
-
                     if (id) {
-                        console.log('Updating member:', id);
                         await api.updateMember(id, payload);
                     } else {
-                        console.log('Creating new member');
                         await api.createMember(payload);
                     }
 
@@ -310,11 +263,6 @@
             };
 
             window.editMember = async (id) => {
-                if (!scoutFunctions.length || !scoutRanks.length) {
-                    console.error('Enums not loaded before editing member');
-                    return;
-                }
-
                 const membersPersonalData = await api.fetchMembers('personalData');
                 const membersScoutData = await api.fetchMembers('scoutInfo');
 
@@ -326,17 +274,11 @@
                     return;
                 }
 
-                console.log('Scout Data:', scoutData);
-                console.log('Scout Functions:', scoutFunctions);
-                console.log('Scout Ranks:', scoutRanks);
-
                 // Map data to IDs
-                const functionId = mapNameToId(scoutData.function, scoutFunctions);
-                const rankOpenId = mapNameToId(scoutData.rankOpen, scoutRanks);
-                const rankAchievedId = mapNameToId(scoutData.rankAchieved, scoutRanks);
-                const instructorRankId = mapNameToId(scoutData.instructorRank, instructorRanks);
-
-                console.log('Mapping results:', { functionId, rankOpenId, rankAchievedId, instructorRankId });
+                const functionId = scoutData.function;
+                const rankOpenId = scoutData.rankOpen;
+                const rankAchievedId = scoutData.rankAchieved;
+                const instructorRankId = scoutData.instructorRank;
 
                 // Populate form fields
                 memberIdField.value = id;
@@ -348,7 +290,7 @@
                 document.getElementById('fatherPhoneNumber').value = personalData.fatherPhoneNumber || '';
                 document.getElementById('motherPhoneNumber').value = personalData.motherPhoneNumber || '';
 
-                // Populate dropdowns
+                // Populate dropdowns using enums.js
                 document.getElementById('function').value = functionId;
                 document.getElementById('rankOpen').value = rankOpenId;
                 document.getElementById('rankAchieved').value = rankAchievedId;

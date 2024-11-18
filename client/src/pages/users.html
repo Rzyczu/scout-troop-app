@@ -113,10 +113,10 @@
                 passwordField.placeholder = ''; // Usuwanie placeholdera przy dodawaniu
             };
 
-            const populateSelect = (selectElement, options, emptyOptionText = 'None') => {
+            const populateSelect = (selectElement, enumData, emptyOptionText = 'None') => {
                 selectElement.innerHTML = `<option value="">${emptyOptionText}</option>`;
-                options.forEach(opt => {
-                    selectElement.innerHTML += `<option value="${opt.id}">${opt.name}</option>`;
+                Object.entries(enumData).forEach(([key, value]) => {
+                    selectElement.innerHTML += `<option value="${key}">${value}</option>`;
                 });
             };
 
@@ -128,7 +128,7 @@
                             <td>${user.id}</td>
                             <td>${user.username}</td>
                             <td>${user.email}</td>
-                            <td>${rolesMap[user.role] || 'Unknown'}</td>
+                            <td>${mapEnumFullName(UserRoles, user.role)}</td>
                             <td>${user.troop || 'None'}</td>
                             <td>
                                 <button class="btn btn-secondary btn-sm editUserBtn" data-id="${user.id}">Edit</button>
@@ -139,12 +139,13 @@
             };
 
             const loadRolesAndTroops = async () => {
-                const roles = await api.fetchRoles();
                 const troops = await api.fetchTroops();
 
-                rolesMap = Object.fromEntries(roles.map(role => [role.id, role.name]));
-                populateSelect(roleSelect, roles);
-                populateSelect(troopSelect, troops);
+                populateSelect(roleSelect, UserRoles);
+                populateSelect(troopSelect, troops.reduce((acc, troop) => {
+                    acc[troop.id] = troop.name;
+                    return acc;
+                }, {}));
             };
 
             usersTableBody.addEventListener('click', async (event) => {
