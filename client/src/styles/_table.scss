@@ -1,0 +1,28 @@
+@import './variables';
+
+table {
+    thead {
+        th {
+            text-align: left;
+            position: relative;
+            padding-right: $padding-right;
+
+            &[data-sort="id"] {
+                min-width: 3em;
+            }
+
+            .sort-icon {
+                position: absolute;
+                right: 0.5em;
+                top: 50%;
+                transform: translateY(-50%);
+                font-size: $icon-size;
+                pointer-events: none;
+
+                &.active {
+                    font-weight: $active-icon-weight;
+                }
+            }
+        }
+    }
+}

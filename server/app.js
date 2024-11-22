@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const cookieParser = require('cookie-parser');
 const logger = require('morgan');
-
 const dashboardRoutes = require('./routes/dashboard');
 const loginRoutes = require('./routes/login');
 const userRoutes = require('./routes/users');
@@ -26,7 +25,6 @@ app.use('/api/users', userRoutes);
 app.use('/api/members', memberRoutes);
 app.use('/api/troops', troopRoutes);
 app.use('/api/enums', enumRoutes);
-
 // Client Pages
 app.get('/', (req, res) => res.redirect('/login'));
 app.get('/dashboard', (req, res) =>

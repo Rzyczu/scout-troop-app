@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Users - Scout Troop App</title>
+    <link rel="stylesheet" href="login.css">
+    <script src="users.bundle.js" defer></script>
+</head>
+
+<body>
+    <header id="navbar"></header>
+    <main class="container mt-4">
+        <h1 class="mb-4">Users</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#userModal" id="addUserBtn">Add
+            User</button>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="id">ID <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="surname">Surname <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="email">Email <span class="sort-icon"></span></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="usersTableBody"></tbody>
+        </table>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="userModal" tabindex="-1" aria-labelledby="userModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="userModalLabel"></h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="userForm">
+                        <!-- Select user field for adding -->
+                        <div id="selectUserField" class="mb-3 d-none">
+                            <label for="selectUser" class="form-label">Select User</label>
+                            <select id="selectUser" class="form-select" required>
+                                <option value="">Select a user</option>
+                            </select>
+                        </div>
+                        <input type="hidden" id="userId">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email" required>
+                        </div>
+                        <div id="passwordField" class="mb-3">
+                            <label for="password" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="password" placeholder="">
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
