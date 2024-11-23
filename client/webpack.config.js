@@ -2,6 +2,7 @@ const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('webpack-dev-server');
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     entry: {
@@ -38,6 +39,14 @@ module.exports = {
         ],
     },
     plugins: [
+        new CopyWebpackPlugin({
+            patterns: [
+                {
+                    from: path.resolve(__dirname, 'src/components/navbar.html'), // Skąd kopiujemy
+                    to: path.resolve(__dirname, 'dist/components'), // Dokąd kopiujemy
+                },
+            ],
+        }),
         new MiniCssExtractPlugin({
             filename: '[name].css', // Tworzy osobne pliki CSS dla każdego entry pointa
             chunkFilename: '[id].css',

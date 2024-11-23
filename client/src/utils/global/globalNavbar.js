@@ -2,7 +2,7 @@ const loadNavbar = async () => {
     const navbarElement = document.getElementById('navbar');
     if (navbarElement) {
         try {
-            const response = await fetch('/navbar.html'); // Pobranie zawartości navbaru
+            const response = await fetch('components/navbar.html'); // Pobranie zawartości navbaru
             const html = await response.text();
             navbarElement.innerHTML = html; // Wstawienie pobranego HTML
         } catch (error) {
