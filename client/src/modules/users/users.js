@@ -1,6 +1,7 @@
 import './users.scss';
-import sortTable from '../../utils/sortTable'
-    ;
+import sortTable from '../../utils/sortTable';
+import initializeFormValidation from '../../utils/formValidation.js';
+
 document.addEventListener('DOMContentLoaded', async () => {
     const api = {
         fetchAllUsers: () => fetchJson('/api/users/all'),

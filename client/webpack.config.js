@@ -86,6 +86,9 @@ module.exports = {
             },
         },
         watchFiles: ['./src/**/*'], // Śledzenie wszystkich plików w folderze src
+        devMiddleware: {
+            writeToDisk: true, // Write files to `dist` during development
+        },
     },
 
 };
