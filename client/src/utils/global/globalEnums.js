@@ -1,4 +1,4 @@
-import { UserRoles, ScoutRanks, InstructorRanks, ScoutFunctions, mapEnumFullName, mapEnumShortName } from '../enums';
+import { ScoutRanks, InstructorRanks, ScoutFunctions, mapEnumFullName, mapEnumShortName } from '../enums';
 
 // Dodanie do globalnego okna (jeśli wymagane)
 window.ScoutRanks = ScoutRanks;

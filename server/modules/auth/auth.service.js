@@ -1,16 +1,15 @@
-const pool = require('../utils/db');
+const pool = require('../../utils/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
-const { JWT_SECRET } = require('../config');
-const errorMessages = require('../utils/errorMessages');
+const { JWT_SECRET } = require('../../config');
+const errorMessages = require('../../utils/errorMessages');
 
-const loginService = {
+const authService = {
     async login(email, password) {
         if (!email || !password) {
             throw { ...errorMessages.login.missingCredentials };
         }
 
-        // Pobieranie użytkownika z bazy danych
         const result = await pool.query(
             `
             SELECT 
@@ -57,4 +56,4 @@ const loginService = {
     },
 };
 
-module.exports = loginService;
+module.exports = authService;

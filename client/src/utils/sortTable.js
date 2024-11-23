@@ -5,7 +5,7 @@
  * @param {string} columnSelector - The data attribute or CSS selector for the column to sort by.
  * @param {number} direction - The sort direction: 1 for ascending, -1 for descending.
  */
-export function sortTable(tableBody, columnSelector, direction) {
+export default function sortTable(tableBody, columnSelector, direction) {
     const rows = Array.from(tableBody.querySelectorAll('tr'));
 
     rows.sort((a, b) => {

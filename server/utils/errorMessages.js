@@ -1,4 +1,25 @@
 const errorMessages = {
+    general: {
+        somethingWentWrong: 'An unexpected error occurred.',
+    },
+    login: {
+        missingCredentials: {
+            error: 'E-mail and password are required',
+            code: 'LOGIN_MISSING_CREDENTIALS',
+        },
+        invalidCredentials: {
+            error: 'Invalid credentials',
+            code: 'LOGIN_INVALID_CREDENTIALS',
+        },
+        passwordNotFound: {
+            error: 'Password not found',
+            code: 'LOGIN_PASSWORD_NOT_FOUND',
+        },
+        databaseError: {
+            error: 'Database error',
+            code: 'LOGIN_DATABASE_ERROR',
+        },
+    },
     users: {
         fetchAll: {
             error: 'Failed to fetch users.',
@@ -20,24 +41,6 @@ const errorMessages = {
             default: { error: 'Failed to delete user.', code: 'USER_DELETE_FAILED' },
             ownAccountDelete: { error: 'You cannot delete your own login.', code: 'USER_DELETE_OWN_ACCOUNT' },
             notFound: { error: 'User not found.', code: 'USER_NOT_FOUND' },
-        },
-    },
-    login: {
-        missingCredentials: {
-            error: 'E-mail and password are required',
-            code: 'LOGIN_MISSING_CREDENTIALS',
-        },
-        invalidCredentials: {
-            error: 'Invalid credentials',
-            code: 'LOGIN_INVALID_CREDENTIALS',
-        },
-        passwordNotFound: {
-            error: 'Password not found',
-            code: 'LOGIN_PASSWORD_NOT_FOUND',
-        },
-        databaseError: {
-            error: 'Database error',
-            code: 'LOGIN_DATABASE_ERROR',
         },
     },
 };

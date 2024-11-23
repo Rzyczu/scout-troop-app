@@ -13,7 +13,7 @@ if (!token) {
         .then(data => {
             if (data.error) {
                 alert(data.error);
-                window.location.href = '/login';
+                window.location.href = '/auth';
             } else {
                 console.log(data);
                 document.getElementById('content').innerText = JSON.stringify(data, null, 2);

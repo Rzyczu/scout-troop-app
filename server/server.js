@@ -1,21 +1,17 @@
 const http = require('http');
 const app = require('./app');
-const initializeDatabase = require('./init/initializeDatabase');
-const addAdminUser = require('./init/addAdminUser');
-const addUser1 = require('./init/addUser1');
+const initApp = require('./init/initApp');
 
-const PORT = process.env.PORT || 3000;
+
+const PORT = process.env.PORT || 5000;
 
 const server = http.createServer(app);
 
 
 (async () => {
     try {
-        await initializeDatabase(); // Inicjalizacja bazy danych
-        await addAdminUser(); // Inicjalizacja bazy danych
-        await addUser1(); // Inicjalizacja bazy danych
-
-
+        await initApp();
+        console.log('initialized');
         // Start serwera
         app.listen(PORT, () => {
             console.log(`Server running on port ${PORT}`);

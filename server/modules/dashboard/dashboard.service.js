@@ -1,12 +1,8 @@
-const express = require('express');
-const { authenticateToken } = require('../middlewares/auth');
-const { ScoutFunctions, mapEnum } = require('../utils/enums');
-const pool = require('../utils/db'); // Połączenie z bazą danych
+const pool = require('../../utils/db');
+const { ScoutFunctions, mapEnum } = require('../../utils/enums');
 
-const router = express.Router();
-
-router.get('/', authenticateToken, async (req, res) => {
-    try {
+const dashboardService = {
+    async getDashboardData(userId) {
         // Pobranie szczegółowych informacji o użytkowniku z bazy danych
         const result = await pool.query(
             `
@@ -29,17 +25,17 @@ router.get('/', authenticateToken, async (req, res) => {
             WHERE 
                 u.id = $1
             `,
-            [req.user.id]
+            [userId]
         );
 
         const userDetails = result.rows[0];
 
         if (!userDetails) {
-            return res.status(404).json({ error: 'User not found' });
+            throw new Error('User not found');
         }
 
         // Tworzenie danych dashboardu
-        const dashboardData = {
+        return {
             message: `Witaj ${userDetails.name} ${userDetails.surname}, jesteś ${mapEnum(
                 ScoutFunctions,
                 userDetails.function
@@ -48,12 +44,7 @@ router.get('/', authenticateToken, async (req, res) => {
                 ? { id: userDetails.troop_id, name: userDetails.troop_name }
                 : null,
         };
+    },
+};
 
-        res.json(dashboardData);
-    } catch (err) {
-        console.error('Error fetching dashboard data:', err.message);
-        res.status(500).json({ error: 'Failed to fetch dashboard data' });
-    }
-});
-
-module.exports = router;
+module.exports = dashboardService;

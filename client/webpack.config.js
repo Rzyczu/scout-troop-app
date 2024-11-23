@@ -1,6 +1,7 @@
 const path = require('path');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const isDev = process.env.NODE_ENV === 'development' || process.argv.includes('webpack-dev-server');
 
 module.exports = {
     entry: {
@@ -12,6 +13,7 @@ module.exports = {
     output: {
         filename: '[name].bundle.js', // Oddzielne bundlowanie per moduł
         path: path.resolve(__dirname, 'dist'),
+        publicPath: '/', // Dodaje poprawne ścieżki w wygenerowanym HTML
         clean: true, // Czyści katalog `dist` przed kompilacją
     },
     module: {
@@ -19,7 +21,7 @@ module.exports = {
             {
                 test: /\.scss$/,
                 use: [
-                    MiniCssExtractPlugin.loader,
+                    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
                     'css-loader',
                     'sass-loader',
                 ],
@@ -37,7 +39,8 @@ module.exports = {
     },
     plugins: [
         new MiniCssExtractPlugin({
-            filename: '[name].css', // Plik CSS per moduł
+            filename: '[name].css', // Tworzy osobne pliki CSS dla każdego entry pointa
+            chunkFilename: '[id].css',
         }),
         new HtmlWebpackPlugin({
             template: './src/index.html',
@@ -46,7 +49,7 @@ module.exports = {
         }),
         new HtmlWebpackPlugin({
             template: './src/modules/auth/login.html',
-            chunks: ['login', 'app'], // Ładuje login.bundle.js i app.bundle.js
+            chunks: ['login'], // Ładuje login.bundle.js
             filename: 'login.html',
         }),
         new HtmlWebpackPlugin({
@@ -60,6 +63,29 @@ module.exports = {
             filename: 'users.html',
         }),
     ],
-    mode: 'development',
+    mode: process.env.NODE_ENV || 'development',
     devtool: 'source-map',
+    devServer: {
+        static: path.resolve(__dirname, 'dist'),
+        port: 3000, // Port Webpack Dev Server
+        hot: true, // Hot Module Replacement
+        open: true,
+        proxy: [
+            {
+                context: ['/'], // Wszystkie żądania zaczynające się od /api
+                target: 'http://localhost:5000', // Backend na porcie 5000
+                secure: false, // Jeśli używasz HTTP, a nie HTTPS
+                changeOrigin: true, // Dostosowuje nagłówki do backendu
+            },
+        ],
+        client: {
+            logging: 'none', // Ukrywa wszystkie logi w konsoli
+            overlay: {
+                warnings: false, // Wyłącza ostrzeżenia
+                errors: true,    // Pozostawia tylko błędy
+            },
+        },
+        watchFiles: ['./src/**/*'], // Śledzenie wszystkich plików w folderze src
+    },
+
 };

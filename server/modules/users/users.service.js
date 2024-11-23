@@ -1,4 +1,4 @@
-const pool = require('../utils/db');
+const pool = require('../../utils/db');
 
 const fetchUsers = async () => {
     const result = await pool.query(`
@@ -23,12 +23,12 @@ const fetchUsers = async () => {
 
 const fetchAllUsers = async () => {
     const result = await pool.query(`
-    SELECT 
-        u.id AS user_id,
-        u.name,
-        u.surname
-    FROM 
-        users u
+        SELECT 
+            u.id AS user_id,
+            u.name,
+            u.surname
+        FROM 
+            users u
     `);
     return result.rows;
 };

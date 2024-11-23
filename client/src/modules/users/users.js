@@ -1,5 +1,6 @@
 import './users.scss';
-
+import sortTable from '../../utils/sortTable'
+    ;
 document.addEventListener('DOMContentLoaded', async () => {
     const api = {
         fetchAllUsers: () => fetchJson('/api/users/all'),

@@ -1,6 +1,3 @@
-console.log('Login script loaded');
-
-
 import './login.scss';
 
 document.getElementById('loginForm').onsubmit = async function (event) {
@@ -10,7 +7,7 @@ document.getElementById('loginForm').onsubmit = async function (event) {
     const payload = JSON.stringify(Object.fromEntries(formData));
 
     try {
-        const response = await fetch('/api/login', {
+        const response = await fetch('/api/auth/login', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: payload,
