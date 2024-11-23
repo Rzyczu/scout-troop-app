@@ -2,14 +2,8 @@ import './login.scss';
 import globalBootstrap from '../../utils/global/globalBootstrap.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 import errorMessages from '../../utils/errors/index';
-import showToast from '../../utils/errorMessagesToasts.js';
-const customValidationRules = [
-    {
-        selector: '#email', // Selektor pola
-        validate: (value) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(value), // Reguła sprawdzająca e-mail
-        message: 'Please provide a valid email address.', // Wiadomość wyświetlana w przypadku błędu
-    },
-];
+import showToast from '../../utils/showToast.js';
+
 // Inicjalizacja walidacji formularza
 document.addEventListener('DOMContentLoaded', () => {
     initializeFormValidation();

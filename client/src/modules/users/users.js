@@ -1,6 +1,14 @@
 import './users.scss';
 import sortTable from '../../utils/sortTable';
 import initializeFormValidation from '../../utils/formValidation.js';
+import showToast from '../../utils/showToast.js';
+import showConfirmationModal from '../../utils/showConfirmationModal.js';
+
+// Inicjalizacja walidacji formularza
+document.addEventListener('DOMContentLoaded', () => {
+    initializeFormValidation();
+});
+
 
 document.addEventListener('DOMContentLoaded', async () => {
     const api = {
@@ -46,7 +54,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         userIdField.value = '';
         passwordField.placeholder = '';
         selectUserField.classList.remove('d-none');
-        selectUser.removeAttribute('required');
+        passwordField.setAttribute('required', 'required');
+        selectUser.setAttribute('required', 'required'); // Pole wyboru użytkownika wymagane
         userModalLabel.textContent = 'Add User';
         await loadAllUsers();
     };
@@ -62,7 +71,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             const message = Object.values(errorMessages.users.fetchAll).find(err => err.code === error.code)?.message
                 || 'An unexpected error occurred.';
-            alert(message);
+            showToast(message);
         }
     };
 
@@ -85,32 +94,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         } catch (error) {
             const message = Object.values(errorMessages.users.fetchAll).find(err => err.code === error.code)?.message
                 || 'An unexpected error occurred.';
-            alert(message);
+            showToast(message);
         }
-    };
-
-    // Walidacja formularza
-    const validateForm = () => {
-        const userId = parseInt(selectUser.value || userIdField.value, 10);
-        const email = document.getElementById('email').value;
-        const password = passwordField.value;
-
-        if (!userId || isNaN(userId)) {
-            alert('Please select a valid user.');
-            return false;
-        }
-
-        if (!email || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
-            alert('Please provide a valid email address.');
-            return false;
-        }
-
-        if (password && password.length < 6) {
-            alert('Password must be at least 6 characters long.');
-            return false;
-        }
-
-        return true;
     };
 
     // Obsługa kliknięcia przycisków edycji i usuwania
@@ -141,34 +126,41 @@ document.addEventListener('DOMContentLoaded', async () => {
                 passwordField.placeholder = 'Enter new password or leave blank';
                 selectUserField.classList.add('d-none');
                 selectUser.removeAttribute('required');
+                passwordField.removeAttribute('required');
                 userModalLabel.textContent = 'Edit User';
                 userModal.show();
             }
             // Obsługa usuwania
             else if (target.classList.contains('deleteUserBtn')) {
-                if (confirm('Are you sure you want to delete this user?')) {
+                const confirmed = await showConfirmationModal(
+                    'Delete User',
+                    'Are you sure you want to delete this user? This action cannot be undone.'
+                );
+                if (confirmed) {
                     try {
                         const response = await api.deleteUser(id);
-                        alert(response.message || 'User deleted successfully.');
+                        showToast(response.message || 'User deleted successfully.', 'success');
                         loadUsers(); // Odśwież listę użytkowników
                     } catch (error) {
                         const message = Object.values(errorMessages.users.delete).find(err => err.code === error.code)?.message
                             || 'Failed to delete the user.';
-                        alert(message);
+                        showToast(message, 'danger');
                     }
                 }
             }
         } catch (error) {
-            alert(error.message || errorMessages.users.fetch.default);
+            showToast(error.message || errorMessages.users.fetch.default);
         }
     });
 
     // Obsługa zapisu formularza
-    userForm.addEventListener('submit', async (event) => {
+    userForm.onsubmit = async function (event) {
         event.preventDefault();
 
-        if (!validateForm()) return;
-
+        if (!this.checkValidity()) {
+            this.classList.add('was-validated'); // Dodaj klasy walidacyjne Bootstrapa
+            return; // Zatrzymaj, jeśli formularz jest niepoprawny
+        }
         const userId = parseInt(selectUser.value || userIdField.value, 10);
         const email = document.getElementById('email').value;
         const password = passwordField.value;
@@ -184,13 +176,14 @@ document.addEventListener('DOMContentLoaded', async () => {
             }
             userModal.hide();
             loadUsers();
+            showToast('User saved successfully!', 'success');
         } catch (error) {
             const message = Object.values(errorMessages.users.create).find(err => err.code === error.code)?.message
                 || 'Failed to delete the user.';
-            alert(message);
+            showToast(message);
         }
+    };
 
-    });
 
     // Sortowanie nagłówków tabeli
     const attachSortingToHeaders = () => {

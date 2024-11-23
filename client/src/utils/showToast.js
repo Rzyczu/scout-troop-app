@@ -1,5 +1,5 @@
 export default function showToast(message, type = 'danger') {
-    const toastContainer = document.getElementById('errors-messages');
+    const toastContainer = document.getElementById('toast-messages');
 
     // Create the toast element
     const toast = document.createElement('div');
@@ -22,7 +22,9 @@ export default function showToast(message, type = 'danger') {
     toastContainer.appendChild(toast);
 
     // Initialize Bootstrap toast
-    const bootstrapToast = new bootstrap.Toast(toast);
+    const bootstrapToast = new bootstrap.Toast(toast, {
+        delay: 10000, // 10 sekund
+    });
     bootstrapToast.show();
 
     // Remove the toast after it's hidden
