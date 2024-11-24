@@ -87,7 +87,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fetchMember: (id) => fetchJson(`/api/members/${id}`),
         createMember: (data) => fetchJson('/api/members', { method: 'POST', body: JSON.stringify(data) }),
         updateMember: (id, data) => fetchJson(`/api/members/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-        deleteMember: (id) => fetch(`/api/members/${id}`, { method: 'DELETE' }),
+        deleteMember: (id) => fetchJson(`/api/members/${id}`, { method: 'DELETE' }),
     };
 
     const membersTableBody = document.getElementById('membersTableBody');
@@ -97,11 +97,6 @@ document.addEventListener('DOMContentLoaded', async () => {
     let currentView = 'basic'; // Domyślny widok
     let sortColumn = null;
     let sortDirection = 1;
-
-    document.querySelectorAll('.view-btn').forEach((btn) => {
-        btn.classList.remove('active');
-    });
-    document.getElementById(`view${currentView.charAt(0).toUpperCase() + currentView.slice(1)}`).classList.add('active');
 
     // Funkcja pomocnicza do fetchowania z obsługą błędów
     const fetchJson = async (url, options = {}) => {
@@ -113,11 +108,16 @@ document.addEventListener('DOMContentLoaded', async () => {
         const result = await response.json();
 
         if (!result.success) {
-            throw { message: result.message, code: result.code };
+            throw { message: result.error, code: result.code };
         }
 
         return result.data || result;
     };
+
+    document.querySelectorAll('.view-btn').forEach((btn) => {
+        btn.classList.remove('active');
+    });
+    document.getElementById(`view${currentView.charAt(0).toUpperCase() + currentView.slice(1)}`).classList.add('active');
 
     // Funkcja do resetowania formularza
     const resetForm = () => {

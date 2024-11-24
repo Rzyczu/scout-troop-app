@@ -62,6 +62,11 @@ const membersController = {
 
     async deleteMember(req, res) {
         try {
+
+            if (req.user.id === parseInt(req.params.id)) {
+                return sendError(res, errorMessages.users.delete.ownAccountDelete);
+            }
+
             const deleted = await membersService.deleteMember(req.params.id);
             if (!deleted) {
                 return sendError(res, errorMessages.users.delete.notFound);

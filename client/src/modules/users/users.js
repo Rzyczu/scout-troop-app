@@ -17,7 +17,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         fetchUser: (id) => fetchJson(`/api/users/${id}`),
         createUser: (data) => fetchJson('/api/users', { method: 'POST', body: JSON.stringify(data) }),
         updateUser: (id, data) => fetchJson(`/api/users/${id}`, { method: 'PUT', body: JSON.stringify(data) }),
-        deleteUser: (id) => fetch(`/api/users/${id}`, { method: 'DELETE' })
+        deleteUser: (id) => fetchJson(`/api/users/${id}`, { method: 'DELETE' })
     };
 
     const usersTableBody = document.getElementById('usersTableBody');
@@ -40,9 +40,9 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
 
         const result = await response.json();
-
+        console.log(result)
         if (!result.success) {
-            throw { message: result.message, code: result.code };
+            throw { message: result.error, code: result.code };
         }
 
         return result.data || result;
@@ -139,8 +139,17 @@ document.addEventListener('DOMContentLoaded', async () => {
                 if (confirmed) {
                     try {
                         const response = await api.deleteUser(id);
-                        showToast(response.message || 'User deleted successfully.', 'success');
-                        loadUsers(); // Odśwież listę użytkowników
+                        console.log(response)
+
+                        // Sprawdź success w odpowiedzi
+                        if (response.success) {
+                            showToast(response.message || 'User deleted successfully.', 'success');
+                            loadUsers(); // Odśwież listę użytkowników
+                        } else {
+                            // Obsłuż błąd, jeśli success = false
+                            const message = response.message || 'Failed to delete the user.';
+                            showToast(message, 'danger');
+                        }
                     } catch (error) {
                         const message = Object.values(errorMessages.users.delete).find(err => err.code === error.code)?.message
                             || 'Failed to delete the user.';
