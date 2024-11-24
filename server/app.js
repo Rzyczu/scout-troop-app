@@ -5,6 +5,7 @@ const logger = require('morgan');
 const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const authRoutes = require('./modules/auth/auth.routes');
 const userRoutes = require('./modules/users/users.routes');
+const membersRoutes = require('./modules/members/members.routes');
 
 const app = express();
 
@@ -17,19 +18,23 @@ app.use(cookieParser());
 app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
+app.use('/api/members', membersRoutes);
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Client Pages
 app.get('/', (req, res) => res.redirect('/auth'));
+app.get('/auth', (req, res) =>
+    res.sendFile(path.join(__dirname, '../client/dist/login.html'))
+);
 app.get('/dashboard', (req, res) =>
     res.sendFile(path.join(__dirname, '../client/dist/dashboard.html'))
 );
 app.get('/users', (req, res) =>
     res.sendFile(path.join(__dirname, '../client/dist/users.html'))
 );
-app.get('/auth', (req, res) =>
-    res.sendFile(path.join(__dirname, '../client/dist/login.html'))
+app.get('/members', (req, res) =>
+    res.sendFile(path.join(__dirname, '../client/dist/members.html'))
 );
 
 // Error Handling

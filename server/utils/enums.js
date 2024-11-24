@@ -7,18 +7,21 @@ const ScoutFunctions = {
 };
 
 const ScoutRanks = {
-    0: { short: 'mł.', full: 'Młodzik' },
-    1: { short: 'wyw.', full: 'Wywiadowca' },
-    2: { short: 'ćw.', full: 'Ćwik' },
-    3: { short: 'HO.', full: 'Harcerz Orli' },
-    4: { short: 'HR', full: 'Harcerz Rzeczypospolitej' }
+    null: { short: '-', full: 'None' },
+    1: { short: 'mł.', full: 'Młodzik' },
+    2: { short: 'wyw.', full: 'Wywiadowca' },
+    3: { short: 'ćw.', full: 'Ćwik' },
+    4: { short: 'HO.', full: 'Harcerz Orli' },
+    5: { short: 'HR', full: 'Harcerz Rzeczypospolitej' }
 };
 
 const InstructorRanks = {
-    0: { short: 'pwd.', full: 'Przewodnik' },
-    1: { short: 'phm.', full: 'Podharcmistrz' },
-    2: { short: 'hm.', full: 'Harcmistrz' }
+    null: { short: '-', full: 'None' },
+    1: { short: 'pwd.', full: 'Przewodnik' },
+    2: { short: 'phm.', full: 'Podharcmistrz' },
+    3: { short: 'hm.', full: 'Harcmistrz' }
 };
+
 
 // Mapowanie wartości z bazy na pełne nazwy
 const mapEnum = (enumType, value) =>

@@ -40,9 +40,9 @@ CREATE TABLE IF NOT EXISTS troops (
 CREATE TABLE IF NOT EXISTS users_scout (
     id SERIAL PRIMARY KEY,
     user_id INT UNIQUE REFERENCES users(id) ON DELETE CASCADE,
-    function INT,
-    open_rank INT,
-    achieved_rank INT,
-    instructor_rank INT,
+    function INT NOT NULL,
+    open_rank INT NOT NULL,
+    achieved_rank INT NOT NULL,
+    instructor_rank INT NOT NULL,
     troop_id INT REFERENCES troops(id)
 );

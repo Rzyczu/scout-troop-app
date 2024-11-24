@@ -10,6 +10,8 @@ module.exports = {
         login: './src/modules/auth/login.js', // Funkcje tylko dla login.html
         dashboard: './src/modules/dashboard/dashboard.js', // Funkcje tylko dla dashboard.html
         users: './src/modules/users/users.js', // Funkcje tylko dla users.html
+        members: './src/modules/members/members.js', // Funkcje tylko dla users.html
+
     },
     output: {
         filename: '[name].bundle.js', // Oddzielne bundlowanie per moduł
@@ -70,6 +72,11 @@ module.exports = {
             template: './src/modules/users/users.html',
             chunks: ['users', 'app'], // Ładuje users.bundle.js i app.bundle.js
             filename: 'users.html',
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/modules/members/members.html',
+            chunks: ['members', 'app'], // Ładuje members.bundle.js i app.bundle.js
+            filename: 'members.html',
         }),
     ],
     mode: process.env.NODE_ENV || 'development',

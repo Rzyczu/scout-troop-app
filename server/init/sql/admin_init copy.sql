@@ -11,8 +11,8 @@ WHERE name = 'example1' AND surname = 'example1' AND date_birth = '2001-01-01'
 ON CONFLICT (user_id) DO NOTHING;
 
 -- Dodanie informacji harcerskich
-INSERT INTO users_scout (user_id, function)
-SELECT id, 3
+INSERT INTO users_scout (user_id, function, achieved_rank, open_rank, instructor_rank)
+SELECT id, 3,0,1,2
 FROM users
 WHERE name = 'example1' AND surname = 'example1' AND date_birth = '2001-01-01'
 ON CONFLICT (user_id) DO NOTHING;

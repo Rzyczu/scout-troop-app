@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Members - Scout Troop App</title>
+</head>
+
+<body>
+    <header id="navbar"></header>
+    <div id="toast-messages" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+
+    <main class="container mt-4">
+        <h1 class="mb-4">Members</h1>
+        <div class="d-flex justify-content-between mb-3">
+            <div class="btn-group" role="group" aria-label="View options">
+                <button class="btn btn-outline-primary view-btn" id="viewBasic">Basic Details</button>
+                <button class="btn btn-outline-primary view-btn" id="viewContact">Contact Details</button>
+                <button class="btn btn-outline-primary view-btn" id="viewScout">Scout Details</button>
+            </div>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#memberModal" id="addMemberBtn">
+                Add Member
+            </button>
+        </div>
+
+        <table class="table table-striped">
+            <thead>
+                <tr id="tableHeaders">
+                    <!-- Dynamic headers based on selected view -->
+                </tr>
+            </thead>
+            <tbody id="membersTableBody">
+                <!-- Dynamic table content based on selected view -->
+            </tbody>
+        </table>
+    </main>
+
+    <!-- Modal for Add/Edit Member -->
+    <div class="modal fade" id="memberModal" tabindex="-1" aria-labelledby="memberModalLabel" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="memberModalLabel">Add/Edit Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="memberForm" class="needs-validation" novalidate>
+                        <!-- User Information -->
+                        <fieldset>
+                            <legend>Basic Details</legend>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="name" class="form-label">Name</label>
+                                    <input type="text" id="name" name="name" class="form-control" required>
+                                    <div class="invalid-feedback">Please provide a valid name.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="surname" class="form-label">Surname</label>
+                                    <input type="text" id="surname" name="surname" class="form-control" required>
+                                    <div class="invalid-feedback">Please provide a valid surname.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="dateBirth" class="form-label">Date of Birth</label>
+                                    <input type="date" id="dateBirth" name="dateBirth" class="form-control" required>
+                                    <div class="invalid-feedback">Please provide a valid date of birth.</div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <hr>
+
+                        <!-- Contact Information -->
+                        <fieldset>
+                            <legend>Contact Details</legend>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="phoneNumber" class="form-label">Phone Number</label>
+                                    <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
+                                        required>
+                                    <div class="invalid-feedback">Please provide a valid phone number.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="motherPhoneNumber" class="form-label">Mother's Phone Number</label>
+                                    <input type="text" id="motherPhoneNumber" name="motherPhoneNumber"
+                                        class="form-control">
+                                    <div class="invalid-feedback">Please provide a valid phone number.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="fatherPhoneNumber" class="form-label">Father's Phone Number</label>
+                                    <input type="text" id="fatherPhoneNumber" name="fatherPhoneNumber"
+                                        class="form-control">
+                                    <div class="invalid-feedback">Please provide a valid phone number.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="parentEmail1" class="form-label">Parent Email 1</label>
+                                    <input type="email" id="parentEmail1" name="parentEmail1" class="form-control">
+                                    <div class="invalid-feedback">Please provide a valid email address.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="parentEmail2" class="form-label">Parent Email 2</label>
+                                    <input type="email" id="parentEmail2" name="parentEmail2" class="form-control">
+                                    <div class="invalid-feedback">Please provide a valid email address.</div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <hr>
+
+                        <!-- Scout Information -->
+                        <fieldset>
+                            <legend>Scout Details</legend>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="scoutFunction" class="form-label">Function</label>
+                                    <select id="scoutFunction" name="scoutFunction" class="form-select"></select>
+                                    <div class="invalid-feedback">Please select a valid function.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="openRank" class="form-label">Open Rank</label>
+                                    <select id="openRank" name="openRank" class="form-select"></select>
+                                    <div class="invalid-feedback">Please select a valid rank.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="achievedRank" class="form-label">Achieved Rank</label>
+                                    <select id="achievedRank" name="achievedRank" class="form-select"></select>
+                                    <div class="invalid-feedback">Please select a valid rank.</div>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="instructorRank" class="form-label">Instructor Rank</label>
+                                    <select id="instructorRank" name="instructorRank" class="form-select"></select>
+                                    <div class="invalid-feedback">Please select a valid rank.</div>
+                                </div>
+                            </div>
+                        </fieldset>
+                        <hr>
+
+                        <button type="submit" class="btn btn-primary w-100">Save Member</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
