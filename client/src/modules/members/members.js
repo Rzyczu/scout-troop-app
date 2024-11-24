@@ -3,6 +3,7 @@ import sortTable from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 import showToast from '../../utils/showToast.js';
 import { ScoutFunctions, ScoutRanks, InstructorRanks, mapEnumFullName } from '../../utils/enums.js';
+import showConfirmationModal from '../../utils/showConfirmationModal.js';
 
 // Dynamiczne wypełnianie selectów
 function populateSelect(selectId, enumData) {
@@ -29,8 +30,49 @@ const addSortableClassToHeaders = () => {
 
 
 document.addEventListener('DOMContentLoaded', () => {
-    initializeFormValidation();
+    const dateInput = document.getElementById('dateBirth');
+    if (dateInput) {
+        const today = new Date();
+        const maxDate = today.toISOString().split('T')[0]; // Format YYYY-MM-DD
+        dateInput.setAttribute('max', maxDate); // Ustaw maksymalną datę na dzisiejszy dzień
+    }
 
+    initializeFormValidation([
+        {
+            selector: '#dateBirth',
+            validate: (value) => {
+                const today = new Date();
+                const birthDate = new Date(value);
+
+                // Sprawdź, czy data jest prawidłowa
+                if (isNaN(birthDate.getTime())) {
+                    return false; // Data jest nieprawidłowa
+                }
+
+                const age = today.getFullYear() - birthDate.getFullYear();
+                const monthDiff = today.getMonth() - birthDate.getMonth();
+                const dayDiff = today.getDate() - birthDate.getDate();
+
+                // Wiek musi być w zakresie 6-100 lat oraz data nie może być w przyszłości
+                return (
+                    age >= 6 &&
+                    age <= 100 &&
+                    (age > 6 || monthDiff >= 0) &&
+                    (age > 6 || monthDiff > 0 || dayDiff >= 0) &&
+                    birthDate <= today
+                );
+            },
+            message: 'Invalid date of birth. Must be between 6 and 100 years old, and not in the future.',
+        },
+        {
+            selector: '#phoneNumber' || '#fatherPhoneNumber' || '#motherPhoneNumber',
+            validate: (value) => {
+                const phoneRegex = /^(\+?[0-9]{1,3})?[0-9]{9,12}$/; // Obsługuje format międzynarodowy i lokalny
+                return phoneRegex.test(value);
+            },
+            message: 'Invalid phone number. Must be 9-12 digits and optionally include a country code.',
+        }
+    ]);
     populateSelect('scoutFunction', ScoutFunctions);
     populateSelect('openRank', ScoutRanks);
     populateSelect('achievedRank', ScoutRanks);
@@ -91,6 +133,8 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('openRank').value = '0';
         document.getElementById('achievedRank').value = '0';
         document.getElementById('instructorRank').value = '0';
+
+        document.getElementById('userId').value = '';
     };
 
     // Funkcja do ładowania widoków
@@ -252,6 +296,8 @@ document.addEventListener('DOMContentLoaded', async () => {
                 document.getElementById('achievedRank').value = member.achieved_rank || '0';
                 document.getElementById('instructorRank').value = member.instructor_rank || '0';
 
+                document.getElementById('userId').value = memberId;
+
                 document.getElementById('memberModalLabel').textContent = 'Edit Member';
                 memberModal.show();
             } catch (error) {
@@ -288,6 +334,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const formData = new FormData(this);
 
         const payload = {
+            user_id: formData.get('userId'),
             user: {
                 name: formData.get('name'),
                 surname: formData.get('surname'),

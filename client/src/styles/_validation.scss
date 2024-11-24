@@ -1,7 +1,21 @@
-input.is-invalid {
-    border-color: rgb(97, 17, 17);
+/* Usuń wbudowaną walidację dla `:valid` i `:invalid` */
+.was-validated .form-control:valid,
+.form-control.is-valid {
+    background-image: none;
 }
 
-input.is-valid {
-    border-color: rgb(10, 70, 10);
+.was-validated .form-control:invalid,
+.form-control.is-invalid {
+    background-image: none;
+}
+
+/* Dodaj własne ikony lub efekty wizualne, jeśli chcesz */
+.form-control.is-valid {
+    border-color: #198754;
+    /* Zielony */
+}
+
+.form-control.is-invalid {
+    border-color: #dc3545;
+    /* Czerwony */
 }

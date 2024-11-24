@@ -46,6 +46,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="memberForm" class="needs-validation" novalidate>
+                        <input type="hidden" id="userId" name="userId">
                         <!-- User Information -->
                         <fieldset>
                             <legend>Basic Details</legend>
@@ -62,7 +63,9 @@
                                 </div>
                                 <div class="col-md-6">
                                     <label for="dateBirth" class="form-label">Date of Birth</label>
-                                    <input type="date" id="dateBirth" name="dateBirth" class="form-control" required>
+                                    <input type="date" id="dateBirth" name="dateBirth" min="1980-01-01"
+                                        class="form-control date-picker"
+                                        required>
                                     <div class="invalid-feedback">Please provide a valid date of birth.</div>
                                 </div>
                             </div>
@@ -75,20 +78,20 @@
                             <div class="row g-3">
                                 <div class="col-md-6">
                                     <label for="phoneNumber" class="form-label">Phone Number</label>
-                                    <input type="text" class="form-control" id="phoneNumber" name="phoneNumber"
-                                        required>
+                                    <input type="text" id="phoneNumber" name="phoneNumber" class="form-control"
+                                        pattern="^\+?[0-9]{9,12}$" required>
                                     <div class="invalid-feedback">Please provide a valid phone number.</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="motherPhoneNumber" class="form-label">Mother's Phone Number</label>
                                     <input type="text" id="motherPhoneNumber" name="motherPhoneNumber"
-                                        class="form-control">
+                                        class="form-control" pattern="^\+?[0-9]{9,12}$">
                                     <div class="invalid-feedback">Please provide a valid phone number.</div>
                                 </div>
                                 <div class="col-md-6">
                                     <label for="fatherPhoneNumber" class="form-label">Father's Phone Number</label>
                                     <input type="text" id="fatherPhoneNumber" name="fatherPhoneNumber"
-                                        class="form-control">
+                                        class="form-control" pattern="^\+?[0-9]{9,12}$">
                                     <div class="invalid-feedback">Please provide a valid phone number.</div>
                                 </div>
                                 <div class="col-md-6">
