@@ -28,6 +28,58 @@ const addSortableClassToHeaders = () => {
     });
 };
 
+const filterMembersByView = (members, view) => {
+    // Mapuj dane, zastępując ID i inne pola
+    return members.map((member, index) => {
+        const processedMember = {
+            ID: index + 1, // ID zaczynające się od 1
+        };
+
+        // Dodaj dane w zależności od wybranego widoku
+        switch (view) {
+            case 'basic':
+                processedMember.Name = member.name;
+                processedMember.Surname = member.surname;
+                processedMember['Date of Birth'] = new Date(member.date_birth).toLocaleDateString();
+                break;
+
+            case 'contact':
+                processedMember.Name = member.name;
+                processedMember.Surname = member.surname;
+                processedMember['Phone Number'] = member.phone_number || '-';
+                processedMember['Parent Email 1'] = member.parent_email_1 || '-';
+                processedMember['Parent Email 2'] = member.parent_email_2 || '-';
+                break;
+
+            case 'scout':
+                processedMember.Name = member.name;
+                processedMember.Surname = member.surname;
+                processedMember.Function = ScoutFunctions[member.function] || '-';
+                processedMember['Open Rank'] = ScoutRanks[member.open_rank]?.full || '-';
+                processedMember['Achieved Rank'] = ScoutRanks[member.achieved_rank]?.full || '-';
+                processedMember['Instructor Rank'] = InstructorRanks[member.instructor_rank]?.full || '-';
+                break;
+
+            default: // Wszystkie dane
+                processedMember.Name = member.name;
+                processedMember.Surname = member.surname;
+                processedMember['Date of Birth'] = new Date(member.date_birth).toLocaleDateString();
+                processedMember['Phone Number'] = member.phone_number || '-';
+                processedMember['Parent Email 1'] = member.parent_email_1 || '-';
+                processedMember['Parent Email 2'] = member.parent_email_2 || '-';
+                processedMember.Function = ScoutFunctions[member.function] || '-';
+                processedMember['Open Rank'] = ScoutRanks[member.open_rank]?.full || '-';
+                processedMember['Achieved Rank'] = ScoutRanks[member.achieved_rank]?.full || '-';
+                processedMember['Instructor Rank'] = InstructorRanks[member.instructor_rank]?.full || '-';
+                break;
+        }
+
+        return processedMember;
+    });
+};
+
+
+
 
 document.addEventListener('DOMContentLoaded', () => {
     const dateInput = document.getElementById('dateBirth');
@@ -419,6 +471,79 @@ document.addEventListener('DOMContentLoaded', async () => {
             });
         });
     };
+
+    // Eksport JSON
+    const exportToJson = (members, view) => {
+        const filteredMembers = filterMembersByView(members, view);
+        const dataStr = JSON.stringify(filteredMembers, null, 4);
+        const blob = new Blob([dataStr], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `members_${view}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+
+    // Eksport CSV
+    const exportToCsv = (members, view) => {
+        const filteredMembers = filterMembersByView(members, view);
+
+        // Sprawdź, czy dane istnieją
+        if (filteredMembers.length === 0) {
+            showToast('No data available to export.', 'warning');
+            return;
+        }
+
+        // Pobierz nagłówki z kluczy pierwszego elementu
+        const headers = Object.keys(filteredMembers[0]);
+
+        // Generowanie wierszy danych
+        const rows = filteredMembers.map(member =>
+            headers.map(header => `"${String(member[header]).replace(/"/g, '""')}"`).join(';') // Separator: średnik
+        );
+
+        // Łączenie nagłówków i wierszy danych w poprawny format CSV
+        const csvContent = `${headers.join(';')}\n${rows.join('\n')}`;
+
+        // Tworzenie pliku CSV
+        const blob = new Blob([`\uFEFF${csvContent}`], { type: 'text/csv;charset=utf-8;' }); // Dodanie BOM dla UTF-8
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `members_${view}.csv`;
+        a.click();
+        URL.revokeObjectURL(url);
+    };
+
+
+
+
+
+    // Obsługa przycisków eksportu
+    document.getElementById('exportJsonBtn').addEventListener('click', async () => {
+        const view = document.getElementById('exportViewSelect').value;
+        try {
+            const members = await api.fetchAllMembers();
+            exportToJson(members, view);
+        } catch (error) {
+            showToast('Failed to export members to JSON.', 'danger');
+        }
+    });
+
+    document.getElementById('exportCsvBtn').addEventListener('click', async () => {
+        const view = document.getElementById('exportViewSelect').value;
+        try {
+            const members = await api.fetchAllMembers();
+            exportToCsv(members, view);
+        } catch (error) {
+            showToast('Failed to export members to CSV.', 'danger');
+        }
+    });
+
+
+
 
     document.getElementById('addMemberBtn').addEventListener('click', resetForm);
     await loadMembers();

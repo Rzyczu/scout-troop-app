@@ -19,6 +19,7 @@
                 <button class="btn btn-outline-primary view-btn" id="viewContact">Contact Details</button>
                 <button class="btn btn-outline-primary view-btn" id="viewScout">Scout Details</button>
             </div>
+
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#memberModal" id="addMemberBtn">
                 Add Member
             </button>
@@ -34,6 +35,16 @@
                 <!-- Dynamic table content based on selected view -->
             </tbody>
         </table>
+        <div>
+            <select id="exportViewSelect" class="form-select me-2" style="width: auto; display: inline-block;">
+                <option value="all">All Views</option>
+                <option value="basic">Basic Details</option>
+                <option value="contact">Contact Details</option>
+                <option value="scout">Scout Details</option>
+            </select>
+            <button class="btn btn-secondary" id="exportJsonBtn">Export to JSON</button>
+            <button class="btn btn-secondary" id="exportCsvBtn">Export to CSV</button>
+        </div>
     </main>
 
     <!-- Modal for Add/Edit Member -->
