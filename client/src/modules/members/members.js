@@ -6,7 +6,7 @@ import { populateSelect, addSortableClassToHeaders, attachSortingToHeaders } fro
 import { filterMembersByView, updateActiveViewButton, getTableHeaders, renderTableRow } from './components/views.js';
 import { setupMemberFormValidation } from './components/formValidation.js';
 import { exportToJson, exportToCsv } from './components/exports.js';
-import { fetchAllMembers, fetchMember, createMember, updateMember, deleteMember } from './components/api.js';
+import { membersApi } from './components/api.js';
 import { showToast } from '../../utils/ui.js';
 
 // Global variables
@@ -28,7 +28,7 @@ const resetForm = () => {
 // Function: Load members and render table
 const loadMembers = async () => {
     try {
-        const members = await fetchAllMembers();
+        const members = await membersApi.fetchAll();
 
         // Render table headers and body
         tableHeaders.innerHTML = getTableHeaders(currentView);
@@ -83,10 +83,10 @@ memberForm.onsubmit = async function (event) {
 
     try {
         if (payload.user_id) {
-            await updateMember(payload.user_id, payload);
+            await membersApi.update(payload.user_id, payload);
             showToast('Member updated successfully.', 'success');
         } else {
-            await createMember(payload);
+            await membersApi.create(payload);
             showToast('Member added successfully.', 'success');
         }
         memberModal.hide();
@@ -103,7 +103,7 @@ membersTableBody.addEventListener('click', async (event) => {
     if (target.classList.contains('editMemberBtn')) {
         const memberId = target.dataset.id;
         try {
-            const member = await fetchMember(memberId);
+            const member = await membersApi.fetchById(memberId);
             if (!member) throw new Error('Member not found.');
 
             // Populate form fields
@@ -130,7 +130,7 @@ membersTableBody.addEventListener('click', async (event) => {
         const confirmed = await showConfirmationModal('Delete Member', 'Are you sure you want to delete this member?');
         if (confirmed) {
             try {
-                await deleteMember(target.dataset.id);
+                await membersApi.delete(target.dataset.id);
                 showToast('Member deleted successfully.', 'success');
                 await loadMembers();
             } catch (error) {
@@ -144,7 +144,7 @@ membersTableBody.addEventListener('click', async (event) => {
 document.getElementById('exportJsonBtn').addEventListener('click', async () => {
     const view = document.getElementById('exportViewSelect').value;
     try {
-        const members = await fetchAllMembers();
+        const members = await membersApi.fetchAll();
         const filteredMembers = filterMembersByView(members, view, true);
         exportToJson(filteredMembers, view);
     } catch (error) {
@@ -155,7 +155,7 @@ document.getElementById('exportJsonBtn').addEventListener('click', async () => {
 document.getElementById('exportCsvBtn').addEventListener('click', async () => {
     const view = document.getElementById('exportViewSelect').value;
     try {
-        const members = await fetchAllMembers();
+        const members = await membersApi.fetchAll();
         const filteredMembers = filterMembersByView(members, view);
         exportToCsv(filteredMembers, view);
     } catch (error) {
