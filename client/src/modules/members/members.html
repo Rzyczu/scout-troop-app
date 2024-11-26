@@ -15,9 +15,10 @@
         <h1 class="mb-4">Members</h1>
         <div class="d-flex justify-content-between mb-3">
             <div class="btn-group" role="group" aria-label="View options">
-                <button class="btn btn-outline-primary view-btn" id="viewBasic">Basic Details</button>
-                <button class="btn btn-outline-primary view-btn" id="viewContact">Contact Details</button>
-                <button class="btn btn-outline-primary view-btn" id="viewScout">Scout Details</button>
+                <button class="btn btn-outline-primary view-btn" data-view="basic" id="viewBasic">Basic Details</button>
+                <button class="btn btn-outline-primary view-btn" data-view="contact" id="viewContact">Contact
+                    Details</button>
+                <button class="btn btn-outline-primary view-btn" data-view="scout" id="viewScout">Scout Details</button>
             </div>
 
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#memberModal" id="addMemberBtn">
@@ -48,7 +49,8 @@
     </main>
 
     <!-- Modal for Add/Edit Member -->
-    <div class="modal fade" id="memberModal" tabindex="-1" aria-labelledby="memberModalLabel" aria-hidden="true">
+    <div class="modal fade" id="memberModal" tabindex="-1" aria-labelledby="memberModalLabel" aria-hidden="true"
+        data-bs-backdrop="true">
         <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">

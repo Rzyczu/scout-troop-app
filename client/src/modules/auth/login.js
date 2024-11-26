@@ -2,7 +2,7 @@ import './login.scss';
 import globalBootstrap from '../../utils/global/globalBootstrap.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 import errorMessages from '../../utils/errors/index';
-import showToast from '../../utils/showToast.js';
+import { showToast } from '../../utils/ui.js';
 
 // Inicjalizacja walidacji formularza
 document.addEventListener('DOMContentLoaded', () => {

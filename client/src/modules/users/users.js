@@ -1,8 +1,8 @@
 import './users.scss';
 import sortTable from '../../utils/sortTable';
 import initializeFormValidation from '../../utils/formValidation.js';
-import showToast from '../../utils/showToast.js';
-import showConfirmationModal from '../../utils/showConfirmationModal.js';
+import { showToast } from '../../utils/ui.js';
+import { showConfirmationModal } from '../../utils/ui.js';
 
 // Inicjalizacja walidacji formularza
 document.addEventListener('DOMContentLoaded', () => {
