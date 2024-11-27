@@ -1,9 +1,9 @@
 // ./users.js
 
 import './users.scss';
-import { loadUsers, } from './components/table.js';
+import { loadUsers, attachSortingToHeaders } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditUser, handleDeleteUser } from './components/form.js';
-import { addSortableClassToHeaders, attachSortingToHeaders } from './utils/helpers.js';
+import { addSortableClassToHeaders } from './utils/helpers.js';
 import sortTable from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 

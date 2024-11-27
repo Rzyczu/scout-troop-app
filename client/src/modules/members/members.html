@@ -89,37 +89,54 @@
                         <fieldset>
                             <legend>Contact Details</legend>
                             <div class="row g-3">
+                                <!-- General Contact Information -->
                                 <div class="col-md-6">
                                     <label for="phoneNumber" class="form-label">Phone Number</label>
                                     <input type="text" id="phoneNumber" name="phoneNumber" class="form-control"
                                         pattern="^\+?[0-9]{9,12}$" required>
                                     <div class="invalid-feedback">Please provide a valid phone number.</div>
                                 </div>
-                                <div class="col-md-6">
-                                    <label for="motherPhoneNumber" class="form-label">Mother's Phone Number</label>
-                                    <input type="text" id="motherPhoneNumber" name="motherPhoneNumber"
-                                        class="form-control" pattern="^\+?[0-9]{9,12}$">
-                                    <div class="invalid-feedback">Please provide a valid phone number.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="fatherPhoneNumber" class="form-label">Father's Phone Number</label>
-                                    <input type="text" id="fatherPhoneNumber" name="fatherPhoneNumber"
-                                        class="form-control" pattern="^\+?[0-9]{9,12}$">
-                                    <div class="invalid-feedback">Please provide a valid phone number.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="parentEmail1" class="form-label">Parent Email 1</label>
-                                    <input type="email" id="parentEmail1" name="parentEmail1" class="form-control">
-                                    <div class="invalid-feedback">Please provide a valid email address.</div>
-                                </div>
-                                <div class="col-md-6">
-                                    <label for="parentEmail2" class="form-label">Parent Email 2</label>
-                                    <input type="email" id="parentEmail2" name="parentEmail2" class="form-control">
-                                    <div class="invalid-feedback">Please provide a valid email address.</div>
-                                </div>
                             </div>
+
+                            <hr>
+                            <!-- Mother's Contact Details -->
+                            <fieldset>
+                                <legend>Mother's Contact Details</legend>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="motherPhoneNumber" class="form-label">Mother's Phone Number</label>
+                                        <input type="text" id="motherPhoneNumber" name="motherPhoneNumber"
+                                            class="form-control" pattern="^\+?[0-9]{9,12}$">
+                                        <div class="invalid-feedback">Please provide a valid phone number.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="motherEmail" class="form-label">Mother's Email</label>
+                                        <input type="email" id="motherEmail" name="motherEmail" class="form-control">
+                                        <div class="invalid-feedback">Please provide a valid email address.</div>
+                                    </div>
+                                </div>
+                            </fieldset>
+
+                            <hr>
+                            <!-- Father's Contact Details -->
+                            <fieldset>
+                                <legend>Father's Contact Details</legend>
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="fatherPhoneNumber" class="form-label">Father's Phone Number</label>
+                                        <input type="text" id="fatherPhoneNumber" name="fatherPhoneNumber"
+                                            class="form-control" pattern="^\+?[0-9]{9,12}$">
+                                        <div class="invalid-feedback">Please provide a valid phone number.</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="fatherEmail" class="form-label">Father's Email</label>
+                                        <input type="email" id="fatherEmail" name="fatherEmail" class="form-control">
+                                        <div class="invalid-feedback">Please provide a valid email address.</div>
+                                    </div>
+                                </div>
+                            </fieldset>
                         </fieldset>
-                        <hr>
+                        <hr />
 
                         <!-- Scout Information -->
                         <fieldset>

@@ -9,40 +9,45 @@ export const filterMembersByView = (members, view, useUnderscore = false) => {
         };
 
         switch (view) {
-            case 'basic':
-                processedMember[formatKey('Name')] = member.name;
-                processedMember[formatKey('Surname')] = member.surname;
-                processedMember[formatKey('Date of Birth')] = new Date(member.date_birth).toLocaleDateString();
+            case "basic":
+                processedMember[formatKey("Name")] = member.name;
+                processedMember[formatKey("Surname")] = member.surname;
+                processedMember[formatKey("Date of Birth")] = new Date(member.date_birth).toLocaleDateString();
                 break;
 
-            case 'contact':
-                processedMember[formatKey('Name')] = member.name;
-                processedMember[formatKey('Surname')] = member.surname;
-                processedMember[formatKey('Phone Number')] = member.phone_number || '-';
-                processedMember[formatKey('Parent Email 1')] = member.parent_email_1 || '-';
-                processedMember[formatKey('Parent Email 2')] = member.parent_email_2 || '-';
+            case "contact":
+                processedMember[formatKey("Name")] = member.name;
+                processedMember[formatKey("Surname")] = member.surname;
+                processedMember[formatKey("Phone Number")] = member.phone_number || "-";
+                processedMember[formatKey("Mother's Number")] = member.mother_phone_number || "-";
+                processedMember[formatKey("Father's Number")] = member.father_phone_number || "-";
+                processedMember[formatKey("Phone Number")] = member.phone_number || "-";
+                processedMember[formatKey("Parent Email 1")] = member.parent_email_1 || "-";
+                processedMember[formatKey("Parent Email 2")] = member.parent_email_2 || "-";
                 break;
 
-            case 'scout':
-                processedMember[formatKey('Name')] = member.name;
-                processedMember[formatKey('Surname')] = member.surname;
-                processedMember[formatKey('Function')] = ScoutFunctions[member.function] || '-';
-                processedMember[formatKey('Open Rank')] = ScoutRanks[member.open_rank]?.full || '-';
-                processedMember[formatKey('Achieved Rank')] = ScoutRanks[member.achieved_rank]?.full || '-';
-                processedMember[formatKey('Instructor Rank')] = InstructorRanks[member.instructor_rank]?.full || '-';
+            case "scout":
+                processedMember[formatKey("Name")] = member.name;
+                processedMember[formatKey("Surname")] = member.surname;
+                processedMember[formatKey("Function")] = ScoutFunctions[member.function] || "-";
+                processedMember[formatKey("Open Rank")] = ScoutRanks[member.open_rank]?.full || "-";
+                processedMember[formatKey("Achieved Rank")] = ScoutRanks[member.achieved_rank]?.full || "-";
+                processedMember[formatKey("Instructor Rank")] = InstructorRanks[member.instructor_rank]?.full || "-";
                 break;
 
             default: // Full data view
-                processedMember[formatKey('Name')] = member.name;
-                processedMember[formatKey('Surname')] = member.surname;
-                processedMember[formatKey('Date of Birth')] = new Date(member.date_birth).toLocaleDateString();
-                processedMember[formatKey('Phone Number')] = member.phone_number || '-';
-                processedMember[formatKey('Parent Email 1')] = member.parent_email_1 || '-';
-                processedMember[formatKey('Parent Email 2')] = member.parent_email_2 || '-';
-                processedMember[formatKey('Function')] = ScoutFunctions[member.function] || '-';
-                processedMember[formatKey('Open Rank')] = ScoutRanks[member.open_rank]?.full || '-';
-                processedMember[formatKey('Achieved Rank')] = ScoutRanks[member.achieved_rank]?.full || '-';
-                processedMember[formatKey('Instructor Rank')] = InstructorRanks[member.instructor_rank]?.full || '-';
+                processedMember[formatKey("Name")] = member.name;
+                processedMember[formatKey("Surname")] = member.surname;
+                processedMember[formatKey("Date of Birth")] = new Date(member.date_birth).toLocaleDateString();
+                processedMember[formatKey("Phone Number")] = member.phone_number || "-";
+                processedMember[formatKey("Mother's Number")] = member.mother_phone_number || "-";
+                processedMember[formatKey("Father's Number")] = member.father_phone_number || "-";
+                processedMember[formatKey("Parent Email 1")] = member.parent_email_1 || "-";
+                processedMember[formatKey("Parent Email 2")] = member.parent_email_2 || "-";
+                processedMember[formatKey("Function")] = ScoutFunctions[member.function] || "-";
+                processedMember[formatKey("Open Rank")] = ScoutRanks[member.open_rank]?.full || "-";
+                processedMember[formatKey("Achieved Rank")] = ScoutRanks[member.achieved_rank]?.full || "-";
+                processedMember[formatKey("Instructor Rank")] = InstructorRanks[member.instructor_rank]?.full || "-";
                 break;
         }
 
@@ -84,7 +89,10 @@ export const getTableHeaders = (view) => {
                 <th data-sort="id">ID</th>
                 <th>Name</th>
                 <th>Surname</th>
+                <th>Mother's Phone Number</th>
+                <th>Father's Phone Number</th>
                 <th>Phone Number</th>
+
                 <th>Email 1</th>
                 <th>Email 2</th>
                 <th>Actions</th>`;
@@ -104,7 +112,7 @@ export const getTableHeaders = (view) => {
 };
 
 export const renderTableRow = (member, index, view) => {
-    const { user_id, name, surname, date_birth, phone_number, parent_email_1, parent_email_2, function: scoutFunction, open_rank, achieved_rank, instructor_rank } = member;
+    const { user_id, name, surname, date_birth, phone_number, mother_phone_number, father_phone_number, parent_email_1, parent_email_2, function: scoutFunction, open_rank, achieved_rank, instructor_rank } = member;
 
     switch (view) {
         case 'basic':
@@ -125,6 +133,8 @@ export const renderTableRow = (member, index, view) => {
                     <td>${index}</td> 
                     <td>${name}</td>
                     <td>${surname}</td>
+                    <td>${mother_phone_number || '-'}</td>
+                    <td>${father_phone_number || '-'}</td>
                     <td>${phone_number || '-'}</td>
                     <td>${parent_email_1 || '-'}</td>
                     <td>${parent_email_2 || '-'}</td>
