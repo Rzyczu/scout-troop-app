@@ -3,13 +3,9 @@
 import { usersApi } from './api.js';
 import { showToast } from '../../../utils/ui.js';
 
-export const loadUsers = async (usersTableBody, usersTableHeader, addSortableClassToHeaders, sortTable) => {
+export const loadUsers = async (usersTableBody) => {
     try {
         const users = await usersApi.fetchUsers();
-
-        // Add sortable functionality to table headers
-        addSortableClassToHeaders(usersTableHeader);
-        attachSortingToHeaders(usersTableHeader, usersTableBody, sortTable);
 
         usersTableBody.innerHTML = users.map((user, index) =>
             `<tr>

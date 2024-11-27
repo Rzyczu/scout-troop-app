@@ -1,10 +1,11 @@
 // ./users.js
 
 import './users.scss';
-import { loadUsers, attachSortingToHeaders } from './components/table.js';
+import { loadUsers, } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditUser, handleDeleteUser } from './components/form.js';
-import { addSortableClassToHeaders } from './utils/helpers.js';
+import { addSortableClassToHeaders, attachSortingToHeaders } from './utils/helpers.js';
 import sortTable from '../../utils/sortTable.js';
+import initializeFormValidation from '../../utils/formValidation.js';
 
 // DOM elements
 const usersTableBody = document.getElementById('usersTableBody');
@@ -16,17 +17,28 @@ const selectUserField = document.getElementById('selectUserField');
 const userModalLabel = document.getElementById('userModalLabel');
 const userModal = new bootstrap.Modal(document.getElementById('userModal'));
 
+userForm.onsubmit = async function (event) {
+    event.preventDefault();
+    if (!this.checkValidity()) {
+        this.classList.add('was-validated');
+        return;
+    }
+    await handleFormSubmit(userForm, userIdField, userModal, async () => loadUsers(usersTableBody));
+};
+
 // Event listeners
 document.addEventListener('DOMContentLoaded', async () => {
+    initializeFormValidation()
+
     try {
         // Load users into the table
-        await loadUsers(usersTableBody, usersTableHeader, addSortableClassToHeaders, sortTable);
+        await loadUsers(usersTableBody);
+
+        addSortableClassToHeaders(usersTableHeader);
+        attachSortingToHeaders(usersTableHeader, usersTableBody, sortTable);
 
         // Add event listener for form submission
-        userForm.addEventListener('submit', async (event) => {
-            event.preventDefault();
-            await handleFormSubmit(userForm, userIdField, userModal, async () => loadUsers(usersTableBody));
-        });
+
 
         // Add event listener for "Add User" button
         document.getElementById('addUserBtn').addEventListener('click', () => {
