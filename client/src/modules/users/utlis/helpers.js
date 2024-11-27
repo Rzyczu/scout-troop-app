@@ -1,18 +1,3 @@
-export const populateSelect = (selectId, enumData) => {
-    const select = document.getElementById(selectId);
-    if (!select) {
-        console.warn(`Select element with ID '${selectId}' not found.`);
-        return;
-    }
-
-    Object.entries(enumData).forEach(([key, value]) => {
-        const option = document.createElement('option');
-        option.value = key;
-        option.textContent = typeof value === 'string' ? value : value.full || value.short;
-        select.appendChild(option);
-    });
-};
-
 export const addSortableClassToHeaders = (tableHeaders) => {
     const headers = tableHeaders.querySelectorAll('th');
 
@@ -29,6 +14,7 @@ export const attachSortingToHeaders = (tableHeaders, tableBody, sortTable) => {
     let sortDirection = 1;
 
     headers.forEach((header, index) => {
+        // Create and append a sort icon if not already present
         let sortIcon = header.querySelector('.sort-icon');
         if (!sortIcon) {
             sortIcon = document.createElement('span');
@@ -36,29 +22,45 @@ export const attachSortingToHeaders = (tableHeaders, tableBody, sortTable) => {
             header.appendChild(sortIcon);
         }
 
+        // Add click event listener for sorting
         header.addEventListener('click', () => {
             const columnSelector = `td:nth-child(${index + 1})`;
 
+            // Toggle the sort direction or set a new column for sorting
             if (currentSortColumn === columnSelector) {
-                sortDirection *= -1; // Toggle sort direction
+                sortDirection *= -1;
             } else {
                 currentSortColumn = columnSelector;
-                sortDirection = 1; // Default to ascending order
+                sortDirection = 1;
             }
 
-            // Reset sort icons
-            headers.forEach(h => {
+            // Reset all icons and set the active one
+            headers.forEach((h) => {
                 const icon = h.querySelector('.sort-icon');
-                if (icon) {
-                    icon.textContent = '';
-                }
+                if (icon) icon.textContent = '';
             });
-
-            // Set the active sort icon
             sortIcon.textContent = sortDirection === 1 ? '▲' : '▼';
 
-            // Perform sorting
+            // Perform table sorting
             sortTable(tableBody, columnSelector, sortDirection);
         });
+    });
+};
+
+export const populateSelect = (selectId, data) => {
+    const select = document.getElementById(selectId);
+
+    if (!select) {
+        console.warn(`Select element with ID '${selectId}' not found.`);
+        return;
+    }
+
+    select.innerHTML = ''; // Clear any existing options
+
+    Object.entries(data).forEach(([key, value]) => {
+        const option = document.createElement('option');
+        option.value = key;
+        option.textContent = typeof value === 'string' ? value : value.full || value.short || key;
+        select.appendChild(option);
     });
 };

@@ -1,5 +1,3 @@
-// ./components/api.js
-
 import fetchJson from "../../../utils/fetchJson";
 
 // Base URL for API endpoints

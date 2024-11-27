@@ -1,10 +1,8 @@
-// ./components/api.js
-
 import fetchJson from "../../../utils/fetchJson";
 
 // Base URL for API endpoints
 const API_BASE_URL = '/api/users';
-const API_MEMBERS_URL = '/api/users';
+const API_MEMBERS_URL = '/api/members';
 
 export const usersApi = {
     fetchAllUsers: () => fetchJson(`${API_MEMBERS_URL}`),

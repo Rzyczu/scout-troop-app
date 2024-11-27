@@ -1,12 +1,3 @@
-// ./components/views.js
-
-/**
- * Filters members based on the selected view type.
- * @param {Array} members - List of members to filter.
- * @param {string} view - The selected view type (e.g., 'basic', 'contact', 'scout').
- * @param {boolean} useUnderscore - Headers have useUnderscore or space in names.
- * @returns {Array} - Filtered members data.
- */
 export const filterMembersByView = (members, view, useUnderscore = false) => {
     const formatKey = (key) => {
         return useUnderscore ? key.replace(/ /g, '_') : key;
@@ -59,10 +50,6 @@ export const filterMembersByView = (members, view, useUnderscore = false) => {
     });
 };
 
-/**
- * Updates the active state of view buttons based on the current view.
- * @param {string} currentView - The current view type.
- */
 export const updateActiveViewButton = (currentView) => {
     if (!currentView) {
         showToast('No valid view selected for updateActiveViewButton.', 'warning');
@@ -83,11 +70,6 @@ export const updateActiveViewButton = (currentView) => {
     }
 };
 
-/**
- * Generates table headers for the selected view.
- * @param {string} view - The selected view type.
- * @returns {string} - Table headers as HTML.
- */
 export const getTableHeaders = (view) => {
     switch (view) {
         case 'basic':
@@ -121,13 +103,6 @@ export const getTableHeaders = (view) => {
     }
 };
 
-/**
- * Renders a single table row for the selected view.
- * @param {object} member - Member data.
- * @param {number} index - Index of the member.
- * @param {string} view - The current view type.
- * @returns {string} - Table row as HTML.
- */
 export const renderTableRow = (member, index, view) => {
     const { user_id, name, surname, date_birth, phone_number, parent_email_1, parent_email_2, function: scoutFunction, open_rank, achieved_rank, instructor_rank } = member;
 

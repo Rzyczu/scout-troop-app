@@ -1,6 +1,7 @@
 const errorMessages = {
     general: {
         somethingWentWrong: 'An unexpected error occurred.',
+        exportWentWrong: 'Failed to export file.'
     },
     login: {
         missingCredentials: {

@@ -1,9 +1,3 @@
-// ./components/formValidation.js
-
-/**
- * Initializes validation by merging custom rules with existing validation logic.
- * @param {Function} initializeFormValidation - The existing form validation initializer.
- */
 export const setupMemberFormValidation = (initializeFormValidation) => {
     const rules = [
         {

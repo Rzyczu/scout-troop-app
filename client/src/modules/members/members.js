@@ -8,6 +8,8 @@ import { setupMemberFormValidation } from './components/formValidation.js';
 import { exportToJson, exportToCsv } from './components/exports.js';
 import { membersApi } from './components/api.js';
 import { showToast } from '../../utils/ui.js';
+import errorMessages
+    from '../../../../server/utils/errorMessages.js';
 
 // Global variables
 let currentView = 'basic';
@@ -148,7 +150,7 @@ document.getElementById('exportJsonBtn').addEventListener('click', async () => {
         const filteredMembers = filterMembersByView(members, view, true);
         exportToJson(filteredMembers, view);
     } catch (error) {
-        showToast('Failed to export members to JSON.', 'danger');
+        showToast(errorMessages.general.exportWentWrong, 'danger');
     }
 });
 
@@ -159,7 +161,7 @@ document.getElementById('exportCsvBtn').addEventListener('click', async () => {
         const filteredMembers = filterMembersByView(members, view);
         exportToCsv(filteredMembers, view);
     } catch (error) {
-        showToast('Failed to export members to CSV.', 'danger');
+        showToast(errorMessages.general.exportWentWrong, 'danger');
     }
 });
 

@@ -1,11 +1,5 @@
-// ./components/exports.js
 import { showToast } from '../../../utils/ui.js';
 
-/**
- * Exports members data to a JSON file.
- * @param {Array} members - Array of member objects.
- * @param {string} view - The selected view type (e.g., 'basic', 'contact', 'scout').
- */
 export const exportToJson = (members, view) => {
     if (!members || members.length === 0) {
         showToast('No members data available for export.', 'warning');
@@ -25,11 +19,6 @@ export const exportToJson = (members, view) => {
     URL.revokeObjectURL(url);
 };
 
-/**
- * Exports members data to a CSV file.
- * @param {Array} members - Array of member objects.
- * @param {string} view - The selected view type (e.g., 'basic', 'contact', 'scout').
- */
 export const exportToCsv = (members, view) => {
     if (!members || members.length === 0) {
         showToast('No members data available for export.', 'warning');
