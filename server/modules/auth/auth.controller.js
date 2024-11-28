@@ -6,7 +6,6 @@ const authController = {
         try {
             const { email, password } = req.body;
             const { token, function: userFunction } = await authService.login(email, password);
-            console.log(email, password)
             res.cookie('token', token, { httpOnly: true, secure: true });
             res.status(200).json({ success: true, function: userFunction });
         } catch (error) {

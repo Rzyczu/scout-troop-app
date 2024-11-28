@@ -68,7 +68,6 @@ const usersController = {
 
     async deleteUser(req, res) {
         try {
-            console.log(req);
             if (req.user.id === parseInt(req.params.id)) {
                 return sendError(res, errorMessages.users.delete.ownAccountDelete);
             }
