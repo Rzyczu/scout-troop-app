@@ -1,7 +1,10 @@
-const errorMessages = {
+export const errorMessages = {
     general: {
         somethingWentWrong: 'An unexpected error occurred.',
-        exportWentWrong: 'Failed to export file.'
+        databaseError: {
+            error: 'Database error',
+            code: 'LOGIN_DATABASE_ERROR',
+        },
     },
     login: {
         missingCredentials: {
@@ -16,10 +19,7 @@ const errorMessages = {
             error: 'Password not found',
             code: 'LOGIN_PASSWORD_NOT_FOUND',
         },
-        databaseError: {
-            error: 'Database error',
-            code: 'LOGIN_DATABASE_ERROR',
-        },
+
     },
     users: {
         fetchAll: {
@@ -46,4 +46,14 @@ const errorMessages = {
     },
 };
 
-module.exports = errorMessages;
+export const sendError = (res, errorObj, statusCode = 400) => {
+    res.status(statusCode).json({ success: false, ...errorObj });
+};
+
+export const throwError = (error) => {
+    throw {
+        message: error.error, // Komunikat błędu
+        code: error.code,     // Kod błędu
+    };
+};
+

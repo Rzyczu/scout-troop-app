@@ -1,52 +1,23 @@
 import './login.scss';
 import globalBootstrap from '../../utils/global/globalBootstrap.js';
-import initializeFormValidation from '../../utils/formValidation.js';
-import errorMessages from '../../utils/errors/index';
-import { showToast } from '../../utils/ui.js';
+import { setupLoginValidation } from './utils/validation.js';
+import { handleLoginSubmit } from './components/form.js';
 
-// Inicjalizacja walidacji formularza
 document.addEventListener('DOMContentLoaded', () => {
-    initializeFormValidation();
-});
+    const loginForm = document.getElementById('loginForm');
 
-// Obsługa przesyłania formularza
-document.getElementById('loginForm').onsubmit = async function (event) {
-    event.preventDefault(); // Zatrzymaj domyślne przesłanie formularza
+    setupLoginValidation(loginForm);
 
-    // Sprawdź, czy formularz jest poprawny
-    if (!this.checkValidity()) {
-        this.classList.add('was-validated'); // Dodaj klasy walidacyjne Bootstrapa
-        return; // Zatrzymaj, jeśli formularz jest niepoprawny
-    }
+    loginForm.onsubmit = async function (event) {
+        event.preventDefault();
 
-    console.log('E-mail jest poprawny!');
-
-
-    const formData = new FormData(this);
-    const payload = JSON.stringify(Object.fromEntries(formData));
-
-    try {
-        const response = await fetch('/api/auth/login', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: payload,
-        });
-
-        const result = await response.json();
-
-        if (result.success) {
-            // Logowanie udane
-            window.location.href = '/dashboard';
-        } else {
-            // Logowanie nieudane
-            const error = Object.values(errorMessages.login).find(
-                (err) => err.code === result.code
-            );
-            const message = error?.message || 'An unexpected error occurred.';
-            showToast(message, 'danger');
+        if (!this.checkValidity()) {
+            this.classList.add('was-validated');
+            return;
         }
-    } catch (err) {
-        console.error('Error during login:', err);
-        showToast('An error occurred during login. Please try again.');
-    }
-};
+
+        await handleLoginSubmit(this, () => {
+            window.location.href = '/dashboard';
+        });
+    };
+});

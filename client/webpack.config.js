@@ -88,19 +88,13 @@ module.exports = {
         open: true,
         proxy: [
             {
-                context: ['/'], // Wszystkie żądania zaczynające się od /api
+                context: ['/'], // Wszystkie żądania zaczynające się od /
                 target: 'http://localhost:5000', // Backend na porcie 5000
                 secure: false, // Jeśli używasz HTTP, a nie HTTPS
                 changeOrigin: true, // Dostosowuje nagłówki do backendu
             },
         ],
-        client: {
-            logging: 'none', // Ukrywa wszystkie logi w konsoli
-            overlay: {
-                warnings: false, // Wyłącza ostrzeżenia
-                errors: true,    // Pozostawia tylko błędy
-            },
-        },
+        client: false,
         watchFiles: ['./src/**/*'], // Śledzenie wszystkich plików w folderze src
         devMiddleware: {
             writeToDisk: true, // Write files to `dist` during development

@@ -1,18 +1,26 @@
 const bcrypt = require('bcryptjs');
 const usersService = require('./users.service');
-const errorMessages = require('../../utils/errorMessages');
-
-const sendError = (res, errorObj) => {
-    res.status(200).json({ success: false, ...errorObj });
-};
+const { errorMessages, sendError } = require('../../utils/errorManager');
 
 const usersController = {
     async fetchUsers(req, res) {
         try {
             const users = await usersService.fetchUsers();
+            if (!email || !password) {
+                return sendError(res, errorMessages.login.missingCredentials);
+            }
             res.status(200).json({ success: true, data: users });
         } catch (err) {
-            sendError(res, errorMessages.users.fetchAll);
+            if (error.code === 'LOGIN_INVALID_CREDENTIALS') {
+                return sendError(res, errorMessages.login.invalidCredentials);
+            }
+            if (error.code === 'LOGIN_PASSWORD_NOT_FOUND') {
+                return sendError(res, errorMessages.login.passwordNotFound);
+            }
+            if (error.code === 'LOGIN_DATABASE_ERROR') {
+                return sendError(res, errorMessages.general.databaseError);
+            }
+            return sendError(res, errorMessages.general.somethingWentWrong);
         }
     },
 

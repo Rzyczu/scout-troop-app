@@ -10,7 +10,6 @@ import { populateSelect } from './utils/helpers.js';
 import { setupMemberFormValidation } from './components/formValidation.js';
 import { exportToJson, exportToCsv } from './components/exports.js';
 import { membersApi } from './components/api.js';
-import errorMessages from '../../../../server/utils/errorMessages.js';
 
 // DOM elements
 const membersTableBody = document.getElementById('membersTableBody');
@@ -113,7 +112,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const filteredMembers = filterMembersByView(members, view, true);
             exportToJson(filteredMembers, view);
         } catch (error) {
-            showToast(errorMessages.general.exportWentWrong, 'danger');
+            showToast('Failed to export file.', 'danger');
         }
     });
 
@@ -124,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             const filteredMembers = filterMembersByView(members, view);
             exportToCsv(filteredMembers, view);
         } catch (error) {
-            showToast(errorMessages.general.exportWentWrong, 'danger');
+            showToast('Failed to export file.', 'danger');
         }
     });
 });

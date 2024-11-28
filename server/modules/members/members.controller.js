@@ -1,9 +1,7 @@
 const membersService = require('./members.service');
-const errorMessages = require('../../utils/errorMessages');
+const { errorMessages, sendError } = require('../../utils/errorManager');
 
-const sendError = (res, errorObj) => {
-    res.status(200).json({ success: false, ...errorObj });
-};
+
 
 const membersController = {
     async fetchAllMembers(req, res) {

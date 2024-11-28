@@ -2,12 +2,16 @@ const pool = require('../../utils/db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const { JWT_SECRET } = require('../../config');
-const errorMessages = require('../../utils/errorMessages');
+const { throwError, errorMessages } = require('../../utils/errorManager');
 
 const authService = {
     async login(email, password) {
+        console.log(email, password);
+
         if (!email || !password) {
-            throw { ...errorMessages.login.missingCredentials };
+            throwError(errorMessages.login.missingCredentials);
+            console.log('errorMessages.login.missingCredentials');
+
         }
 
         const result = await pool.query(
@@ -27,28 +31,34 @@ const authService = {
             `,
             [email]
         );
+        console.log('SELECT');
+
 
         const user = result.rows[0];
+        console.log(user);
+
         if (!user) {
-            throw { ...errorMessages.login.invalidCredentials };
+            throwError(errorMessages.login.invalidCredentials);
         }
 
         if (!user.password) {
-            throw { ...errorMessages.login.passwordNotFound };
+            throwError(errorMessages.login.passwordNotFound);
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            throw { ...errorMessages.login.invalidCredentials };
+            throwError(errorMessages.login.invalidCredentials);
         }
 
-        const token = jwt.sign({ id: user.id, function: user.function }, JWT_SECRET, { expiresIn: '1h' });
+        const token = jwt.sign(
+            { id: user.id, function: user.function },
+            JWT_SECRET,
+            { expiresIn: '1h' }
+        );
 
-        return {
-            token,
-            function: user.function,
-        };
+        return { token, function: user.function };
     },
+
 
     async logout(res) {
         res.clearCookie('token');
