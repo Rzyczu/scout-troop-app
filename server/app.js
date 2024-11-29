@@ -6,6 +6,7 @@ const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const authRoutes = require('./modules/auth/auth.routes');
 const userRoutes = require('./modules/users/users.routes');
 const membersRoutes = require('./modules/members/members.routes');
+const { redirectIfAuthenticated, redirectIfNotAuthenticated } = require('./middlewares/auth');
 
 const app = express();
 
@@ -23,17 +24,19 @@ app.use('/api/members', membersRoutes);
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
 // Client Pages
-app.get('/', (req, res) => res.redirect('/auth'));
-app.get('/auth', (req, res) =>
+app.get('/', (req, res) =>
+    res.redirect('/auth')
+);
+app.get('/auth', redirectIfAuthenticated, (req, res) =>
     res.sendFile(path.join(__dirname, '../client/dist/login.html'))
 );
-app.get('/dashboard', (req, res) =>
+app.get('/dashboard', redirectIfNotAuthenticated, (req, res) =>
     res.sendFile(path.join(__dirname, '../client/dist/dashboard.html'))
 );
-app.get('/users', (req, res) =>
+app.get('/users', redirectIfNotAuthenticated, (req, res) =>
     res.sendFile(path.join(__dirname, '../client/dist/users.html'))
 );
-app.get('/members', (req, res) =>
+app.get('/members', redirectIfNotAuthenticated, (req, res) =>
     res.sendFile(path.join(__dirname, '../client/dist/members.html'))
 );
 
@@ -46,9 +49,8 @@ app.use((req, res, next) => {
 
 app.use((error, req, res, next) => {
     if (process.env.NODE_ENV === 'development') {
-        console.error(error.stack); // Logowanie szczegółów w trybie dev
+        console.error(error.stack);
     }
-
     res.status(error.status || 500).json({
         error: {
             message: error.message,
@@ -56,13 +58,5 @@ app.use((error, req, res, next) => {
     });
 });
 
-app.use((error, req, res, next) => {
-    res.status(error.status || 500);
-    res.json({
-        error: {
-            message: error.message,
-        },
-    });
-});
 
 module.exports = app;

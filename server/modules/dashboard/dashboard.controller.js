@@ -3,6 +3,7 @@ const dashboardService = require('./dashboard.service');
 const dashboardController = {
     async getDashboard(req, res) {
         try {
+            console.log(req.user)
             const dashboardData = await dashboardService.getDashboardData(req.user.id);
             res.json(dashboardData);
         } catch (err) {
