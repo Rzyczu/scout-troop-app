@@ -19,15 +19,20 @@ const authService = {
             SELECT 
                 ul.user_id AS id,
                 ul.password,
-                us.function
+                us.function,
+                t.gender,
+                t.id AS team_id
             FROM 
                 users_login ul
-            INNER JOIN 
-                users_scout us
-            ON 
-                ul.user_id = us.user_id
+            JOIN 
+                users u ON ul.user_id = u.id
+            JOIN 
+                users_scout us ON u.id = us.user_id
+            JOIN 
+                teams t ON u.team_id = t.id
             WHERE 
-                ul.mail = $1
+                ul.mail = $1;
+
             `,
             [email]
         );
@@ -51,12 +56,14 @@ const authService = {
         }
 
         const token = jwt.sign(
-            { id: user.id, function: user.function },
+            { user_id: user.id, function: user.function, team_id: user.team_id, gender: user.gender },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        return { token, function: user.function };
+        console.log(token);
+
+        return { token };
     },
 
 

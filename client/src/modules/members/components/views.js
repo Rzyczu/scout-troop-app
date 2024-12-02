@@ -1,3 +1,6 @@
+import { mapEnumFullName, ScoutFunctions, ScoutRanks, InstructorRanks } from "../../../utils/enums";
+
+
 export const filterMembersByView = (members, view, useUnderscore = false) => {
     const formatKey = (key) => {
         return useUnderscore ? key.replace(/ /g, '_') : key;
@@ -111,9 +114,8 @@ export const getTableHeaders = (view) => {
     }
 };
 
-export const renderTableRow = (member, index, view) => {
+export const renderTableRow = (member, index, view, gender) => {
     const { user_id, name, surname, date_birth, phone_number, mother_phone_number, father_phone_number, parent_email_1, parent_email_2, function: scoutFunction, open_rank, achieved_rank, instructor_rank } = member;
-
     switch (view) {
         case 'basic':
             return `
@@ -149,10 +151,10 @@ export const renderTableRow = (member, index, view) => {
                     <td>${index}</td> 
                     <td>${name}</td>
                     <td>${surname}</td>
-                    <td>${ScoutFunctions[scoutFunction] || '-'}</td>
-                    <td>${ScoutRanks[open_rank]?.full || '-'}</td>
-                    <td>${ScoutRanks[achieved_rank]?.full || '-'}</td>
-                    <td>${InstructorRanks[instructor_rank]?.full || '-'}</td>
+                    <td>${mapEnumFullName(ScoutFunctions, scoutFunction, gender) || '-'}</td>
+                    <td>${mapEnumFullName(ScoutRanks, open_rank, gender) || '-'}</td>
+                    <td>${mapEnumFullName(ScoutRanks, achieved_rank, gender) || '-'}</td>
+                    <td>${mapEnumFullName(InstructorRanks, instructor_rank, gender) || '-'}</td>
                     <td>
                         <button class="btn btn-secondary btn-sm editMemberBtn" data-id="${user_id}">Edit</button>
                         <button class="btn btn-danger btn-sm deleteMemberBtn" data-id="${user_id}">Delete</button>

@@ -5,7 +5,9 @@ const { errorMessages, sendError } = require('../../utils/errorManager');
 const usersController = {
     async fetchUsers(req, res) {
         try {
-            const users = await usersService.fetchUsers();
+            const teamId = req.user.team_id;
+            console.log(req.user)
+            const users = await usersService.fetchUsers(teamId);
 
             res.status(200).json({ success: true, data: users });
         } catch (err) {
@@ -15,7 +17,8 @@ const usersController = {
 
     async fetchAllUsers(req, res) {
         try {
-            const users = await usersService.fetchAllUsers();
+            const teamId = req.user.team_id;
+            const users = await usersService.fetchAllUsers(teamId);
             res.status(200).json({ success: true, data: users });
         } catch (err) {
             console.error('Error fetching all users:', err);
@@ -25,8 +28,8 @@ const usersController = {
 
     async fetchUserById(req, res) {
         try {
-            const user = await usersService.fetchUserById(req.params.id);
-            if (!user) {
+            const teamId = req.user.team_id;
+            const user = await usersService.fetchUserById(req.params.id, teamId); if (!user) {
                 return sendError(res, errorMessages.users.fetchSingle.notFound);
             }
             res.status(200).json({ success: true, data: user });

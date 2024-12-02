@@ -1,5 +1,3 @@
-// ./components/table.js
-
 import { usersApi } from './api.js';
 import { showToast } from '../../../utils/ui.js';
 

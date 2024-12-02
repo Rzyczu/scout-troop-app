@@ -1,39 +1,6 @@
 const pool = require('../../utils/db');
 
-const fetchUsers = async () => {
-    const result = await pool.query(`
-        SELECT 
-            u.id AS user_id,
-            u.name,
-            u.surname,
-            ul.mail AS email,
-            us.function AS function,
-            t.name AS troop
-        FROM 
-            users u
-        INNER JOIN 
-            users_login ul ON u.id = ul.user_id
-        LEFT JOIN 
-            users_scout us ON u.id = us.user_id
-        LEFT JOIN 
-            troops t ON us.troop_id = t.id
-    `);
-    return result.rows;
-};
-
-const fetchAllUsers = async () => {
-    const result = await pool.query(`
-        SELECT 
-            u.id AS user_id,
-            u.name,
-            u.surname
-        FROM 
-            users u
-    `);
-    return result.rows;
-};
-
-const fetchUserById = async (userId) => {
+const fetchUsers = async (teamId) => {
     const result = await pool.query(`
         SELECT 
             u.id AS user_id,
@@ -51,8 +18,45 @@ const fetchUserById = async (userId) => {
         LEFT JOIN 
             troops t ON us.troop_id = t.id
         WHERE 
-            ul.user_id = $1
-    `, [userId]);
+            u.team_id = $1
+    `, [teamId]);
+    return result.rows;
+};
+
+const fetchAllUsers = async (teamId) => {
+    const result = await pool.query(`
+        SELECT 
+            u.id AS user_id,
+            u.name,
+            u.surname
+        FROM 
+            users u
+        WHERE 
+            u.team_id = $1
+    `, [teamId]);
+    return result.rows;
+};
+
+const fetchUserById = async (userId, teamId) => {
+    const result = await pool.query(`
+        SELECT 
+            u.id AS user_id,
+            u.name,
+            u.surname,
+            ul.mail AS email,
+            us.function AS function,
+            t.name AS troop
+        FROM 
+            users u
+        INNER JOIN 
+            users_login ul ON u.id = ul.user_id
+        LEFT JOIN 
+            users_scout us ON u.id = us.user_id
+        LEFT JOIN 
+            troops t ON us.troop_id = t.id
+        WHERE 
+            ul.user_id = $1 AND u.team_id = $2
+    `, [userId, teamId]);
     return result.rows[0];
 };
 

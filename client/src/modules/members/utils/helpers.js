@@ -1,17 +1,20 @@
-export const populateSelect = (selectId, enumData) => {
+export const populateSelect = (selectId, enumData, gender) => {
     const select = document.getElementById(selectId);
     if (!select) {
         console.warn(`Select element with ID '${selectId}' not found.`);
         return;
     }
 
+    select.innerHTML = '';
+
     Object.entries(enumData).forEach(([key, value]) => {
         const option = document.createElement('option');
         option.value = key;
-        option.textContent = typeof value === 'string' ? value : value.full || value.short;
+        option.textContent = mapEnumFullName(enumData, key, gender);
         select.appendChild(option);
     });
 };
+
 
 export const addSortableClassToHeaders = (tableHeaders) => {
     const headers = tableHeaders.querySelectorAll('th');

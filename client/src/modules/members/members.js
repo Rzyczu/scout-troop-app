@@ -38,16 +38,19 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Initialize form validation
     setupMemberFormValidation(initializeFormValidation);
 
-    // Populate dropdowns with enums
-    populateSelect('scoutFunction', ScoutFunctions);
-    populateSelect('openRank', ScoutRanks);
-    populateSelect('achievedRank', ScoutRanks);
-    populateSelect('instructorRank', InstructorRanks);
-
     // Update active view button and load initial data
     updateActiveViewButton(currentView);
     updateTableHeaders(currentView);
-    await loadTable(membersTableBody, renderTableRow, currentView);
+    const gender = await loadTable(membersTableBody, renderTableRow, currentView);
+
+    // Populate dropdowns with enums
+    if (gender) {
+        // Populate dropdowns with enums using the fetched gender
+        populateSelect('scoutFunction', ScoutFunctions, gender);
+        populateSelect('openRank', ScoutRanks, gender);
+        populateSelect('achievedRank', ScoutRanks, gender);
+        populateSelect('instructorRank', InstructorRanks, gender);
+    }
 
     // Add event listener to the "Add Member" button
     document.getElementById('addMemberBtn').addEventListener('click', () => {

@@ -12,6 +12,13 @@ const addAdminUser = async () => {
 
         const client = await pool.connect();
         try {
+            const insertTeamSQL = `
+            INSERT INTO teams (name, gender)
+            VALUES ('exampleTeam1', 0)
+            ON CONFLICT DO NOTHING;
+        `;
+
+            await client.query(insertTeamSQL);
             await client.query('BEGIN');
             const finalSQL = sql.replace('PASSWORD_', hashedPassword);
             await client.query(finalSQL);

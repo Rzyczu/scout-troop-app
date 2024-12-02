@@ -1,9 +1,17 @@
+-- Tworzenie tabeli `teams`
+CREATE TABLE IF NOT EXISTS teams (
+    id SERIAL PRIMARY KEY,
+    name VARCHAR(100) NOT NULL,
+    gender INT NOT NULL
+);
+
 -- Tworzenie tabeli `users`
 CREATE TABLE IF NOT EXISTS users (
     id SERIAL PRIMARY KEY,
     name VARCHAR(100) NOT NULL,
     surname VARCHAR(100) NOT NULL,
-    date_birth DATE NOT NULL
+    date_birth DATE NOT NULL,
+    team_id INT REFERENCES teams(id) ON DELETE SET NULL
 );
 
 -- Tworzenie tabeli `users_login`
@@ -33,7 +41,8 @@ CREATE TABLE IF NOT EXISTS troops (
     song VARCHAR(100),
     color VARCHAR(50),
     points INT DEFAULT 0,
-    leader_id INT UNIQUE REFERENCES users(id)
+    leader_id INT UNIQUE REFERENCES users(id),
+    team_id INT REFERENCES teams(id) ON DELETE SET NULL
 );
 
 -- Tworzenie tabeli `users_scout`

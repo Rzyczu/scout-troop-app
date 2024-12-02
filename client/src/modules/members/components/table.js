@@ -3,10 +3,14 @@ import { showToast } from '../../../utils/ui.js';
 
 export const loadTable = async (tableBody, getTableRow, view) => {
     try {
-        const members = await membersApi.fetchAll();
-        tableBody.innerHTML = members.map((member, index) => getTableRow(member, index + 1, view)).join('');
+        const response = await membersApi.fetchAll();
+        const members = response.members;
+        const gender = response.gender;
+        tableBody.innerHTML = members.map((member, index) => getTableRow(member, index + 1, view, gender)).join('');
+        return gender;
     } catch (error) {
         showToast(error.message || 'Failed to load members.', 'danger');
+        return null;
     }
 };
 

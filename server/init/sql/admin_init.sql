@@ -1,6 +1,14 @@
+
+-- Pobranie ID drużyny `exampleTeam1`
+WITH team_id_cte AS (
+    SELECT id FROM teams WHERE name = 'exampleTeam1' AND gender = 0
+)
+
+
 -- Dodanie użytkownika do tabeli `users`
-INSERT INTO users (name, surname, date_birth)
-VALUES ('adminName', 'adminSurname', '2000-01-01')
+INSERT INTO users (name, surname, date_birth, team_id) 
+SELECT 'adminName', 'adminSurname', '2000-01-01', team_id_cte.id
+FROM team_id_cte
 ON CONFLICT DO NOTHING;
 
 -- Pobranie ID użytkownika

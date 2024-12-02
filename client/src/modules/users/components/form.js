@@ -60,16 +60,6 @@ export const handleFormSubmit = async (userForm, userIdField, userModal, loadUse
     }
 };
 
-/**
- * Obsługuje zdarzenie kliknięcia przycisku edycji użytkownika.
- * @param {HTMLElement} target - Kliknięty przycisk edycji.
- * @param {HTMLFormElement} userForm - Formularz użytkownika.
- * @param {HTMLElement} userIdField - Pole identyfikatora użytkownika.
- * @param {HTMLElement} passwordField - Pole hasła.
- * @param {HTMLElement} selectUserField - Pole wyboru użytkownika.
- * @param {HTMLElement} userModalLabel - Element nagłówka modalnego.
- * @param {HTMLElement} userModal - Modal użytkownika.
- */
 export const handleEditUser = async (
     target,
     userForm,
@@ -92,11 +82,6 @@ export const handleEditUser = async (
     }
 };
 
-/**
- * Obsługuje zdarzenie kliknięcia przycisku usunięcia użytkownika.
- * @param {HTMLElement} target - Kliknięty przycisk usunięcia.
- * @param {Function} loadUsers - Funkcja do odświeżania tabeli użytkowników.
- */
 export const handleDeleteUser = async (target, loadUsers) => {
     const userId = target.dataset.id;
     console.log(userId);

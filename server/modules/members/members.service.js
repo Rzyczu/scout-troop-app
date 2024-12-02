@@ -1,33 +1,6 @@
 const pool = require('../../utils/db');
 
-const fetchAllMembers = async () => {
-    const result = await pool.query(`
-        SELECT 
-            u.id AS user_id,
-            u.name,
-            u.surname,
-            u.date_birth,
-            uc.phone_number,
-            uc.mother_phone_number,
-            uc.father_phone_number,
-            uc.parent_email_1,
-            uc.parent_email_2,
-            us.function,
-            us.open_rank,
-            us.achieved_rank,
-            us.instructor_rank,
-            us.troop_id
-        FROM 
-            users u
-        LEFT JOIN 
-            users_contact uc ON u.id = uc.user_id
-        LEFT JOIN 
-            users_scout us ON u.id = us.user_id
-    `);
-    return result.rows;
-};
-
-const fetchMemberById = async (id) => {
+const fetchAllMembers = async (teamId) => {
     const result = await pool.query(`
         SELECT 
             u.id AS user_id,
@@ -51,8 +24,36 @@ const fetchMemberById = async (id) => {
         LEFT JOIN 
             users_scout us ON u.id = us.user_id
         WHERE 
-            u.id = $1
-    `, [id]);
+            u.team_id = $1
+    `, [teamId]);
+    return result.rows;
+};
+const fetchMemberById = async (id, teamId) => {
+    const result = await pool.query(`
+        SELECT 
+            u.id AS user_id,
+            u.name,
+            u.surname,
+            u.date_birth,
+            uc.phone_number,
+            uc.mother_phone_number,
+            uc.father_phone_number,
+            uc.parent_email_1,
+            uc.parent_email_2,
+            us.function,
+            us.open_rank,
+            us.achieved_rank,
+            us.instructor_rank,
+            us.troop_id
+        FROM 
+            users u
+        LEFT JOIN 
+            users_contact uc ON u.id = uc.user_id
+        LEFT JOIN 
+            users_scout us ON u.id = us.user_id
+        WHERE 
+            u.id = $1 AND u.team_id = $2
+    `, [id, teamId]);
     return result.rows[0];
 };
 

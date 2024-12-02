@@ -39,7 +39,7 @@ const redirectIfAuthenticated = (req, res, next) => {
     }
 };
 
-const authorize = (roles) => (req, res, next) => {
+const authorize = (roles, genders) => (req, res, next) => {
     const userRole = parseInt(req.user.function, 10);
     if (!roles.includes(userRole)) {
         return res.status(403).json({ error: 'Access denied' });

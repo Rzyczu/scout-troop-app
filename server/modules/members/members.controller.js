@@ -6,8 +6,10 @@ const { errorMessages, sendError } = require('../../utils/errorManager');
 const membersController = {
     async fetchAllMembers(req, res) {
         try {
-            const members = await membersService.fetchAllMembers();
-            res.status(200).json({ success: true, data: members });
+            const teamId = req.user.team_id;
+            const gender = req.user.gender;
+            const members = await membersService.fetchAllMembers(teamId);
+            res.status(200).json({ success: true, data: { members: members, gender: gender } });
         } catch (err) {
             console.error('Error fetching members:', err);
             sendError(res, errorMessages.users.fetchAll);
@@ -16,7 +18,8 @@ const membersController = {
 
     async fetchMemberById(req, res) {
         try {
-            const member = await membersService.fetchMemberById(req.params.id);
+            const teamId = req.user.team_id;
+            const member = await membersService.fetchMemberById(req.params.id, teamId);
             if (!member) {
                 return sendError(res, errorMessages.users.fetchSingle.notFound);
             }
