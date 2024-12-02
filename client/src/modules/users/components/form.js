@@ -11,10 +11,10 @@ export const resetForm = async (userForm, userIdField, passwordField, selectUser
 
     // Load all users into the select field
     try {
-        const users = await usersApi.fetchAllUsers();
+        const results = await usersApi.fetchAllUsers();
         const selectUser = document.getElementById('selectUser');
         selectUser.innerHTML = '<option value="">Select a user</option>';
-        users.forEach(user => {
+        results.members.forEach(user => {
             const option = document.createElement('option');
             option.value = user.user_id;
             option.textContent = `${user.name} ${user.surname}`;

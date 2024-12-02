@@ -6,10 +6,10 @@ const usersController = {
     async fetchUsers(req, res) {
         try {
             const teamId = req.user.team_id;
-            console.log(req.user)
+            const gender = req.user.gender;
             const users = await usersService.fetchUsers(teamId);
 
-            res.status(200).json({ success: true, data: users });
+            res.status(200).json({ success: true, data: { users: users, gender: gender } });
         } catch (err) {
             sendError(res, errorMessages.users.fetchAll);
         }
@@ -18,6 +18,7 @@ const usersController = {
     async fetchAllUsers(req, res) {
         try {
             const teamId = req.user.team_id;
+            console.log('Fetching all users...');
             const users = await usersService.fetchAllUsers(teamId);
             res.status(200).json({ success: true, data: users });
         } catch (err) {

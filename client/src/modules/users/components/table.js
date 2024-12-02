@@ -1,16 +1,19 @@
 import { usersApi } from './api.js';
 import { showToast } from '../../../utils/ui.js';
+import { mapEnumFullName, ScoutFunctions } from "../../../utils/enums";
 
 export const loadUsers = async (usersTableBody) => {
     try {
-        const users = await usersApi.fetchUsers();
-
+        const response = await usersApi.fetchUsers();
+        const users = response.users;
+        const gender = response.gender;
         usersTableBody.innerHTML = users.map((user, index) =>
             `<tr>
                 <td>${index + 1}</td>
                 <td>${user.name}</td>
                 <td>${user.surname}</td>
                 <td>${user.email}</td>
+                <td>${mapEnumFullName(ScoutFunctions, user.function, gender) || '-'}</td>
                 <td>
                     <button class="btn btn-secondary btn-sm editUserBtn" data-id="${user.user_id}">Edit</button>
                     <button class="btn btn-danger btn-sm deleteUserBtn" data-id="${user.user_id}">Delete</button>

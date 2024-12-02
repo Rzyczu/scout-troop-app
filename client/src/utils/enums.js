@@ -62,8 +62,6 @@ const mapEnumValue = (enumData, key, property, gender = null) => {
     const entry = enumData[key];
     const genderKey = gender === 0 ? 'male' : gender === 1 ? 'female' : null;
 
-    console.log(entry[genderKey])
-
     if (genderKey && typeof entry === 'object' && entry[genderKey]) {
         return entry[genderKey][property] || entry[genderKey];
     }

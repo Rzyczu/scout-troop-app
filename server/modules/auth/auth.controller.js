@@ -5,7 +5,6 @@ const authController = {
     async login(req, res) {
         try {
             const { email, password } = req.body;
-            console.log(email, password);
             const { token } = await authService.login(email, password);
 
             res.cookie('token', token, { httpOnly: true, secure: true });
