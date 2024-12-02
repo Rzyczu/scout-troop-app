@@ -40,6 +40,8 @@ const membersController = {
             return sendError(res, errorMessages.users.create.validation);
         }
 
+        user.team_id = req.user.team_id;
+
         try {
             const memberId = await membersService.createMember(user, contact, scout);
             res.status(200).json({ success: true, message: 'Member created successfully.', data: { id: memberId } });

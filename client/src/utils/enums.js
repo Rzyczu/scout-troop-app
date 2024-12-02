@@ -19,7 +19,7 @@ export const ScoutFunctions = {
 };
 
 export const ScoutRanks = {
-    0: { short: '-', full: 'None' },
+    0: { short: '-', full: '-' },
     1: {
         male: { short: 'mł.', full: 'Młodzik' },
         female: { short: 'och.', full: 'Ochotniczka' }
@@ -43,7 +43,7 @@ export const ScoutRanks = {
 };
 
 export const InstructorRanks = {
-    0: { short: '-', full: 'None' },
+    0: { short: '-', full: '-' },
     1: {
         male: { short: 'pwd.', full: 'Przewodnik' },
         female: { short: 'pwd.', full: 'Przewodniczka' }

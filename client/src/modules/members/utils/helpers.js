@@ -1,12 +1,16 @@
-export const populateSelect = (selectId, enumData, gender) => {
+import { mapEnumFullName, ScoutFunctions, ScoutRanks, InstructorRanks } from "../../../utils/enums";
+
+export const populateSelect = (selectId, enumData, gender = null) => {
     const select = document.getElementById(selectId);
     if (!select) {
         console.warn(`Select element with ID '${selectId}' not found.`);
         return;
     }
 
+    // Clear existing options
     select.innerHTML = '';
 
+    // Populate options from enumData
     Object.entries(enumData).forEach(([key, value]) => {
         const option = document.createElement('option');
         option.value = key;

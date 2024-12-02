@@ -42,9 +42,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateActiveViewButton(currentView);
     updateTableHeaders(currentView);
     const gender = await loadTable(membersTableBody, renderTableRow, currentView);
-
+    console.log('gender is ', gender)
     // Populate dropdowns with enums
-    if (gender) {
+    if (gender !== undefined && gender !== null) {
+        console.log('populate się wykonuje')
+
         // Populate dropdowns with enums using the fetched gender
         populateSelect('scoutFunction', ScoutFunctions, gender);
         populateSelect('openRank', ScoutRanks, gender);

@@ -62,10 +62,10 @@ const createMember = async (user, contact, scout) => {
     try {
         await client.query('BEGIN');
         const userResult = await client.query(`
-            INSERT INTO users (name, surname, date_birth) 
-            VALUES ($1, $2, $3) 
+            INSERT INTO users (name, surname, date_birth, team_id) 
+            VALUES ($1, $2, $3, $4) 
             RETURNING id
-        `, [user.name, user.surname, user.date_birth]);
+        `, [user.name, user.surname, user.date_birth, user.team_id]);
         const userId = userResult.rows[0].id;
 
         await client.query(`

@@ -1,6 +1,5 @@
 import { mapEnumFullName, ScoutFunctions, ScoutRanks, InstructorRanks } from "../../../utils/enums";
 
-
 export const filterMembersByView = (members, view, useUnderscore = false) => {
     const formatKey = (key) => {
         return useUnderscore ? key.replace(/ /g, '_') : key;
@@ -92,9 +91,9 @@ export const getTableHeaders = (view) => {
                 <th data-sort="id">ID</th>
                 <th>Name</th>
                 <th>Surname</th>
+                <th>Phone Number</th>
                 <th>Mother's Phone Number</th>
                 <th>Father's Phone Number</th>
-                <th>Phone Number</th>
 
                 <th>Email 1</th>
                 <th>Email 2</th>
@@ -135,9 +134,9 @@ export const renderTableRow = (member, index, view, gender) => {
                     <td>${index}</td> 
                     <td>${name}</td>
                     <td>${surname}</td>
+                    <td>${phone_number || '-'}</td>
                     <td>${mother_phone_number || '-'}</td>
                     <td>${father_phone_number || '-'}</td>
-                    <td>${phone_number || '-'}</td>
                     <td>${parent_email_1 || '-'}</td>
                     <td>${parent_email_2 || '-'}</td>
                     <td>
