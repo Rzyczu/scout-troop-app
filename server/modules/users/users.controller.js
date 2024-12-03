@@ -18,7 +18,6 @@ const usersController = {
     async fetchAllUsers(req, res) {
         try {
             const teamId = req.user.team_id;
-            console.log('Fetching all users...');
             const users = await usersService.fetchAllUsers(teamId);
             res.status(200).json({ success: true, data: users });
         } catch (err) {

@@ -1,6 +1,6 @@
 import { mapEnumFullName, ScoutFunctions, ScoutRanks, InstructorRanks } from "../../../utils/enums";
 
-export const filterMembersByView = (members, view, useUnderscore = false) => {
+export const filterMembersByView = (members, view, gender, useUnderscore = false) => {
     const formatKey = (key) => {
         return useUnderscore ? key.replace(/ /g, '_') : key;
     };
@@ -31,10 +31,10 @@ export const filterMembersByView = (members, view, useUnderscore = false) => {
             case "scout":
                 processedMember[formatKey("Name")] = member.name;
                 processedMember[formatKey("Surname")] = member.surname;
-                processedMember[formatKey("Function")] = ScoutFunctions[member.function] || "-";
-                processedMember[formatKey("Open Rank")] = ScoutRanks[member.open_rank]?.full || "-";
-                processedMember[formatKey("Achieved Rank")] = ScoutRanks[member.achieved_rank]?.full || "-";
-                processedMember[formatKey("Instructor Rank")] = InstructorRanks[member.instructor_rank]?.full || "-";
+                processedMember[formatKey("Function")] = mapEnumFullName(ScoutFunctions, member.function, gender) || '-';
+                processedMember[formatKey("Open Rank")] = mapEnumFullName(ScoutRanks, member.open_rank, gender) || "-";
+                processedMember[formatKey("Achieved Rank")] = mapEnumFullName(ScoutRanks, member.achieved_rank, gender) || "-";
+                processedMember[formatKey("Instructor Rank")] = mapEnumFullName(InstructorRanks, member.instructor_rank, gender) || "-";
                 break;
 
             default: // Full data view
@@ -46,10 +46,10 @@ export const filterMembersByView = (members, view, useUnderscore = false) => {
                 processedMember[formatKey("Father's Number")] = member.father_phone_number || "-";
                 processedMember[formatKey("Parent Email 1")] = member.parent_email_1 || "-";
                 processedMember[formatKey("Parent Email 2")] = member.parent_email_2 || "-";
-                processedMember[formatKey("Function")] = ScoutFunctions[member.function] || "-";
-                processedMember[formatKey("Open Rank")] = ScoutRanks[member.open_rank]?.full || "-";
-                processedMember[formatKey("Achieved Rank")] = ScoutRanks[member.achieved_rank]?.full || "-";
-                processedMember[formatKey("Instructor Rank")] = InstructorRanks[member.instructor_rank]?.full || "-";
+                processedMember[formatKey("Function")] = mapEnumFullName(ScoutFunctions, member.function, gender) || '-';
+                processedMember[formatKey("Open Rank")] = mapEnumFullName(ScoutRanks, member.open_rank, gender) || "-";
+                processedMember[formatKey("Achieved Rank")] = mapEnumFullName(ScoutRanks, member.achieved_rank, gender) || "-";
+                processedMember[formatKey("Instructor Rank")] = mapEnumFullName(InstructorRanks, member.instructor_rank, gender) || "-";
                 break;
         }
 
@@ -59,9 +59,7 @@ export const filterMembersByView = (members, view, useUnderscore = false) => {
 
 export const updateActiveViewButton = (currentView) => {
     if (!currentView) {
-        showToast('No valid view selected for updateActiveViewButton.', 'warning');
-        console.warn('No valid view selected for updateActiveViewButton.');
-        return;
+        showToast('No valid view selected for updateActiveViewButton.', 'warning'); return;
     }
 
     document.querySelectorAll('.view-btn').forEach((btn) => {
@@ -73,7 +71,6 @@ export const updateActiveViewButton = (currentView) => {
         activeBtn.classList.add('active');
     } else {
         showToast(`No button found for current view: ${currentView}`, 'warning');
-        console.warn(`No button found for current view: ${currentView}`);
     }
 };
 

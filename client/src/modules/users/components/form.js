@@ -84,7 +84,6 @@ export const handleEditUser = async (
 
 export const handleDeleteUser = async (target, loadUsers) => {
     const userId = target.dataset.id;
-    console.log(userId);
     try {
         const confirmed = await showConfirmationModal(
             'Delete User',

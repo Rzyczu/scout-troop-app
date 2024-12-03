@@ -6,12 +6,9 @@ const { throwError, errorMessages } = require('../../utils/errorManager');
 
 const authService = {
     async login(email, password) {
-        console.log(email, password);
 
         if (!email || !password) {
             throwError(errorMessages.login.missingCredentials);
-            console.log('errorMessages.login.missingCredentials');
-
         }
 
         const result = await pool.query(
@@ -36,11 +33,8 @@ const authService = {
             `,
             [email]
         );
-        console.log('SELECT');
-
 
         const user = result.rows[0];
-        console.log(user);
 
         if (!user) {
             throwError(errorMessages.login.invalidCredentials);
@@ -60,8 +54,6 @@ const authService = {
             JWT_SECRET,
             { expiresIn: '1h' }
         );
-
-        console.log(token);
 
         return { token };
     },

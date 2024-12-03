@@ -3,7 +3,6 @@ import { showToast } from '../../../utils/ui.js';
 export const exportToJson = (members, view) => {
     if (!members || members.length === 0) {
         showToast('No members data available for export.', 'warning');
-        console.warn('No members data available for export.');
         return;
     }
 
@@ -22,7 +21,6 @@ export const exportToJson = (members, view) => {
 export const exportToCsv = (members, view) => {
     if (!members || members.length === 0) {
         showToast('No members data available for export.', 'warning');
-        console.warn('No members data available for export.');
         return;
     }
 

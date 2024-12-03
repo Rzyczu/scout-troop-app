@@ -34,9 +34,6 @@ const fetchAllUsers = async (teamId) => {
         WHERE 
             u.team_id = $1
     `, [teamId]);
-
-    console.log('select');
-    console.log(result.rows);
     return result.rows;
 };
 

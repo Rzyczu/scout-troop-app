@@ -32,9 +32,6 @@ const membersController = {
 
     async createMember(req, res) {
         const { user, contact, scout } = req.body;
-        console.log(user)
-        console.log(contact)
-        console.log(scout)
 
         if (!user || !contact || !scout) {
             return sendError(res, errorMessages.users.create.validation);
@@ -53,9 +50,6 @@ const membersController = {
 
     async updateMember(req, res) {
         const { user, contact, scout } = req.body;
-        console.log(user)
-        console.log(contact)
-        console.log(scout)
 
         try {
             await membersService.updateMember(req.params.id, user, contact, scout);

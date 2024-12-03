@@ -42,12 +42,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateActiveViewButton(currentView);
     updateTableHeaders(currentView);
     const gender = await loadTable(membersTableBody, renderTableRow, currentView);
-    console.log('gender is ', gender)
+
     // Populate dropdowns with enums
     if (gender !== undefined && gender !== null) {
-        console.log('populate się wykonuje')
-
-        // Populate dropdowns with enums using the fetched gender
         populateSelect('scoutFunction', ScoutFunctions, gender);
         populateSelect('openRank', ScoutRanks, gender);
         populateSelect('achievedRank', ScoutRanks, gender);
@@ -113,8 +110,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('exportJsonBtn').addEventListener('click', async () => {
         const view = exportViewSelect.value;
         try {
-            const members = await membersApi.fetchAll();
-            const filteredMembers = filterMembersByView(members, view, true);
+            const results = await membersApi.fetchAll();
+            const members = results.members;
+            const gender = results.gender;
+            const filteredMembers = filterMembersByView(members, view, gender, true);
             exportToJson(filteredMembers, view);
         } catch (error) {
             showToast('Failed to export file.', 'danger');
@@ -124,8 +123,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     document.getElementById('exportCsvBtn').addEventListener('click', async () => {
         const view = exportViewSelect.value;
         try {
-            const members = await membersApi.fetchAll();
-            const filteredMembers = filterMembersByView(members, view);
+            const results = await membersApi.fetchAll();
+            const members = results.members;
+            const gender = results.gender;
+            const filteredMembers = filterMembersByView(members, view, gender);
             exportToCsv(filteredMembers, view);
         } catch (error) {
             showToast('Failed to export file.', 'danger');
