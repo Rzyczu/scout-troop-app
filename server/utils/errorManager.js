@@ -44,6 +44,50 @@ export const errorMessages = {
             notFound: { error: 'User not found.', code: 'USER_NOT_FOUND' },
         },
     },
+
+    troops: {
+        fetchAll: {
+            error: 'Failed to fetch troops.',
+            code: 'TROOP_FETCH_FAILED',
+        },
+        fetchSingle: {
+            default: { error: 'Failed to fetch troop.', code: 'TROOP_FETCH_FAILED' },
+            notFound: { error: 'Troop not found.', code: 'TROOP_NOT_FOUND' },
+        },
+        create: {
+            default: { error: 'Failed to create troop.', code: 'TROOP_CREATE_FAILED' },
+            validation: { error: 'Invalid input data.', code: 'TROOP_INVALID_DATA' },
+        },
+        update: {
+            default: { error: 'Failed to update troop.', code: 'TROOP_UPDATE_FAILED' },
+        },
+        delete: {
+            default: { error: 'Failed to delete troop.', code: 'TROOP_DELETE_FAILED' },
+            notFound: { error: 'Troop not found.', code: 'TROOP_NOT_FOUND' },
+        },
+    },
+
+    troop: {
+        fetchSingle: {
+            default: { error: 'Failed to fetch troop details.', code: 'TROOP_FETCH_DETAILS_FAILED' },
+            notFound: { error: 'Troop not found.', code: 'TROOP_NOT_FOUND' },
+        },
+        users: {
+            fetchAll: { error: 'Failed to fetch troop users.', code: 'TROOP_USERS_FETCH_FAILED' },
+            add: {
+                default: { error: 'Failed to add user to troop.', code: 'TROOP_ADD_USER_FAILED' },
+                validation: { error: 'Invalid user data for troop addition.', code: 'TROOP_ADD_USER_INVALID' },
+            },
+            remove: {
+                default: { error: 'Failed to remove user from troop.', code: 'TROOP_REMOVE_USER_FAILED' },
+                notFound: { error: 'User not found in troop.', code: 'TROOP_USER_NOT_FOUND' },
+            },
+        },
+        update: {
+            default: { error: 'Failed to update troop details.', code: 'TROOP_UPDATE_FAILED' },
+        },
+    },
+
 };
 
 export const sendError = (res, errorObj, statusCode = 400) => {
