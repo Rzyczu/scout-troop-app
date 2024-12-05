@@ -6,6 +6,8 @@ const dashboardRoutes = require('./modules/dashboard/dashboard.routes');
 const authRoutes = require('./modules/auth/auth.routes');
 const userRoutes = require('./modules/users/users.routes');
 const membersRoutes = require('./modules/members/members.routes');
+const troopsRoutes = require('./modules/troops/troops.routes');
+
 const { redirectIfAuthenticated, redirectIfNotAuthenticated } = require('./middlewares/auth');
 
 const app = express();
@@ -20,6 +22,7 @@ app.use('/api/dashboard', dashboardRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/users', userRoutes);
 app.use('/api/members', membersRoutes);
+app.use('/api/troops', troopsRoutes);
 
 app.use(express.static(path.join(__dirname, '../client/dist')));
 
@@ -38,6 +41,10 @@ app.get('/users', redirectIfNotAuthenticated, (req, res) =>
 );
 app.get('/members', redirectIfNotAuthenticated, (req, res) =>
     res.sendFile(path.join(__dirname, '../client/dist/members.html'))
+);
+
+app.get('/troops', redirectIfNotAuthenticated, (req, res) =>
+    res.sendFile(path.join(__dirname, '../client/dist/troops.html'))
 );
 
 // Error Handling

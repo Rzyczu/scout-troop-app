@@ -11,6 +11,7 @@ module.exports = {
         dashboard: './src/modules/dashboard/dashboard.js', // Funkcje tylko dla dashboard.html
         users: './src/modules/users/users.js', // Funkcje tylko dla users.html
         members: './src/modules/members/members.js', // Funkcje tylko dla users.html
+        members: './src/modules/members/members.js', // Funkcje tylko dla users.html
 
     },
     output: {
