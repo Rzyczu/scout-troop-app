@@ -12,6 +12,7 @@ module.exports = {
         users: './src/modules/users/users.js', // Funkcje tylko dla users.html
         members: './src/modules/members/members.js', // Funkcje tylko dla users.html
         members: './src/modules/members/members.js', // Funkcje tylko dla users.html
+        troops: './src/modules/troops/troops.js', // Funkcje tylko dla troops.html
 
     },
     output: {
@@ -79,6 +80,11 @@ module.exports = {
             chunks: ['members', 'app'], // Ładuje members.bundle.js i app.bundle.js
             filename: 'members.html',
         }),
+        new HtmlWebpackPlugin({
+            template: './src/modules/troops/troops.html',
+            chunks: ['troops', 'app'], // Ładuje troops.bundle.js i app.bundle.js
+            filename: 'troops.html',
+        }),
     ],
     mode: process.env.NODE_ENV || 'development',
     devtool: 'source-map',
@@ -101,5 +107,4 @@ module.exports = {
             writeToDisk: true, // Write files to `dist` during development
         },
     },
-
 };

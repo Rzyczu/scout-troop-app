@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Troops - Scout Troop App</title>
+</head>
+
+<body>
+    <header id="navbar"></header>
+    <div id="toast-messages" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
+    <main class="container mt-4">
+        <h1 class="mb-4">Troops</h1>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#troopModal">Add Troop</button>
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th class="sortable" data-sort="id">ID <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
+                    <th class="sortable" data-sort="leader">Leader <span class="sort-icon"></span></th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="troopsTableBody"></tbody>
+        </table>
+    </main>
+
+    <!-- Modal -->
+    <div class="modal fade" id="troopModal" tabindex="-1" aria-labelledby="troopModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="troopModalLabel">Add Troop</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="troopForm" class="needs-validation" novalidate>
+                        <div class="mb-3">
+                            <label for="troopName" class="form-label">Troop Name</label>
+                            <input type="text" class="form-control" id="troopName" required>
+                            <div class="invalid-feedback">Please provide a name for the troop.</div>
+                        </div>
+                        <div class="mb-3">
+                            <label for="troopLeader" class="form-label">Leader</label>
+                            <select class="form-select" id="troopLeader" required>
+                                <option value="">Select a leader</option>
+                            </select>
+                            <div class="invalid-feedback">Please select a leader for the troop.</div>
+                        </div>
+                        <button type="submit" class="btn btn-primary w-100">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+
+</html>
