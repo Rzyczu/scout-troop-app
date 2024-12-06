@@ -1,52 +1,65 @@
 import './troops.scss';
-import { fetchAllTroops, createTroop } from './components/api';
-import initializeFormValidation from '../../utils/formValidation';
-import { resetForm, populateSelect } from './components/form';
-import { renderTableRows, attachSortingToHeaders } from './components/table';
+import { loadTroops, attachSortingToHeaders } from './components/table.js';
+import { resetForm, handleFormSubmit, handleEditTroop, handleDeleteTroop } from './components/form.js';
+import { addSortableClassToHeaders } from './utils/helpers.js';
+import sortTable from '../../utils/sortTable.js';
+import initializeFormValidation from '../../utils/formValidation.js';
 
 // DOM Elements
 const troopsTableBody = document.getElementById('troopsTableBody');
+const troopsTableHeader = document.querySelector('thead');
 const troopForm = document.getElementById('troopForm');
+const troopModalLabel = document.getElementById('troopModalLabel');
 const troopLeaderSelect = document.getElementById('troopLeader');
 const troopModal = new bootstrap.Modal(document.getElementById('troopModal'));
 
-// Initialization
+// Reload troops and render them in the table
+const reloadTroops = async () => {
+    await loadTroops(troopsTableBody);
+};
+
+// Handle form submission
+troopForm.onsubmit = async function (event) {
+    event.preventDefault();
+    if (!this.checkValidity()) {
+        this.classList.add('was-validated');
+        return;
+    }
+    await handleFormSubmit(troopForm, troopModal, reloadTroops);
+};
+
+// Initialize module
 document.addEventListener('DOMContentLoaded', async () => {
+    initializeFormValidation();
+
     try {
         // Load troops into the table
-        const troops = await fetchAllTroops();
-        renderTableRows(troopsTableBody, troops);
+        await reloadTroops();
 
-        // Load leaders into the select field
-        const leaders = await fetchAllTroops('leaders');
-        populateSelect(troopLeaderSelect, leaders);
+        addSortableClassToHeaders(troopsTableHeader);
+        attachSortingToHeaders(troopsTableHeader, troopsTableBody, sortTable);
 
-        // Attach sorting
-        attachSortingToHeaders(troopsTableBody);
+        // Add event listener for "Add Troop" button
+        document.getElementById('addTroopBtn').addEventListener('click', () => {
+            resetForm(troopForm, troopModalLabel, troopLeaderSelect);
+            troopModal.show();
+        });
 
-        // Form validation
-        initializeFormValidation();
+        // Add event listener for table actions (edit/delete)
+        troopsTableBody.addEventListener('click', async (event) => {
+            const target = event.target;
+
+            // Handle Edit button
+            if (target.classList.contains('editTroopBtn')) {
+                await handleEditTroop(target, troopForm, troopModalLabel, troopModal);
+            }
+
+            // Handle Delete button
+            else if (target.classList.contains('deleteTroopBtn')) {
+                await handleDeleteTroop(target, reloadTroops);
+            }
+        });
     } catch (error) {
         console.error('Error initializing troops module:', error);
     }
 });
-
-// Handle form submission
-troopForm.onsubmit = async (event) => {
-    event.preventDefault();
-    if (!troopForm.checkValidity()) {
-        troopForm.classList.add('was-validated');
-        return;
-    }
-
-    const name = document.getElementById('troopName').value;
-    const leaderId = troopLeaderSelect.value;
-
-    try {
-        await createTroop({ name, leaderId });
-        troopModal.hide();
-        location.reload(); // Reload the page to see updated data
-    } catch (error) {
-        console.error('Error creating troop:', error);
-    }
-};

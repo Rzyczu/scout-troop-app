@@ -1,11 +1,11 @@
-const troopsService = require('./troops.service');
+const troopService = require('./troop.service');
 const { sendError, errorMessages } = require('../../utils/errorManager');
 
 const troopController = {
     async fetchTroopDetails(req, res) {
         try {
             const { team_id: teamId } = req.user;
-            const troop = await troopsService.fetchTroopById(req.params.id, teamId);
+            const troop = await troopService.fetchTroopById(req.params.id, teamId);
             if (!troop) {
                 return sendError(res, errorMessages.troops.fetchSingle.notFound, 404);
             }
@@ -20,7 +20,7 @@ const troopController = {
             const troopId = req.params.id;
             const { name, description, song, color } = req.body;
 
-            const updatedTroop = await troopsService.updateTroop(troopId, { name, description, song, color });
+            const updatedTroop = await troopService.updateTroop(troopId, { name, description, song, color });
             if (!updatedTroop) {
                 return sendError(res, errorMessages.troops.update.default, 404);
             }
@@ -34,7 +34,7 @@ const troopController = {
     async fetchTroopUsers(req, res) {
         try {
             const teamId = req.user.team_id;
-            const users = await troopsService.fetchTroopUsers(req.params.id, teamId);
+            const users = await troopService.fetchTroopUsers(req.params.id, teamId);
             res.status(200).json({ success: true, data: users });
         } catch (error) {
             sendError(res, errorMessages.troop.users.fetchAll, 500);
@@ -51,7 +51,7 @@ const troopController = {
                 return sendError(res, errorMessages.troop.users.add.validation, 400);
             }
 
-            const addedUser = await troopsService.addUserToTroop(userId, troopId, teamId);
+            const addedUser = await troopService.addUserToTroop(userId, troopId, teamId);
             res.status(201).json({ success: true, message: 'User added to troop successfully.', data: addedUser });
         } catch (error) {
             sendError(res, errorMessages.troop.users.add.default, 500);
@@ -66,7 +66,7 @@ const troopController = {
                 return sendError(res, errorMessages.troop.users.remove.notFound, 404);
             }
 
-            await troopsService.removeUserFromTroop(userId);
+            await troopService.removeUserFromTroop(userId);
             res.status(200).json({ success: true, message: 'User removed from troop successfully.' });
         } catch (error) {
             sendError(res, errorMessages.troop.users.remove.default, 500);

@@ -1,4 +1,4 @@
-import { membersApi } from './api.js';
+import membersApi from './api.js';
 import { showToast } from '../../../utils/ui.js';
 
 export const loadTable = async (tableBody, getTableRow, view) => {

@@ -1,4 +1,4 @@
-import { api } from './api.js';
+import api from './api.js';
 import { showToast } from '../../../utils/ui.js';
 
 export const handleLoginSubmit = async (form, onSuccess) => {

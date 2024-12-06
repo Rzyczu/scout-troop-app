@@ -1,4 +1,4 @@
-import { usersApi } from './api.js';
+import usersApi from './api.js';
 import { showToast } from '../../../utils/ui.js';
 import { mapEnumFullName, ScoutFunctions } from "../../../utils/enums";
 

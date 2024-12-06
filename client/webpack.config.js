@@ -13,7 +13,7 @@ module.exports = {
         members: './src/modules/members/members.js', // Funkcje tylko dla users.html
         members: './src/modules/members/members.js', // Funkcje tylko dla users.html
         troops: './src/modules/troops/troops.js', // Funkcje tylko dla troops.html
-
+        troop: './src/modules/troop/troop.js', // Funkcje tylko dla troop.html
     },
     output: {
         filename: '[name].bundle.js', // Oddzielne bundlowanie per moduł
@@ -84,6 +84,11 @@ module.exports = {
             template: './src/modules/troops/troops.html',
             chunks: ['troops', 'app'], // Ładuje troops.bundle.js i app.bundle.js
             filename: 'troops.html',
+        }),
+        new HtmlWebpackPlugin({
+            template: './src/modules/troop/troop.html',
+            chunks: ['troop', 'app'], // Ładuje troop.bundle.js i app.bundle.js
+            filename: 'troop.html',
         }),
     ],
     mode: process.env.NODE_ENV || 'development',

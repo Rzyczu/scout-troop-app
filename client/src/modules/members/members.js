@@ -1,6 +1,7 @@
 import './members.scss';
 import sortTable from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
+import membersApi from './components/api.js';
 import { showConfirmationModal, showToast } from '../../utils/ui.js';
 import { addSortableClassToHeaders } from './utils/helpers.js';
 import { getTableHeaders, renderTableRow, filterMembersByView, updateActiveViewButton } from './components/views.js';
@@ -9,7 +10,6 @@ import { resetForm, handleFormSubmit, handleEditMember, handleDeleteMember } fro
 import { populateSelect } from './utils/helpers.js';
 import { setupMemberFormValidation } from './components/formValidation.js';
 import { exportToJson, exportToCsv } from './components/exports.js';
-import { membersApi } from './components/api.js';
 
 // DOM elements
 const membersTableBody = document.getElementById('membersTableBody');

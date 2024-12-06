@@ -4,6 +4,7 @@ const troopsController = {
     async fetchAllTroops(req, res) {
         try {
             const teamId = req.user.team_id;
+            console.log(teamId);
             const troops = await troopsService.fetchAllTroops(teamId);
             res.status(200).json({ success: true, data: troops });
         } catch (error) {

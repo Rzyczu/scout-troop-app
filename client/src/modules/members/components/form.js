@@ -1,4 +1,4 @@
-import { membersApi } from './api.js';
+import membersApi from './api.js';
 import { showToast, showConfirmationModal } from '../../../utils/ui.js';
 
 export const resetForm = (form, modalLabel, fieldsToClear) => {

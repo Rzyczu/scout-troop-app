@@ -1,4 +1,4 @@
-import { usersApi } from './api.js';
+import usersApi from './api.js';
 import { showToast, showConfirmationModal } from '../../../utils/ui.js';
 
 export const resetForm = async (userForm, userIdField, passwordField, selectUserField, userModalLabel) => {
