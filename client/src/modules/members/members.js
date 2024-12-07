@@ -1,5 +1,5 @@
 import './members.scss';
-import sortTable from '../../utils/sortTable.js';
+import { sortTable } from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 import membersApi from './components/api.js';
 import { showConfirmationModal, showToast } from '../../utils/ui.js';
@@ -53,21 +53,25 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Add event listener to the "Add Member" button
     document.getElementById('addMemberBtn').addEventListener('click', () => {
-        resetForm(memberForm, modalLabel, [
-            'userId',
-            'name',
-            'surname',
-            'dateBirth',
-            'phoneNumber',
-            'motherPhoneNumber',
-            'fatherPhoneNumber',
-            'parentEmail1',
-            'parentEmail2',
-            'scoutFunction',
-            'openRank',
-            'achievedRank',
-            'instructorRank',
-        ]);
+        resetForm(memberForm, modalLabel,
+            [
+                'userId',
+                'name',
+                'surname',
+                'dateBirth',
+                'phoneNumber',
+                'motherPhoneNumber',
+                'fatherPhoneNumber',
+                'parentEmail1',
+                'parentEmail2',
+            ],
+            [
+                'scoutFunction',
+                'openRank',
+                'achievedRank',
+                'instructorRank',
+            ]
+        );
         memberModal.show();
     });
 

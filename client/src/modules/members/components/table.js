@@ -6,6 +6,18 @@ export const loadTable = async (tableBody, getTableRow, view) => {
         const response = await membersApi.fetchAll();
         const members = response.members;
         const gender = response.gender;
+
+        if (members.length === 0) {
+            // Jeśli brak zastępów, wyświetl ostrzeżenie i komunikat w tabeli
+            showToast('No members available.', 'warning');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center">No members to display. Add a member to get started.</td>
+                </tr>
+            `;
+            return;
+        };
+
         tableBody.innerHTML = members.map((member, index) => getTableRow(member, index + 1, view, gender)).join('');
         return gender;
     } catch (error) {

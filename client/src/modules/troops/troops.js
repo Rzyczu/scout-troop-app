@@ -1,8 +1,7 @@
 import './troops.scss';
-import { loadTroops, attachSortingToHeaders } from './components/table.js';
+import { loadTroops } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditTroop, handleDeleteTroop } from './components/form.js';
-import { addSortableClassToHeaders } from './utils/helpers.js';
-import sortTable from '../../utils/sortTable.js';
+import { sortTable, addSortableClassToHeaders, attachSortingToHeaders } from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 
 // DOM Elements
@@ -13,11 +12,6 @@ const troopModalLabel = document.getElementById('troopModalLabel');
 const troopLeaderSelect = document.getElementById('troopLeader');
 const troopModal = new bootstrap.Modal(document.getElementById('troopModal'));
 
-// Reload troops and render them in the table
-const reloadTroops = async () => {
-    await loadTroops(troopsTableBody);
-};
-
 // Handle form submission
 troopForm.onsubmit = async function (event) {
     event.preventDefault();
@@ -25,7 +19,7 @@ troopForm.onsubmit = async function (event) {
         this.classList.add('was-validated');
         return;
     }
-    await handleFormSubmit(troopForm, troopModal, reloadTroops);
+    await handleFormSubmit(troopForm, troopModal, async () => loadTroops(troopsTableBody));
 };
 
 // Initialize module
@@ -34,7 +28,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     try {
         // Load troops into the table
-        await reloadTroops();
+        await loadTroops(troopsTableBody);
 
         addSortableClassToHeaders(troopsTableHeader);
         attachSortingToHeaders(troopsTableHeader, troopsTableBody, sortTable);
@@ -56,7 +50,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Handle Delete button
             else if (target.classList.contains('deleteTroopBtn')) {
-                await handleDeleteTroop(target, reloadTroops);
+                await handleDeleteTroop(target, async () => loadTroops(troopsTableBody));
             }
         });
     } catch (error) {

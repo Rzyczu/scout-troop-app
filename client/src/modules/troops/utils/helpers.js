@@ -1,4 +1,4 @@
-import { populateSelect as basePopulateSelect, addSortableClassToHeaders } from '../../../utils/helpers';
+import { populateSelect, addSortableClassToHeaders } from '../../../utils/helpers';
 
 /**
  * Populates a select element with troop leaders.

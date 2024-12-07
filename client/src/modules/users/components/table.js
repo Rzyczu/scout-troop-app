@@ -7,6 +7,18 @@ export const loadUsers = async (usersTableBody) => {
         const response = await usersApi.fetchUsers();
         const users = response.users;
         const gender = response.gender;
+
+        if (users.length === 0) {
+            // Jeśli brak zastępów, wyświetl ostrzeżenie i komunikat w tabeli
+            showToast('No users available.', 'warning');
+            tableBody.innerHTML = `
+                <tr>
+                    <td colspan="4" class="text-center">No users to display. Add a user to get started.</td>
+                </tr>
+            `;
+            return;
+        };
+
         usersTableBody.innerHTML = users.map((user, index) =>
             `<tr>
                 <td>${index + 1}</td>

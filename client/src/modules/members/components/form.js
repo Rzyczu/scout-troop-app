@@ -1,11 +1,16 @@
 import membersApi from './api.js';
 import { showToast, showConfirmationModal } from '../../../utils/ui.js';
 
-export const resetForm = (form, modalLabel, fieldsToClear) => {
+export const resetForm = (form, modalLabel, fieldsToClear, selectFieldsToClear) => {
     form.reset();
     fieldsToClear.forEach((fieldId) => {
         const field = document.getElementById(fieldId);
         if (field) field.value = '';
+    });
+
+    selectFieldsToClear.forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = 0;
     });
     modalLabel.textContent = 'Add Member';
 };

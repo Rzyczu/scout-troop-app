@@ -12,7 +12,8 @@
     <div id="toast-messages" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
     <main class="container mt-4">
         <h1 class="mb-4">Troops</h1>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#troopModal">Add Troop</button>
+        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#troopModal" id="addTroopBtn">Add
+            Troop</button>
         <table class="table table-striped">
             <thead>
                 <tr>
@@ -38,12 +39,12 @@
                     <form id="troopForm" class="needs-validation" novalidate>
                         <div class="mb-3">
                             <label for="troopName" class="form-label">Troop Name</label>
-                            <input type="text" class="form-control" id="troopName" required>
+                            <input type="text" class="form-control" id="troopName" name="troopName" required>
                             <div class="invalid-feedback">Please provide a name for the troop.</div>
                         </div>
                         <div class="mb-3">
                             <label for="troopLeader" class="form-label">Leader</label>
-                            <select class="form-select" id="troopLeader" required>
+                            <select class="form-select" id="troopLeader" name="troopLeader" required>
                                 <option value="">Select a leader</option>
                             </select>
                             <div class="invalid-feedback">Please select a leader for the troop.</div>

@@ -7,12 +7,13 @@ export const resetForm = async (form, modalLabel, leaderSelect) => {
     modalLabel.textContent = 'Add Troop';
 
     try {
-        const leaders = await troopsApi.fetchLeaders();
+        const response = await troopsApi.fetchMembers();
+        const members = response.members;
         leaderSelect.innerHTML = '<option value="">Select a leader</option>';
-        leaders.forEach((leader) => {
+        members.forEach((member) => {
             const option = document.createElement('option');
-            option.value = leader.id;
-            option.textContent = `${leader.name} ${leader.surname}`;
+            option.value = member.user_id;
+            option.textContent = `${member.name} ${member.surname}`;
             leaderSelect.appendChild(option);
         });
     } catch (error) {
@@ -20,12 +21,14 @@ export const resetForm = async (form, modalLabel, leaderSelect) => {
     }
 };
 
-export const handleFormSubmit = async (form, modal, reloadTroops) => {
+export const handleFormSubmit = async (form, modal, loadTroops) => {
     const formData = new FormData(form);
     const payload = {
-        name: formData.get('name'),
-        leaderId: formData.get('leader'),
+        name: formData.get('troopName'),
+        leaderId: formData.get('troopLeader'),
     };
+
+    console.log(formData.get('troopLeader'));
 
     try {
         if (form.dataset.id) {
@@ -36,7 +39,7 @@ export const handleFormSubmit = async (form, modal, reloadTroops) => {
             showToast('Troop added successfully!', 'success');
         }
         modal.hide();
-        await reloadTroops();
+        await loadTroops();
     } catch (error) {
         showToast(error.message || 'Failed to save troop.', 'danger');
     }
@@ -59,7 +62,7 @@ export const handleEditTroop = async (target, form, modalLabel, modal) => {
     }
 };
 
-export const handleDeleteTroop = async (target, reloadTroops) => {
+export const handleDeleteTroop = async (target, loadTroops) => {
     const troopId = target.dataset.id;
 
     try {
@@ -71,7 +74,7 @@ export const handleDeleteTroop = async (target, reloadTroops) => {
         if (confirmed) {
             await troopsApi.delete(troopId);
             showToast('Troop deleted successfully!', 'success');
-            await reloadTroops();
+            await loadTroops();
         }
     } catch (error) {
         showToast(error.message || 'Failed to delete troop.', 'danger');

@@ -57,6 +57,8 @@ export const errorMessages = {
         create: {
             default: { error: 'Failed to create troop.', code: 'TROOP_CREATE_FAILED' },
             validation: { error: 'Invalid input data.', code: 'TROOP_INVALID_DATA' },
+            leaderAlreadyAssigned: { error: 'Selected leader is already a leader of another troop.', code: 'LEADER_ALREADY_ASSIGNED' },
+            leaderIsTeamLeader: { error: 'Selected leader is a team leader and cannot be assigned to a troop.', code: 'LEADER_IS_TEAM_LEADER' },
         },
         update: {
             default: { error: 'Failed to update troop.', code: 'TROOP_UPDATE_FAILED' },

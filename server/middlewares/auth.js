@@ -4,7 +4,6 @@ const JWT_SECRET = process.env.JWT_SECRET || 'supersecretkey';
 
 const redirectIfNotAuthenticated = (req, res, next) => {
     const token = req.cookies.token || (req.headers.authorization?.split(' ')[1] || null);
-    console.log('Token:', token);
 
     if (!token) {
         return res.redirect('/auth');
@@ -14,7 +13,6 @@ const redirectIfNotAuthenticated = (req, res, next) => {
         if (err) {
             return res.redirect('/auth');
         }
-        console.log(user);
         req.user = user;
         next();
     });
@@ -22,7 +20,6 @@ const redirectIfNotAuthenticated = (req, res, next) => {
 
 const redirectIfAuthenticated = (req, res, next) => {
     const token = req.cookies.token || (req.headers.authorization?.split(' ')[1] || null);
-    console.log('Token:', token);
 
     if (token) {
         jwt.verify(token, JWT_SECRET, (err, user) => {
@@ -30,7 +27,6 @@ const redirectIfAuthenticated = (req, res, next) => {
                 console.log('Zalogowany użytkownik:', user);
                 return res.redirect('/dashboard');
             }
-            console.log('Błędny token:', err.message);
             next();
         });
     } else {
