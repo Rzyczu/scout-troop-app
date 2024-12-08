@@ -23,7 +23,7 @@ userForm.onsubmit = async function (event) {
         this.classList.add('was-validated');
         return;
     }
-    await handleFormSubmit(userForm, userIdField, userModal, async () => loadUsers(usersTableBody));
+    await handleFormSubmit(userForm, userModal, async () => loadUsers(usersTableBody));
 };
 
 // Event listeners
@@ -41,8 +41,8 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
         // Add event listener for "Add User" button
-        document.getElementById('addUserBtn').addEventListener('click', () => {
-            resetForm(userForm, userIdField, passwordField, selectUserField, userModalLabel);
+        document.getElementById('addUserBtn').addEventListener('click', async () => {
+            await resetForm(userForm, userModalLabel, ['userId', 'email', 'password'], 'selectUser');
             userModal.show();
         });
 
@@ -52,15 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Handle Edit button using handleEditUser
             if (target.classList.contains('editUserBtn')) {
-                await handleEditUser(
-                    target,
-                    userForm,
-                    userIdField,
-                    passwordField,
-                    selectUserField,
-                    userModalLabel,
-                    userModal
-                );
+                await handleEditUser(target, userForm, userModalLabel, userModal);
             }
 
             // Handle Delete button using handleDeleteUser

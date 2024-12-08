@@ -40,6 +40,10 @@ const usersController = {
 
     async createUser(req, res) {
         const { user_id, email, password } = req.body;
+        console.log("body")
+        console.log(user_id, email, password)
+
+
         if (!user_id || !email || !password || password.length < 6) {
             return sendError(res, errorMessages.users.create.validation);
         }
@@ -67,8 +71,14 @@ const usersController = {
     },
 
     async deleteUser(req, res) {
+        console.log("param")
+        console.log(req.params.id)
+        console.log("user")
+        console.log(req.user)
+
+
         try {
-            if (req.user.id === parseInt(req.params.id)) {
+            if (req.user.user_id === parseInt(req.params.id)) {
                 return sendError(res, errorMessages.users.delete.ownAccountDelete);
             }
 

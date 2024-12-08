@@ -8,10 +8,12 @@ export const loadUsers = async (usersTableBody) => {
         const users = response.users;
         const gender = response.gender;
 
+        console.log(users)
+
         if (users.length === 0) {
             // Jeśli brak zastępów, wyświetl ostrzeżenie i komunikat w tabeli
             showToast('No users available.', 'warning');
-            tableBody.innerHTML = `
+            usersTableBody.innerHTML = `
                 <tr>
                     <td colspan="4" class="text-center">No users to display. Add a user to get started.</td>
                 </tr>

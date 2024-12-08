@@ -28,7 +28,6 @@ export const handleFormSubmit = async (form, modal, loadTroops) => {
         leaderId: formData.get('troopLeader'),
     };
 
-    console.log(formData.get('troopLeader'));
 
     try {
         if (form.dataset.id) {

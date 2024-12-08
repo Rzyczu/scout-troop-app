@@ -42,7 +42,6 @@ document.addEventListener('DOMContentLoaded', async () => {
         // Add event listener for table actions (edit/delete)
         troopsTableBody.addEventListener('click', async (event) => {
             const target = event.target;
-
             // Handle Edit button
             if (target.classList.contains('editTroopBtn')) {
                 await handleEditTroop(target, troopForm, troopModalLabel, troopModal);

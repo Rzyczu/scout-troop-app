@@ -43,7 +43,7 @@
                         <!-- Select user field for adding -->
                         <div id="selectUserField" class="mb-3 d-none">
                             <label for="selectUser" class="form-label">Select User</label>
-                            <select id="selectUser" class="form-select" required>
+                            <select id="selectUser" class="form-select" name="user_id" required>
                                 <option value="">Select a user</option>
                             </select>
                             <div class="invalid-feedback">Please select any user.</div>
@@ -51,12 +51,12 @@
                         <input type="hidden" id="userId">
                         <div class="mb-3">
                             <label for="email" class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" required>
+                            <input type="email" class="form-control" name="email" id="email" required>
                             <div class="invalid-feedback">Please provide a valid email address.</div>
                         </div>
                         <div id="passwordField" class="mb-3">
                             <label for="password" class="form-label">Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="">
+                            <input type="password" class="form-control" name="password" id="password" placeholder="">
                             <div class="invalid-feedback">Please provide a valid password.</div>
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
