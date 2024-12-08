@@ -31,6 +31,7 @@ export const filterMembersByView = (members, view, gender, useUnderscore = false
             case "scout":
                 processedMember[formatKey("Name")] = member.name;
                 processedMember[formatKey("Surname")] = member.surname;
+                processedMember[formatKey("Troop")] = member.troop_name || '';
                 processedMember[formatKey("Function")] = mapEnumFullName(ScoutFunctions, member.function, gender) || '-';
                 processedMember[formatKey("Open Rank")] = mapEnumFullName(ScoutRanks, member.open_rank, gender) || "-";
                 processedMember[formatKey("Achieved Rank")] = mapEnumFullName(ScoutRanks, member.achieved_rank, gender) || "-";
@@ -46,6 +47,7 @@ export const filterMembersByView = (members, view, gender, useUnderscore = false
                 processedMember[formatKey("Father's Number")] = member.father_phone_number || "-";
                 processedMember[formatKey("Parent Email 1")] = member.parent_email_1 || "-";
                 processedMember[formatKey("Parent Email 2")] = member.parent_email_2 || "-";
+                processedMember[formatKey("Troop")] = member.troop_name || '';
                 processedMember[formatKey("Function")] = mapEnumFullName(ScoutFunctions, member.function, gender) || '-';
                 processedMember[formatKey("Open Rank")] = mapEnumFullName(ScoutRanks, member.open_rank, gender) || "-";
                 processedMember[formatKey("Achieved Rank")] = mapEnumFullName(ScoutRanks, member.achieved_rank, gender) || "-";
@@ -91,7 +93,6 @@ export const getTableHeaders = (view) => {
                 <th>Phone Number</th>
                 <th>Mother's Phone Number</th>
                 <th>Father's Phone Number</th>
-
                 <th>Email 1</th>
                 <th>Email 2</th>
                 <th>Actions</th>`;
@@ -100,6 +101,7 @@ export const getTableHeaders = (view) => {
                 <th data-sort="id">ID</th>
                 <th>Name</th>
                 <th>Surname</th>
+                <th>Troop</th>
                 <th>Function</th>
                 <th>Open Rank</th>
                 <th>Achieved Rank</th>
@@ -111,7 +113,7 @@ export const getTableHeaders = (view) => {
 };
 
 export const renderTableRow = (member, index, view, gender) => {
-    const { user_id, name, surname, date_birth, phone_number, mother_phone_number, father_phone_number, parent_email_1, parent_email_2, function: scoutFunction, open_rank, achieved_rank, instructor_rank } = member;
+    const { user_id, name, surname, date_birth, phone_number, mother_phone_number, father_phone_number, parent_email_1, parent_email_2, troop_name, function: scoutFunction, open_rank, achieved_rank, instructor_rank } = member;
     switch (view) {
         case 'basic':
             return `
@@ -147,6 +149,7 @@ export const renderTableRow = (member, index, view, gender) => {
                     <td>${index}</td> 
                     <td>${name}</td>
                     <td>${surname}</td>
+                    <td>${troop_name || ''}</td>
                     <td>${mapEnumFullName(ScoutFunctions, scoutFunction, gender) || '-'}</td>
                     <td>${mapEnumFullName(ScoutRanks, open_rank, gender) || '-'}</td>
                     <td>${mapEnumFullName(ScoutRanks, achieved_rank, gender) || '-'}</td>

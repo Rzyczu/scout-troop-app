@@ -17,6 +17,7 @@ export const resetForm = (form, modalLabel, fieldsToClear, selectFieldsToClear) 
 
 export const handleFormSubmit = async (form, modal, reloadMembers) => {
     const formData = new FormData(form);
+    const troopIdValue = formData.get('troop_id');
 
     const payload = {
         user_id: formData.get('userId'),
@@ -37,6 +38,7 @@ export const handleFormSubmit = async (form, modal, reloadMembers) => {
             open_rank: formData.get('openRank'),
             achieved_rank: formData.get('achievedRank'),
             instructor_rank: formData.get('instructorRank'),
+            troop_id: troopIdValue === '0' ? null : troopIdValue,
         },
     };
 
@@ -64,7 +66,6 @@ export const handleEditMember = async (target, form, modalLabel, modal) => {
         const member = await membersApi.fetchById(memberId);
         if (!member) throw new Error('Member not found.');
 
-        // Wypełnij formularz danymi członka
         Object.entries({
             name: member.name,
             surname: member.surname,
@@ -78,6 +79,7 @@ export const handleEditMember = async (target, form, modalLabel, modal) => {
             openRank: member.open_rank || '0',
             achievedRank: member.achieved_rank || '0',
             instructorRank: member.instructor_rank || '0',
+            troop_id: member.troop_id ? member.troop_id : '0',
             userId: memberId,
         }).forEach(([key, value]) => {
             const field = document.getElementById(key);

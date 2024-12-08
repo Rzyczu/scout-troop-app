@@ -7,6 +7,7 @@ const troopsController = {
             const teamId = req.user.team_id;
             const troops = await troopsService.fetchAllTroops(teamId);
 
+            console.log(troops)
             res.status(200).json({ success: true, data: troops });
         } catch (error) {
             sendError(res, errorMessages.troops.fetchAll, 500);

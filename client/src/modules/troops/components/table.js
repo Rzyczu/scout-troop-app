@@ -16,7 +16,6 @@ export const loadTroops = async (tableBody) => {
             return;
         };
 
-        console.log(troops)
 
         tableBody.innerHTML = troops.map((troop, index) =>
             `<tr>

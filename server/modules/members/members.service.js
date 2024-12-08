@@ -16,13 +16,16 @@ const fetchAllMembers = async (teamId) => {
             us.open_rank,
             us.achieved_rank,
             us.instructor_rank,
-            us.troop_id
+            us.troop_id,
+            t.name AS troop_name
         FROM 
             users u
         LEFT JOIN 
             users_contact uc ON u.id = uc.user_id
         LEFT JOIN 
             users_scout us ON u.id = us.user_id
+        LEFT JOIN 
+            troops t ON us.troop_id = t.id
         WHERE 
             u.team_id = $1
     `, [teamId]);

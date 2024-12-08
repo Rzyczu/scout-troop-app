@@ -29,6 +29,21 @@ const updateTableHeaders = (view) => {
     attachSortingToHeaders(tableHeaders, membersTableBody, sortTable);
 };
 
+const fetchAndPopulateTroops = async () => {
+    try {
+        const troops = await membersApi.fetchTroops();
+
+        const formattedTroops = troops.reduce((acc, troop) => {
+            acc[troop.id] = troop.name;
+            return acc;
+        }, {});
+
+        populateSelect('troopSelect', formattedTroops, null, true);
+    } catch (error) {
+        showToast('Failed to load troops.', 'danger');
+    }
+};
+
 // Initialize event listeners
 document.addEventListener('DOMContentLoaded', async () => {
     // Set max date for date of birth
@@ -52,7 +67,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // Add event listener to the "Add Member" button
-    document.getElementById('addMemberBtn').addEventListener('click', () => {
+    document.getElementById('addMemberBtn').addEventListener('click', async () => {
+        await fetchAndPopulateTroops();
         resetForm(memberForm, modalLabel,
             [
                 'userId',
@@ -70,6 +86,7 @@ document.addEventListener('DOMContentLoaded', async () => {
                 'openRank',
                 'achievedRank',
                 'instructorRank',
+                'troopSelect'
             ]
         );
         memberModal.show();
