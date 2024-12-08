@@ -5,9 +5,8 @@ const troopsController = {
     async fetchAllTroops(req, res) {
         try {
             const teamId = req.user.team_id;
-            console.log(teamId);
             const troops = await troopsService.fetchAllTroops(teamId);
-            console.log(troops);
+
             res.status(200).json({ success: true, data: troops });
         } catch (error) {
             sendError(res, errorMessages.troops.fetchAll, 500);
@@ -32,6 +31,7 @@ const troopsController = {
             const { name, leaderId } = req.body;
             const teamId = req.user.team_id;
 
+            console.log(teamId)
             console.log(req.body)
             if (!name || !leaderId) {
                 return sendError(res, errorMessages.troops.create.validation, 400);
@@ -40,20 +40,28 @@ const troopsController = {
             // 1. Sprawdź, czy leader nie jest już liderem innego zastępu
             const existingLeader = await troopsService.checkIfLeaderExists(leaderId);
             if (existingLeader) {
+                console.log("err 1")
                 return sendError(res, errorMessages.troops.create.leaderAlreadyAssigned, 400);
             }
 
             // 2. Sprawdź, czy leader nie jest drużynowym
             const isTeamLeader = await troopsService.checkIfTeamLeader(leaderId);
             if (isTeamLeader) {
+                console.log("err 2")
                 return sendError(res, errorMessages.troops.create.leaderIsTeamLeader, 400);
             }
 
             // 3. Tworzenie nowego zastępu
             const troopId = await troopsService.createTroop({ name, leaderId, teamId });
+            console.log("created", troopId)
 
-            // 4. Ustawienie troop_id w users_scout
+            // 4.1. Ustawienie funkcji lidera na 2 w users_scout (ustawienie funkcji jako 'Zastępowy')
+            await troopsService.setLeaderFunction(leaderId, 2);
+            console.log("setLeaderFunction", troopId)
+
+            // 4.2. Ustawienie troop_id w users_scout
             await troopsService.assignLeaderToTroop(leaderId, troopId);
+            console.log("assignLeaderToTroop", troopId)
 
             res.status(201).json({ success: true, message: 'Troop created successfully.', data: { id: troopId } });
         } catch (error) {

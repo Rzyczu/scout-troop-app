@@ -17,7 +17,18 @@ const troopsService = {
             WHERE 
                 t.team_id = $1
         `, [teamId]);
-        return result.rows;
+
+        const formattedResults = result.rows.map(row => ({
+            id: row.id,
+            name: row.name,
+            leader: row.leader_id ? {
+                id: row.leader_id,
+                name: row.leader_name,
+                surname: row.leader_surname
+            } : null
+        }));
+
+        return formattedResults;
     },
 
     // Pobierz szczegóły zastępu na podstawie ID
@@ -28,7 +39,7 @@ const troopsService = {
                 t.name AS name,
                 t.description,
                 t.song,
-                t.color,
+                t.co lor,
                 t.points,
                 t.leader_id,
                 u.name AS leader_name,
@@ -46,7 +57,7 @@ const troopsService = {
     // Dodaj nowy zastęp
     async createTroop({ name, leaderId, teamId }) {
         const result = await pool.query(`
-        INSERT INTO troops (name, leader_id, id, description, song, color, points)
+        INSERT INTO troops (name, leader_id, team_id, description, song, color, points)
         VALUES ($1, $2, $3, NULL, NULL, NULL, 0)
         RETURNING id
     `, [name, leaderId, teamId]);
@@ -101,6 +112,14 @@ const troopsService = {
         SET troop_id = $1 
         WHERE user_id = $2
     `, [troopId, leaderId]);
+    },
+
+    async setLeaderFunction(userId, functionId) {
+        await pool.query(`
+            UPDATE users_scout 
+            SET function = $1 
+            WHERE user_id = $2
+        `, [functionId, userId]);
     }
 };
 
