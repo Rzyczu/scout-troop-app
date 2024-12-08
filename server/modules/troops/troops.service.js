@@ -5,8 +5,8 @@ const troopsService = {
     async fetchAllTroops(teamId) {
         const result = await pool.query(`
             SELECT 
-                t.id AS troop_id,
-                t.name AS troop_name,
+                t.id AS id,
+                t.name AS name,
                 t.leader_id,
                 u.name AS leader_name,
                 u.surname AS leader_surname
@@ -24,8 +24,8 @@ const troopsService = {
     async fetchTroopById(troopId, teamId) {
         const result = await pool.query(`
             SELECT 
-                t.id AS troop_id,
-                t.name AS troop_name,
+                t.id AS id,
+                t.name AS name,
                 t.description,
                 t.song,
                 t.color,
@@ -46,7 +46,7 @@ const troopsService = {
     // Dodaj nowy zastęp
     async createTroop({ name, leaderId, teamId }) {
         const result = await pool.query(`
-        INSERT INTO troops (name, leader_id, team_id, description, song, color, points)
+        INSERT INTO troops (name, leader_id, id, description, song, color, points)
         VALUES ($1, $2, $3, NULL, NULL, NULL, 0)
         RETURNING id
     `, [name, leaderId, teamId]);

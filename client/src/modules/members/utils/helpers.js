@@ -12,7 +12,6 @@ export const populateSelect = (selectId, enumData, gender = null) => {
 
     // Populate options from enumData
     Object.entries(enumData).forEach(([key, value]) => {
-        console.log(key);
         const option = document.createElement('option');
         option.value = key;
         option.textContent = mapEnumFullName(enumData, key, gender);
