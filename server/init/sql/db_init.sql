@@ -41,7 +41,7 @@ CREATE TABLE IF NOT EXISTS troops (
     song VARCHAR(100),
     color VARCHAR(50),
     points INT DEFAULT 0,
-    leader_id INT UNIQUE REFERENCES users(id),
+    leader_id INT UNIQUE REFERENCES users(id) ON DELETE SET NULL,
     team_id INT REFERENCES teams(id) ON DELETE SET NULL
 );
 
@@ -53,5 +53,5 @@ CREATE TABLE IF NOT EXISTS users_scout (
     open_rank INT NOT NULL,
     achieved_rank INT NOT NULL,
     instructor_rank INT NOT NULL,
-    troop_id INT REFERENCES troops(id)
+    troop_id INT REFERENCES troops(id) ON DELETE SET NULL
 );

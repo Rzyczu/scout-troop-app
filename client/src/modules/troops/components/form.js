@@ -1,39 +1,62 @@
 import troopsApi from './api.js';
 import { showToast, showConfirmationModal } from '../../../utils/ui.js';
 
-export const resetForm = async (form, modalLabel, leaderSelect) => {
-    form.reset();
-    form.dataset.id = ''; // Clear troop ID for create mode
-    modalLabel.textContent = 'Add Troop';
-
+export const populateLeaderSelect = async (selectFieldId, selectedValue = null) => {
     try {
         const response = await troopsApi.fetchMembers();
         const members = response.members;
-        leaderSelect.innerHTML = '<option value="">Select a leader</option>';
+        const selectField = document.getElementById(selectFieldId);
+        selectField.innerHTML = '<option value="">Select a leader</option>';
+
         members.forEach((member) => {
             const option = document.createElement('option');
             option.value = member.user_id;
             option.textContent = `${member.name} ${member.surname}`;
-            leaderSelect.appendChild(option);
+            if (selectedValue && member.user_id === selectedValue) {
+                option.selected = true;
+            }
+            selectField.appendChild(option);
         });
     } catch (error) {
         showToast(error.message || 'Failed to load leaders.', 'danger');
     }
 };
 
+export const resetForm = async (form, modalLabel, fieldsToClear, selectLeaderFieldId) => {
+    form.reset();
+    form.dataset.id = ''; // Clear troop ID for create mode
+    fieldsToClear.forEach((fieldId) => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
+
+    await populateLeaderSelect(selectLeaderFieldId);
+    document.getElementById(selectLeaderFieldId).value = '';
+
+
+    modalLabel.textContent = 'Add Troop';
+};
+
 export const handleFormSubmit = async (form, modal, loadTroops) => {
     const formData = new FormData(form);
+    const troopId = form.dataset.id;
+    const leaderId = formData.get('troopLeader');
+
     const payload = {
         name: formData.get('troopName'),
-        leaderId: formData.get('troopLeader'),
+        leaderId: leaderId || null,
     };
 
+    console.log(payload)
+    console.log(troopId)
 
     try {
-        if (form.dataset.id) {
-            await troopsApi.update(form.dataset.id, payload);
+        if (troopId) {
+            // Edycja istniejącego oddziału
+            await troopsApi.update(troopId, payload);
             showToast('Troop updated successfully!', 'success');
         } else {
+            // Tworzenie nowego oddziału
             await troopsApi.create(payload);
             showToast('Troop added successfully!', 'success');
         }
@@ -52,8 +75,9 @@ export const handleEditTroop = async (target, form, modalLabel, modal) => {
         if (!troop) throw new Error('Troop not found.');
 
         form.dataset.id = troop.id;
-        form.name.value = troop.name;
-        form.leader.value = troop.leaderId || '';
+        document.getElementById('troopName').value = troop.name;
+
+        await populateLeaderSelect('troopLeader', troop.leader.id);
         modalLabel.textContent = 'Edit Troop';
         modal.show();
     } catch (error) {

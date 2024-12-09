@@ -39,7 +39,7 @@ const troopsService = {
                 t.name AS name,
                 t.description,
                 t.song,
-                t.co lor,
+                t.color,
                 t.points,
                 t.leader_id,
                 u.name AS leader_name,
@@ -51,7 +51,28 @@ const troopsService = {
             WHERE 
                 t.id = $1 AND t.team_id = $2
         `, [troopId, teamId]);
-        return result.rows[0];
+
+        if (result.rows.length === 0) {
+            return null;
+        }
+
+        const row = result.rows[0];
+
+        const formattedResult = {
+            id: row.id,
+            name: row.name,
+            description: row.description || '',
+            song: row.song || '',
+            color: row.color || '',
+            points: row.points || 0,
+            leader: row.leader_id ? {
+                id: row.leader_id,
+                name: row.leader_name,
+                surname: row.leader_surname
+            } : null
+        };
+
+        return formattedResult;
     },
 
     // Dodaj nowy zastęp
@@ -65,24 +86,40 @@ const troopsService = {
     },
 
     // Zaktualizuj zast-ęp
-    async updateTroop(troopId, { name, description, song, color }) {
+    async updateTroop(troopId, name, leaderId) {
         const result = await pool.query(`
             UPDATE troops
-            SET name = $1, description = $2, song = $3, color = $4
-            WHERE id = $5
+            SET name = $2, leader_id = $3
+            WHERE id = $1
             RETURNING *
-        `, [name, description, song, color, troopId]);
+        `, [troopId, name, leaderId]);
         return result.rows[0];
     },
 
     // Usuń zastęp
     async deleteTroop(troopId) {
-        const result = await pool.query(`
-            DELETE FROM troops
-            WHERE id = $1
-            RETURNING *
-        `, [troopId]);
-        return result.rowCount > 0;
+        try {
+            console.log('Starting troop deletion for troopId:', troopId);
+
+            const resetLeader = await pool.query(`
+                UPDATE troops
+                SET leader_id = NULL
+                WHERE id = $1
+            `, [troopId]);
+            console.log('Reset leader_id for troop:', resetLeader.rowCount);
+
+            const result = await pool.query(`
+                DELETE FROM troops
+                WHERE id = $1
+                RETURNING *
+            `, [troopId]);
+
+            console.log('Troop deleted successfully:', result.rowCount > 0);
+            return result.rowCount > 0;
+        } catch (error) {
+            console.error('Error occurred while deleting troop:', error);
+            throw new Error('Failed to delete troop');
+        }
     },
 
     // Sprawdź, czy leader jest już liderem innego zastępu

@@ -34,14 +34,15 @@ document.addEventListener('DOMContentLoaded', async () => {
         attachSortingToHeaders(troopsTableHeader, troopsTableBody, sortTable);
 
         // Add event listener for "Add Troop" button
-        document.getElementById('addTroopBtn').addEventListener('click', () => {
-            resetForm(troopForm, troopModalLabel, troopLeaderSelect);
+        document.getElementById('addTroopBtn').addEventListener('click', async () => {
+            await resetForm(troopForm, troopModalLabel, ['troopName'], 'troopLeader');
             troopModal.show();
         });
 
         // Add event listener for table actions (edit/delete)
         troopsTableBody.addEventListener('click', async (event) => {
             const target = event.target;
+
             // Handle Edit button
             if (target.classList.contains('editTroopBtn')) {
                 await handleEditTroop(target, troopForm, troopModalLabel, troopModal);

@@ -47,8 +47,7 @@ export const errorMessages = {
 
     troops: {
         fetchAll: {
-            error: 'Failed to fetch troops.',
-            code: 'TROOP_FETCH_FAILED',
+            default: { error: 'Failed to fetch troops.', code: 'TROOP_FETCH_FAILED' },
         },
         fetchSingle: {
             default: { error: 'Failed to fetch troop.', code: 'TROOP_FETCH_FAILED' },

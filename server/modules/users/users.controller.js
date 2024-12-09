@@ -71,11 +71,6 @@ const usersController = {
     },
 
     async deleteUser(req, res) {
-        console.log("param")
-        console.log(req.params.id)
-        console.log("user")
-        console.log(req.user)
-
 
         try {
             if (req.user.user_id === parseInt(req.params.id)) {
