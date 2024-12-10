@@ -1,3 +1,5 @@
+// ./users.js
+
 import './users.scss';
 import { loadUsers } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditUser, handleDeleteUser } from './components/form.js';
@@ -8,6 +10,7 @@ import initializeFormValidation from '../../utils/formValidation.js';
 const usersTableBody = document.getElementById('usersTableBody');
 const usersTableHeader = document.querySelector('thead');
 const userForm = document.getElementById('userForm');
+const selectUserField = document.getElementById('selectUserField');
 const userModalLabel = document.getElementById('userModalLabel');
 const userModal = new bootstrap.Modal(document.getElementById('userModal'));
 
@@ -36,7 +39,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Add event listener for "Add User" button
         document.getElementById('addUserBtn').addEventListener('click', async () => {
-            await resetForm(userForm, userModalLabel, ['userId', 'email', 'password'], 'selectUser');
+            await resetForm(userForm, userModalLabel, ['userId', 'email', 'password'], selectUserField);
             userModal.show();
         });
 
@@ -46,7 +49,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Handle Edit button using handleEditUser
             if (target.classList.contains('editUserBtn')) {
-                await handleEditUser(target, userForm, userModalLabel, userModal);
+                await handleEditUser(target, userModalLabel, userModal, selectUserField);
             }
 
             // Handle Delete button using handleDeleteUser

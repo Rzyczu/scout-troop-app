@@ -75,10 +75,9 @@ const troopsController = {
 
             if (oldLeaderId && oldLeaderId !== leaderId) {
                 await troopsService.setLeaderFunction(oldLeaderId, 0);
+                await troopsService.setLeaderFunction(leaderId, 2);
+                await troopsService.assignLeaderToTroop(leaderId, troopId);
             }
-
-            await troopsService.setLeaderFunction(leaderId, 2);
-            await troopsService.assignLeaderToTroop(leaderId, troopId);
 
             const updatedTroop = await troopsService.updateTroop(troopId, name, leaderId);
 

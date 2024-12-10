@@ -3,13 +3,33 @@ import { sortTable, addSortableClassToHeaders, attachSortingToHeaders } from '..
 import initializeFormValidation from '../../utils/formValidation.js';
 import membersApi from './components/api.js';
 import { showToast } from '../../utils/ui.js';
-import { } from './utils/helpers.js';
 import { getTableHeaders, renderTableRow, filterMembersByView, updateActiveViewButton } from './components/views.js';
 import { loadTable } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditMember, handleDeleteMember } from './components/form.js';
-import { populateSelect } from './utils/helpers.js';
 import { setupMemberFormValidation } from './components/formValidation.js';
 import { exportToJson, exportToCsv } from './components/exports.js';
+import { createSelectPopulator } from '../../utils/selectFactory';
+
+// **Populators for selects** 
+const populateTroopSelect = createSelectPopulator({
+    valueField: 'id',
+    textField: 'name',
+    addNone: true
+});
+
+const populateScoutFunctions = createSelectPopulator({
+    valueField: 'id',
+    textField: 'name',
+    addNone: false,
+    mapEnum: true
+});
+
+const populateRanks = createSelectPopulator({
+    valueField: 'id',
+    textField: 'name',
+    addNone: false,
+    mapEnum: true
+});
 
 // DOM elements
 const membersTableBody = document.getElementById('membersTableBody');
@@ -29,20 +49,32 @@ const updateTableHeaders = (view) => {
     attachSortingToHeaders(tableHeaders, membersTableBody, sortTable);
 };
 
+// Function: Fetch and populate troop select
+// Function: Fetch and populate troop select
 const fetchAndPopulateTroops = async () => {
     try {
         const troops = await membersApi.fetchTroops();
+        console.log('Fetched Troops:', troops);
 
-        const formattedTroops = troops.reduce((acc, troop) => {
-            acc[troop.id] = troop.name;
-            return acc;
-        }, {});
+        // Check if troops data is an array
+        if (!Array.isArray(troops)) {
+            throw new Error('Troops data is not an array.');
+        }
 
-        populateSelect('troopSelect', formattedTroops, null, true);
+        // Ensure each troop has an id and name
+        const formattedTroops = troops.map((troop) => ({
+            id: troop.id,
+            name: troop.name,
+        }));
+
+        await populateTroopSelect('troopSelect', formattedTroops);
     } catch (error) {
+        console.error('Error populating troop select:', error.message);
         showToast('Failed to load troops.', 'danger');
     }
 };
+
+
 
 // Initialize event listeners
 document.addEventListener('DOMContentLoaded', async () => {
@@ -60,10 +92,10 @@ document.addEventListener('DOMContentLoaded', async () => {
 
     // Populate dropdowns with enums
     if (gender !== undefined && gender !== null) {
-        populateSelect('scoutFunction', ScoutFunctions, gender);
-        populateSelect('openRank', ScoutRanks, gender);
-        populateSelect('achievedRank', ScoutRanks, gender);
-        populateSelect('instructorRank', InstructorRanks, gender);
+        await populateScoutFunctions('scoutFunction', ScoutFunctions, null, gender);
+        await populateRanks('openRank', ScoutRanks, null, gender);
+        await populateRanks('achievedRank', ScoutRanks, null, gender);
+        await populateRanks('instructorRank', InstructorRanks, null, gender);
     }
 
     // Add event listener to the "Add Member" button
@@ -119,7 +151,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         const target = event.target;
 
         if (target.classList.contains('editMemberBtn')) {
-            await handleEditMember(target, memberForm, modalLabel, memberModal);
+            await handleEditMember(target, modalLabel, memberModal);
         } else if (target.classList.contains('deleteMemberBtn')) {
             await handleDeleteMember(target, async () =>
                 loadTable(membersTableBody, renderTableRow, currentView)

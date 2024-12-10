@@ -59,7 +59,7 @@ export const handleFormSubmit = async (form, modal, reloadMembers) => {
     }
 };
 
-export const handleEditMember = async (target, form, modalLabel, modal) => {
+export const handleEditMember = async (target, modalLabel, modal) => {
     const memberId = target.dataset.id;
 
     try {

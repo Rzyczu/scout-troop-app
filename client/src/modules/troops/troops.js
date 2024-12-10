@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // Add event listener for "Add Troop" button
         document.getElementById('addTroopBtn').addEventListener('click', async () => {
-            await resetForm(troopForm, troopModalLabel, ['troopName'], 'troopLeader');
+            await resetForm(troopForm, troopModalLabel, ['troopId', 'troopName'], 'troopLeader');
             troopModal.show();
         });
 
@@ -44,7 +44,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
             // Handle Edit button
             if (target.classList.contains('editTroopBtn')) {
-                await handleEditTroop(target, troopForm, troopModalLabel, troopModal);
+                await handleEditTroop(target, troopModalLabel, troopModal);
             }
 
             // Handle Delete button

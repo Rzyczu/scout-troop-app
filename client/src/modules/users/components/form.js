@@ -1,7 +1,15 @@
 import usersApi from './api.js';
 import { showToast, showConfirmationModal } from '../../../utils/ui.js';
+import { createSelectPopulator } from '../../../utils/selectFactory';
 
-export const resetForm = async (form, modalLabel, fieldsToClear, selectUserFieldId) => {
+export const populateUserSelect = createSelectPopulator({
+    valueField: 'user_id',
+    textField: (user) => `${user.name} ${user.surname}`,
+    addNone: true,
+});
+
+
+export const resetForm = async (form, modalLabel, fieldsToClear, selectUserField) => {
     form.reset();
     fieldsToClear.forEach((fieldId) => {
         const field = document.getElementById(fieldId);
@@ -10,17 +18,16 @@ export const resetForm = async (form, modalLabel, fieldsToClear, selectUserField
 
     try {
         // Wypełnianie pola select
-        const results = await usersApi.fetchAllUsers();
-        const selectUser = document.getElementById(selectUserFieldId);
-        selectUser.innerHTML = '<option value="">Select a user</option>';
-        results.members.forEach(user => {
-            const option = document.createElement('option');
-            option.value = user.user_id;
-            option.textContent = `${user.name} ${user.surname}`;
-            selectUser.appendChild(option);
-        });
+        const response = await usersApi.fetchAllUsers();
+        const selectUser = selectUserField.querySelector('select');
+        if (!selectUser) {
+            console.warn(`Select element with ID '${selectUser.id}' not found.`);
+            return;
+        }
 
-        const selectUserField = document.getElementById('selectUserField');
+        const members = Array.isArray(response.members) ? response.members : Object.values(response.members);
+        await populateUserSelect(selectUser.id, members);
+
         selectUserField.classList.remove('d-none');
     } catch (error) {
         showToast(error.message || 'Failed to load users for the select field.', 'danger');
@@ -28,6 +35,7 @@ export const resetForm = async (form, modalLabel, fieldsToClear, selectUserField
 
     modalLabel.textContent = 'Add User';
 };
+
 
 export const handleFormSubmit = async (form, modal, reloadUsers) => {
     const formData = new FormData(form);
@@ -66,7 +74,7 @@ export const handleFormSubmit = async (form, modal, reloadUsers) => {
     }
 };
 
-export const handleEditUser = async (target, form, modalLabel, modal) => {
+export const handleEditUser = async (target, modalLabel, modal, selectUserField) => {
     const userId = target.dataset.id;
 
     try {
@@ -84,7 +92,6 @@ export const handleEditUser = async (target, form, modalLabel, modal) => {
         document.getElementById('password').placeholder = 'Enter new password or leave blank';
         modalLabel.textContent = 'Edit User';
 
-        const selectUserField = document.getElementById('selectUserField');
         selectUserField.classList.add('d-none');
 
         modal.show();
