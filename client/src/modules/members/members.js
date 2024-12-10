@@ -1,11 +1,11 @@
 import './members.scss';
-import { sortTable } from '../../utils/sortTable.js';
+import { sortTable, addSortableClassToHeaders, attachSortingToHeaders } from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 import membersApi from './components/api.js';
-import { showConfirmationModal, showToast } from '../../utils/ui.js';
-import { addSortableClassToHeaders } from './utils/helpers.js';
+import { showToast } from '../../utils/ui.js';
+import { } from './utils/helpers.js';
 import { getTableHeaders, renderTableRow, filterMembersByView, updateActiveViewButton } from './components/views.js';
-import { loadTable, attachSortingToHeaders } from './components/table.js';
+import { loadTable } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditMember, handleDeleteMember } from './components/form.js';
 import { populateSelect } from './utils/helpers.js';
 import { setupMemberFormValidation } from './components/formValidation.js';

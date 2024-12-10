@@ -9,7 +9,6 @@ const troopsTableBody = document.getElementById('troopsTableBody');
 const troopsTableHeader = document.querySelector('thead');
 const troopForm = document.getElementById('troopForm');
 const troopModalLabel = document.getElementById('troopModalLabel');
-const troopLeaderSelect = document.getElementById('troopLeader');
 const troopModal = new bootstrap.Modal(document.getElementById('troopModal'));
 
 // Handle form submission

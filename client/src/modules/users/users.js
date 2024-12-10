@@ -1,19 +1,13 @@
-// ./users.js
-
 import './users.scss';
-import { loadUsers, attachSortingToHeaders } from './components/table.js';
+import { loadUsers } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditUser, handleDeleteUser } from './components/form.js';
-import { addSortableClassToHeaders } from './utils/helpers.js';
-import { sortTable } from '../../utils/sortTable.js';
+import { sortTable, addSortableClassToHeaders, attachSortingToHeaders } from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 
 // DOM elements
 const usersTableBody = document.getElementById('usersTableBody');
 const usersTableHeader = document.querySelector('thead');
 const userForm = document.getElementById('userForm');
-const userIdField = document.getElementById('userId');
-const passwordField = document.getElementById('password');
-const selectUserField = document.getElementById('selectUserField');
 const userModalLabel = document.getElementById('userModalLabel');
 const userModal = new bootstrap.Modal(document.getElementById('userModal'));
 

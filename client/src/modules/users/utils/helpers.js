@@ -1,13 +1,3 @@
-export const addSortableClassToHeaders = (tableHeaders) => {
-    const headers = tableHeaders.querySelectorAll('th');
-
-    headers.forEach((header) => {
-        if (!header.textContent.trim().toLowerCase().includes('actions')) {
-            header.classList.add('sortable');
-        }
-    });
-};
-
 export const populateSelect = (selectId, data) => {
     const select = document.getElementById(selectId);
 
