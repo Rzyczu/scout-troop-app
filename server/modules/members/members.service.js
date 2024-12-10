@@ -130,4 +130,11 @@ const deleteMember = async (id) => {
     return result.rowCount > 0;
 };
 
-module.exports = { fetchAllMembers, fetchMemberById, createMember, updateMember, deleteMember };
+const checkIfUserIsTroopLeader = async (userId) => {
+    const result = await pool.query(`
+        SELECT id FROM troops WHERE leader_id = $1
+    `, [userId]);
+    return result.rowCount > 0;
+};
+
+module.exports = { checkIfUserIsTroopLeader, fetchAllMembers, fetchMemberById, createMember, updateMember, deleteMember };

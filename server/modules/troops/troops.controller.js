@@ -95,10 +95,23 @@ const troopsController = {
     async deleteTroop(req, res) {
         try {
             const troopId = req.params.id;
+            const teamId = req.user.team_id;
 
+            const currentTroop = await troopsService.fetchTroopById(troopId, teamId);
+            if (!currentTroop) {
+                return sendError(res, errorMessages.troop.fetchSingle.notFound, 404);
+            }
+            const leaderId = currentTroop?.leader?.id || null;
+
+            console.log(leaderId)
             const deleted = await troopsService.deleteTroop(troopId);
+
             if (!deleted) {
                 return sendError(res, errorMessages.troops.delete.notFound, 404);
+            }
+
+            if (leaderId) {
+                await troopsService.setLeaderFunction(leaderId, 0);
             }
 
             res.status(200).json({

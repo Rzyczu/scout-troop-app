@@ -37,11 +37,13 @@ export const errorMessages = {
         },
         update: {
             default: { error: 'Failed to update user.', code: 'USER_UPDATE_FAILED' },
+            cannotChangeScoutFunction: { error: 'Cannot change scout function because the member is currently a troop leader.', code: "UPDATE_MEMBER_IS_TROOP_LEADER" },
+
         },
         delete: {
             default: { error: 'Failed to delete user.', code: 'USER_DELETE_FAILED' },
             ownAccountDelete: { error: 'You cannot delete your own login.', code: 'USER_DELETE_OWN_ACCOUNT' },
-            notFound: { error: 'User not found.', code: 'USER_NOT_FOUND' },
+            cannotDeleteScoutLeader: { error: 'Cannot delete member because  they are currently a troop leader.', code: "DELETE_MEMBER_IS_TROOP_LEADER" },
         },
     },
 

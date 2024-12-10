@@ -52,6 +52,18 @@ const membersController = {
         const { user, contact, scout } = req.body;
 
         try {
+            const currentMember = await membersService.fetchMemberById(req.params.id, req.user.team_id);
+            if (!currentMember) {
+                return sendError(res, errorMessages.users.fetchSingle.notFound);
+            }
+
+            if (currentMember.function === 2 && scout.function !== 2) {
+                const isLeader = await membersService.checkIfUserIsTroopLeader(req.params.id);
+                if (isLeader) {
+                    return sendError(res, errorMessages.users.update.cannotChangeScoutFunction);
+                }
+            }
+
             await membersService.updateMember(req.params.id, user, contact, scout);
             res.status(200).json({ success: true, message: 'Member updated successfully.' });
         } catch (err) {
@@ -67,9 +79,21 @@ const membersController = {
                 return sendError(res, errorMessages.users.delete.ownAccountDelete);
             }
 
+            const currentMember = await membersService.fetchMemberById(req.params.id, req.user.team_id);
+            if (!currentMember) {
+                return sendError(res, errorMessages.users.fetchSingle.notFound);
+            }
+
+            if (currentMember.function === 2) {
+                const isLeader = await membersService.checkIfUserIsTroopLeader(req.params.id);
+                if (isLeader) {
+                    return sendError(res, errorMessages.users.delete.cannotDeleteScoutLeader);
+                }
+            }
+
             const deleted = await membersService.deleteMember(req.params.id);
             if (!deleted) {
-                return sendError(res, errorMessages.users.delete.notFound);
+                return sendError(res, errorMessages.users.delete.default);
             }
             res.status(200).json({ success: true, message: 'Member deleted successfully.' });
         } catch (err) {
