@@ -87,12 +87,29 @@ const troopsService = {
 
     // Zaktualizuj zast-ęp
     async updateTroop(troopId, name, leaderId) {
-        const result = await pool.query(`
-            UPDATE troops
-            SET name = $2, leader_id = $3
-            WHERE id = $1
-            RETURNING *
-        `, [troopId, name, leaderId]);
+        await pool.query(
+            `UPDATE users_scout 
+             SET troop_id = NULL 
+             WHERE user_id = $1`,
+            [leaderId]
+        );
+
+        const result = await pool.query(
+            `UPDATE troops
+             SET name = $2, leader_id = $3
+             WHERE id = $1
+             RETURNING *`,
+            [troopId, name, leaderId]
+        );
+
+        // Przypisz troop_id do lidera
+        await pool.query(
+            `UPDATE users_scout 
+             SET troop_id = $1 
+             WHERE user_id = $2`,
+            [troopId, leaderId]
+        );
+
         return result.rows[0];
     },
 
@@ -145,10 +162,16 @@ const troopsService = {
     // Przypisz lidera do zastępu (ustaw troop_id w users_scout)
     async assignLeaderToTroop(leaderId, troopId) {
         await pool.query(`
-        UPDATE users_scout 
-        SET troop_id = $1 
-        WHERE user_id = $2
-    `, [troopId, leaderId]);
+            UPDATE users_scout 
+            SET troop_id = NULL 
+            WHERE user_id = $1
+        `, [leaderId]);
+
+        await pool.query(`
+            UPDATE users_scout 
+            SET troop_id = $1 
+            WHERE user_id = $2
+        `, [troopId, leaderId]);
     },
 
     async setLeaderFunction(userId, functionId) {

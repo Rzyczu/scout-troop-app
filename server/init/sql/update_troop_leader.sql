@@ -9,7 +9,7 @@ BEGIN
     END IF;
 
     -- Jeśli lider zostaje zdegradowany, usuń lidera z `troops`
-    IF OLD.function = 2 AND NEW.function != 2 THEN
+    IF OLD.function = 2 AND NEW.function != 2 AND OLD.troop_id != NEW.troop_id THEN
         UPDATE troops
         SET leader_id = NULL
         WHERE id = OLD.troop_id;

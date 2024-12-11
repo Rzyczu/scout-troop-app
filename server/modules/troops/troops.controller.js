@@ -61,11 +61,6 @@ const troopsController = {
             const { name, leaderId } = req.body;
             const teamId = req.user.team_id;
 
-            const isTeamLeader = await troopsService.checkIfTeamLeader(leaderId);
-            if (isTeamLeader) {
-                return sendError(res, errorMessages.troops.create.leaderIsTeamLeader, 400);
-            }
-
             const currentTroop = await troopsService.fetchTroopById(troopId, teamId);
             if (!currentTroop) {
                 return sendError(res, errorMessages.troop.fetchSingle.notFound, 404);
@@ -73,6 +68,7 @@ const troopsController = {
 
             const oldLeaderId = currentTroop?.leader?.id || null;
 
+            // Tylko jeśli zmienił się lider
             if (oldLeaderId && oldLeaderId !== leaderId) {
                 await troopsService.setLeaderFunction(oldLeaderId, 0);
                 await troopsService.setLeaderFunction(leaderId, 2);

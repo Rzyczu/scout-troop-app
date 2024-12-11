@@ -50,24 +50,12 @@ const updateTableHeaders = (view) => {
 };
 
 // Function: Fetch and populate troop select
-// Function: Fetch and populate troop select
 const fetchAndPopulateTroops = async () => {
     try {
         const troops = await membersApi.fetchTroops();
         console.log('Fetched Troops:', troops);
 
-        // Check if troops data is an array
-        if (!Array.isArray(troops)) {
-            throw new Error('Troops data is not an array.');
-        }
-
-        // Ensure each troop has an id and name
-        const formattedTroops = troops.map((troop) => ({
-            id: troop.id,
-            name: troop.name,
-        }));
-
-        await populateTroopSelect('troopSelect', formattedTroops);
+        await populateTroopSelect('troopSelect', troops);
     } catch (error) {
         console.error('Error populating troop select:', error.message);
         showToast('Failed to load troops.', 'danger');
@@ -97,6 +85,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await populateRanks('achievedRank', ScoutRanks, null, gender);
         await populateRanks('instructorRank', InstructorRanks, null, gender);
     }
+    await fetchAndPopulateTroops();
 
     // Add event listener to the "Add Member" button
     document.getElementById('addMemberBtn').addEventListener('click', async () => {

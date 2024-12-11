@@ -1,13 +1,14 @@
 -- Tworzenie funkcji `validate_leader` tylko, jeśli nie istnieje
 CREATE OR REPLACE FUNCTION validate_leader() RETURNS TRIGGER AS $$
 BEGIN
-    IF EXISTS (
+        IF EXISTS (
         SELECT 1 
         FROM users_scout 
         WHERE troop_id = NEW.troop_id AND function = 2
-    ) AND NEW.function = 2 THEN
+    ) AND NEW.function = 2 AND OLD.troop_id != NEW.troop_id THEN
         RAISE EXCEPTION 'Troop already has a leader.';
     END IF;
+
     RETURN NEW;
 END;
 $$ LANGUAGE plpgsql;
