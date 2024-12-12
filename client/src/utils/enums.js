@@ -59,7 +59,7 @@ export const InstructorRanks = {
 };
 
 const mapEnumValue = (enumData, key, property, gender = null) => {
-    const entry = enumData[key];
+    const entry = enumData[key] || enumData[0];
     const genderKey = gender === 0 ? 'male' : gender === 1 ? 'female' : null;
 
     if (genderKey && typeof entry === 'object' && entry[genderKey]) {

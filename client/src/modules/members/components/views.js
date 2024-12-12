@@ -1,5 +1,31 @@
 import { mapEnumFullName, ScoutFunctions, ScoutRanks, InstructorRanks } from "../../../utils/enums";
 
+const viewConfig = {
+    basic: [
+        { key: 'name', label: 'Name' },
+        { key: 'surname', label: 'Surname' },
+        { key: 'date_birth', label: 'Date of Birth', formatter: (value) => new Date(value).toLocaleDateString() }
+    ],
+    contact: [
+        { key: 'name', label: 'Name' },
+        { key: 'surname', label: 'Surname' },
+        { key: 'phone_number', label: 'Phone Number' },
+        { key: 'mother_phone_number', label: "Mother's Phone Number" },
+        { key: 'father_phone_number', label: "Father's Phone Number" },
+        { key: 'parent_email_1', label: 'Email 1' },
+        { key: 'parent_email_2', label: 'Email 2' }
+    ],
+    scout: [
+        { key: 'name', label: 'Name' },
+        { key: 'surname', label: 'Surname' },
+        { key: 'troop_name', label: 'Troop' },
+        { key: 'function', label: 'Function', formatter: (value, gender) => mapEnumFullName(ScoutFunctions, value, gender) || '-' },
+        { key: 'open_rank', label: 'Open Rank', formatter: (value, gender) => mapEnumFullName(ScoutRanks, value, gender) || '-' },
+        { key: 'achieved_rank', label: 'Achieved Rank', formatter: (value, gender) => mapEnumFullName(ScoutRanks, value, gender) || '-' },
+        { key: 'instructor_rank', label: 'Instructor Rank', formatter: (value, gender) => mapEnumFullName(InstructorRanks, value, gender) || '-' }
+    ]
+};
+
 export const filterMembersByView = (members, view, gender, useUnderscore = false) => {
     const formatKey = (key) => {
         return useUnderscore ? key.replace(/ /g, '_') : key;
@@ -77,89 +103,30 @@ export const updateActiveViewButton = (currentView) => {
 };
 
 export const getTableHeaders = (view) => {
-    switch (view) {
-        case 'basic':
-            return `
-                <th data-sort="id">ID</th>
-                <th>Name</th>
-                <th>Surname</th>
-                <th>Date of Birth</th>
-                <th>Actions</th>`;
-        case 'contact':
-            return `
-                <th data-sort="id">ID</th>
-                <th>Name</th>
-                <th>Surname</th>
-                <th>Phone Number</th>
-                <th>Mother's Phone Number</th>
-                <th>Father's Phone Number</th>
-                <th>Email 1</th>
-                <th>Email 2</th>
-                <th>Actions</th>`;
-        case 'scout':
-            return `
-                <th data-sort="id">ID</th>
-                <th>Name</th>
-                <th>Surname</th>
-                <th>Troop</th>
-                <th>Function</th>
-                <th>Open Rank</th>
-                <th>Achieved Rank</th>
-                <th>Instructor Rank</th>
-                <th>Actions</th>`;
-        default:
-            return ''; // Default headers if view is invalid
-    }
+    const columns = viewConfig[view] || [];
+    const headers = columns.map(col => `<th>${col.label}</th>`).join('');
+    return `
+        <th data-sort="id">ID</th>
+        ${headers}
+        <th>Actions</th>
+    `;
 };
 
 export const renderTableRow = (member, index, view, gender) => {
-    const { user_id, name, surname, date_birth, phone_number, mother_phone_number, father_phone_number, parent_email_1, parent_email_2, troop_name, function: scoutFunction, open_rank, achieved_rank, instructor_rank } = member;
-    switch (view) {
-        case 'basic':
-            return `
-                <tr>
-                    <td>${index}</td> 
-                    <td>${name}</td>
-                    <td>${surname}</td>
-                    <td>${new Date(date_birth).toLocaleDateString()}</td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm editMemberBtn" data-id="${user_id}">Edit</button>
-                        <button class="btn btn-danger btn-sm deleteMemberBtn" data-id="${user_id}">Delete</button>
-                    </td>
-                </tr>`;
-        case 'contact':
-            return `
-                <tr>
-                    <td>${index}</td> 
-                    <td>${name}</td>
-                    <td>${surname}</td>
-                    <td>${phone_number || '-'}</td>
-                    <td>${mother_phone_number || '-'}</td>
-                    <td>${father_phone_number || '-'}</td>
-                    <td>${parent_email_1 || '-'}</td>
-                    <td>${parent_email_2 || '-'}</td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm editMemberBtn" data-id="${user_id}">Edit</button>
-                        <button class="btn btn-danger btn-sm deleteMemberBtn" data-id="${user_id}">Delete</button>
-                    </td>
-                </tr>`;
-        case 'scout':
-            return `
-                <tr>
-                    <td>${index}</td> 
-                    <td>${name}</td>
-                    <td>${surname}</td>
-                    <td>${troop_name || ''}</td>
-                    <td>${mapEnumFullName(ScoutFunctions, scoutFunction, gender) || '-'}</td>
-                    <td>${mapEnumFullName(ScoutRanks, open_rank, gender) || '-'}</td>
-                    <td>${mapEnumFullName(ScoutRanks, achieved_rank, gender) || '-'}</td>
-                    <td>${mapEnumFullName(InstructorRanks, instructor_rank, gender) || '-'}</td>
-                    <td>
-                        <button class="btn btn-secondary btn-sm editMemberBtn" data-id="${user_id}">Edit</button>
-                        <button class="btn btn-danger btn-sm deleteMemberBtn" data-id="${user_id}">Delete</button>
-                    </td>
-                </tr>`;
-        default:
-            return ''; // Empty row if view is invalid
-    }
+    const columns = viewConfig[view] || [];
+    const rowCells = columns.map(col => {
+        const value = member[col.key] || '-';
+        return `<td>${col.formatter ? col.formatter(value, gender) : value}</td>`;
+    }).join('');
+
+    return `
+        <tr>
+            <td>${index}</td>
+            ${rowCells}
+            <td>
+                <button class="btn btn-secondary btn-sm editMemberBtn" data-id="${member.user_id}">Edit</button>
+                <button class="btn btn-danger btn-sm deleteMemberBtn" data-id="${member.user_id}">Delete</button>
+            </td>
+        </tr>
+    `;
 };
