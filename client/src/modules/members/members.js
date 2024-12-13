@@ -9,6 +9,10 @@ import { resetForm, handleFormSubmit, handleEditMember, handleDeleteMember } fro
 import { setupMemberFormValidation } from './components/formValidation.js';
 import { exportToJson, exportToCsv } from './components/exports.js';
 import { createSelectPopulator } from '../../utils/selectFactory';
+import {
+    showColumnManagerModal,
+    applyColumnPreferences
+} from '../../utils/columnManager.js';
 
 // **Populators for selects** 
 const populateTroopSelect = createSelectPopulator({
@@ -32,7 +36,7 @@ const populateRanks = createSelectPopulator({
 });
 
 // DOM elements
-const membersTableBody = document.getElementById('membersTableBody');
+const tableBody = document.getElementById('membersTableBody');
 const tableHeaders = document.getElementById('tableHeaders');
 const memberForm = document.getElementById('memberForm');
 const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
@@ -46,7 +50,7 @@ let currentView = 'basic';
 const updateTableHeaders = (view) => {
     tableHeaders.innerHTML = getTableHeaders(view);
     addSortableClassToHeaders(tableHeaders);
-    attachSortingToHeaders(tableHeaders, membersTableBody, sortTable);
+    attachSortingToHeaders(tableHeaders, tableBody, sortTable);
 };
 
 // Function: Fetch and populate troop select
@@ -76,7 +80,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     // Update active view button and load initial data
     updateActiveViewButton(currentView);
     updateTableHeaders(currentView);
-    const gender = await loadTable(membersTableBody, renderTableRow, currentView);
+    applyColumnPreferences('members', currentView, tableHeaders, tableBody);
+
+    const gender = await loadTable(tableBody, renderTableRow, currentView);
 
     // Populate dropdowns with enums
     if (gender !== undefined && gender !== null) {
@@ -121,7 +127,7 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         await handleFormSubmit(memberForm, memberModal, async () =>
-            loadTable(membersTableBody, renderTableRow, currentView)
+            loadTable(tableBody, renderTableRow, currentView)
         );
     };
 
@@ -131,19 +137,27 @@ document.addEventListener('DOMContentLoaded', async () => {
             currentView = btn.dataset.view;
             updateActiveViewButton(currentView);
             updateTableHeaders(currentView);
-            await loadTable(membersTableBody, renderTableRow, currentView);
+            await loadTable(tableBody, renderTableRow, currentView);
+            applyColumnPreferences('members', currentView, tableHeaders, tableBody); // Stosowanie preferencji po załadowaniu widoku
         });
     });
 
+
+    document.getElementById('setColumnsBtn')?.addEventListener('click', () => {
+        const view = currentView;
+        const columns = Array.from(tableHeaders.querySelectorAll('th')).map(th => th.textContent.trim());
+        showColumnManagerModal('members', view, columns, tableHeaders, tableBody);
+    });
+
     // Add event listener for table actions (edit/delete)
-    membersTableBody.addEventListener('click', async (event) => {
+    tableBody.addEventListener('click', async (event) => {
         const target = event.target;
 
         if (target.classList.contains('editMemberBtn')) {
             await handleEditMember(target, modalLabel, memberModal);
         } else if (target.classList.contains('deleteMemberBtn')) {
             await handleDeleteMember(target, async () =>
-                loadTable(membersTableBody, renderTableRow, currentView)
+                loadTable(tableBody, renderTableRow, currentView)
             );
         }
     });

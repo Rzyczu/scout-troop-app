@@ -1,5 +1,5 @@
 export const ScoutFunctions = {
-    0: 'None',
+    0: '-',
     1: {
         male: 'Podzastępowy',
         female: 'Podzastępowa'
