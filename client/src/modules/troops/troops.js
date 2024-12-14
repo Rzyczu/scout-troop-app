@@ -7,8 +7,8 @@ import initializeFormValidation from '../../utils/formValidation.js';
 import headersConfig from './config/headers.js';
 
 // ** DOM Elements **
-const troopsTableBody = document.getElementById('troopsTableBody');
-const troopsTableHeader = document.querySelector('thead');
+const troopsTableBody = document.getElementById('tableBody');
+const troopsTableHeader = document.getElementById('tableHeaders');
 const troopForm = document.getElementById('troopForm');
 const troopModalLabel = document.getElementById('troopModalLabel');
 const troopModal = new bootstrap.Modal(document.getElementById('troopModal'));
@@ -36,11 +36,11 @@ document.addEventListener('DOMContentLoaded', async () => {
     try {
         // ** Load troops into the table **
         await loadTroops(troopsTableBody);
-
         // ** Add sorting to headers **
         addSortableClassToHeaders(troopsTableHeader, headersConfig);
         attachSortingToHeaders(troopsTableHeader, troopsTableBody, sortTable);
-
+        console.log(troopsTableHeader)
+        console.log(troopsTableBody)
         // ** Apply column preferences **
         applyColumnPreferences('troops', 'default', troopsTableHeader, troopsTableBody);
 
@@ -52,7 +52,7 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         // ** Event listener for Set Columns button **
         document.getElementById('setColumnsBtn')?.addEventListener('click', () => {
-            const columns = Array.from(troopsTableHeader.querySelectorAll('th')).map(th => th.textContent.trim());
+            const columns = headersConfig.map(header => header.label);
             showColumnManagerModal('troops', 'default', columns, troopsTableHeader, troopsTableBody);
         });
 

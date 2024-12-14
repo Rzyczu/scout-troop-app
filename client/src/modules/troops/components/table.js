@@ -5,7 +5,7 @@ import headersConfig from '../config/headers.js';
 
 export const loadTroops = async (tableBody) => {
     try {
-        const troopsTableHeader = document.querySelector('thead');
+        const troopsTableHeader = document.getElementById('tableHeaders');
         const troops = await troopsApi.fetchAll();
 
         if (troops.length === 0) {
@@ -19,7 +19,7 @@ export const loadTroops = async (tableBody) => {
         };
 
         const tableHeaders = getTableHeaders();
-        troopsTableHeader.innerHTML = `<tr>${tableHeaders}</tr>`;
+        troopsTableHeader.innerHTML = tableHeaders;
         tableBody.innerHTML = renderTableRows(troops);
         updateTableRowIds(tableBody);
     } catch (error) {
