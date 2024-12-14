@@ -78,16 +78,13 @@ memberForm.onsubmit = async function (event) {
 
 const reloadMembers = async () => {
     const view = currentView;
-    if (!gender)
-        gender = await loadTable(tableBody, renderTableRow, view);
-    else
-        await loadTable(tableBody, renderTableRow, view);
+    gender = gender || await loadTable(tableBody, renderTableRow, view);
+    await loadTable(tableBody, renderTableRow, view);
 
     updateTableHeaders(view);
-    addSortableClassToHeaders(tableHeaders, headersConfig[currentView]);
-    attachSortingToHeaders(tableHeaders, tableBody, sortTable);
     applyColumnPreferences('members', view, tableHeaders, tableBody);
 };
+
 
 // Initialize event listeners
 document.addEventListener('DOMContentLoaded', async () => {

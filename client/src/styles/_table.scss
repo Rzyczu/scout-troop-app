@@ -27,6 +27,12 @@ table {
     }
 }
 
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+
 .switch {
     position: relative;
     display: inline-block;
