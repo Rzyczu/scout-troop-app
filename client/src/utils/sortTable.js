@@ -50,17 +50,12 @@ export const attachSortingToHeaders = (usersTableHeader, usersTableBody, sortTab
                 sortDirection = 1;
             }
 
-            // Resetowanie wszystkich strzałek do domyślnego stanu
-            headers.forEach((h) => {
-                const icon = h.querySelector('.sort-icon');
-                if (icon) {
-                    icon.textContent = '\u2B06'; // Strzałka w górę
-                }
-            });
+            // Resetowanie klas `active`, `asc`, `desc` we wszystkich nagłówkach
+            headers.forEach((h) => h.classList.remove('active', 'asc', 'desc'));
 
-            // Aktualizacja strzałki w aktualnie sortowanej kolumnie
-            icon.textContent = sortDirection === 1 ? '\u2B06' : '\u2B07'; // ⬆️ lub ⬇️
-            icon.style.color = 'black'; // Czarny kolor dla aktywnej strzałki
+            // Dodanie klasy aktywnej do aktualnej kolumny
+            header.classList.add('active');
+            header.classList.add(sortDirection === 1 ? 'asc' : 'desc');
 
             // Sortowanie wierszy
             sortTable(usersTableBody, columnSelector, sortDirection);
@@ -69,10 +64,9 @@ export const attachSortingToHeaders = (usersTableHeader, usersTableBody, sortTab
 };
 
 const createSortIcon = (header) => {
-    const sortIcon = document.createElement('span');
-    sortIcon.className = 'sort-icon';
-    sortIcon.textContent = '\u2B06'; // Domyślna strzałka w górę
-    sortIcon.style.marginLeft = '5px'; // Dodanie odstępu od tekstu
-    header.appendChild(sortIcon);
-    return sortIcon;
+    if (!header.querySelector('.sort-icon')) {
+        const sortIcon = document.createElement('span');
+        sortIcon.className = 'sort-icon';
+        header.appendChild(sortIcon);
+    }
 };

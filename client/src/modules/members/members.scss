@@ -47,16 +47,37 @@
     display: none !important;
 }
 
-.sort-icon {
-    font-size: 12px;
-    color: rgb(210, 208, 208);
-    /* Domyślny kolor strzałek */
-    margin-left: 5px;
-    transition: color 0.2s ease;
-    /* Płynne przejście koloru */
-}
+$default-arrow-color: gray;
+$active-arrow-color: black;
 
-.sortable:hover .sort-icon {
-    color: black;
-    /* Zmiana koloru na czarny podczas najechania kursorem */
+.sortable {
+    position: relative;
+
+    .sort-icon::after {
+        font-size: 12px;
+        color: $default-arrow-color; // Szary kolor strzałki w stanie domyślnym
+        margin-left: 5px;
+        content: '\2B06'; // Domyślnie strzałka skierowana w górę (⬆️)
+        transition: color 0.2s ease, transform 0.2s ease;
+    }
+
+    &.active {
+        .sort-icon::after {
+            color: $active-arrow-color; // Aktywny kolor strzałki
+        }
+
+        &.asc .sort-icon::after {
+            content: '\2B06'; // Strzałka w górę (⬆️)
+            transform: rotate(0deg);
+        }
+
+        &.desc .sort-icon::after {
+            content: '\2B07'; // Strzałka w dół (⬇️)
+            transform: rotate(0deg);
+        }
+    }
+
+    &:hover .sort-icon::after {
+        color: $active-arrow-color; // Zmiana koloru na czarny podczas najechania kursorem
+    }
 }
