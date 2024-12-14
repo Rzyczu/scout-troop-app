@@ -1,4 +1,4 @@
-// src/utils/columnManager.js
+import { updateTableRowIds } from './tableUtils.js';
 
 export const saveColumnPreferences = (module, view, preferences) => {
     const key = `${module}_table_columns`;
@@ -19,13 +19,15 @@ export const applyColumnPreferences = (module, view, tableHeaders, tableBody) =>
 
     preferences.columns.forEach((colName, index) => {
         const th = tableHeaders.querySelectorAll('th.sortable')[index];
-        const tds = tableBody.querySelectorAll(`td:nth-child(${index + 1})`);
+        const tds = tableBody.querySelectorAll(`td:nth-child(${index + 2})`);
         if (!th) return;
         const isVisible = preferences.visibility[colName];
 
         th.style.display = isVisible ? '' : 'none';
         tds.forEach(td => td.style.display = isVisible ? '' : 'none');
     });
+
+    updateTableRowIds(tableBody);
 };
 
 export const resetColumnPreferences = (module, view, tableHeaders, tableBody) => {
@@ -37,7 +39,7 @@ export const resetColumnPreferences = (module, view, tableHeaders, tableBody) =>
     }
 
     // Reset widoczności kolumn do stanu początkowego
-    const ths = tableHeaders.querySelectorAll('th.sortable');
+    const ths = Array.from(tableHeaders.querySelectorAll('th.sortable')).filter(th => th.textContent !== 'ID');
     const rows = tableBody.querySelectorAll('tr');
     ths.forEach(th => th.style.display = '');
     rows.forEach(row => {
@@ -49,7 +51,7 @@ export const resetColumnPreferences = (module, view, tableHeaders, tableBody) =>
 
 export const showColumnManagerModal = (module, view, columns, tableHeaders, tableBody) => {
     const preferences = getColumnPreferences(module, view) || { columns, visibility: {} };
-    const filteredColumns = columns.map(col => col.replace(/▲|▼/g, '')).filter(col => col.toLowerCase() !== 'actions');
+    const filteredColumns = columns.map(col => col.replace(/[\u2B07\u2B06]/g, '')).filter(col => col.toLowerCase() !== 'actions' && col.toLowerCase() !== 'id');
     const modal = document.createElement('div');
     modal.className = 'modal fade';
     modal.id = 'columnManagerModal';

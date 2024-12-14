@@ -13,6 +13,7 @@ import {
     showColumnManagerModal,
     applyColumnPreferences
 } from '../../utils/columnManager.js';
+import { updateTableRowIds } from '../../utils/tableUtils.js';
 
 // **Populators for selects** 
 const populateTroopSelect = createSelectPopulator({
@@ -83,6 +84,8 @@ document.addEventListener('DOMContentLoaded', async () => {
     applyColumnPreferences('members', currentView, tableHeaders, tableBody);
 
     const gender = await loadTable(tableBody, renderTableRow, currentView);
+
+    updateTableRowIds(tableBody);
 
     // Populate dropdowns with enums
     if (gender !== undefined && gender !== null) {

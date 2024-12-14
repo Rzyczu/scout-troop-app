@@ -1,3 +1,5 @@
+import { updateTableRowIds } from '../../../utils/tableUtils.js';
+
 import membersApi from './api.js';
 import { showToast } from '../../../utils/ui.js';
 
@@ -18,7 +20,9 @@ export const loadTable = async (tableBody, getTableRow, view) => {
             return;
         };
 
-        tableBody.innerHTML = members.map((member, index) => getTableRow(member, index + 1, view, gender)).join('');
+        tableBody.innerHTML = members.map((member, index) => getTableRow(member, index, view, gender)).join('');
+        updateTableRowIds(tableBody);
+
         return gender;
     } catch (error) {
         showToast(error.message || 'Failed to load members.', 'danger');

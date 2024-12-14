@@ -106,13 +106,13 @@ export const getTableHeaders = (view) => {
     const columns = viewConfig[view] || [];
     const headers = columns.map(col => `<th>${col.label}</th>`).join('');
     return `
-        <th data-sort="id">ID</th>
+        <th>ID</th> 
         ${headers}
         <th>Actions</th>
     `;
 };
 
-export const renderTableRow = (member, index, view, gender) => {
+export const renderTableRow = (member, _, view, gender) => {
     const columns = viewConfig[view] || [];
     const rowCells = columns.map(col => {
         const value = member[col.key] || '-';
@@ -120,13 +120,13 @@ export const renderTableRow = (member, index, view, gender) => {
     }).join('');
 
     return `
-        <tr>
-            <td>${index}</td>
-            ${rowCells}
-            <td>
-                <button class="btn btn-secondary btn-sm editMemberBtn" data-id="${member.user_id}">Edit</button>
-                <button class="btn btn-danger btn-sm deleteMemberBtn" data-id="${member.user_id}">Delete</button>
-            </td>
-        </tr>
+    <tr>
+        <td class="dynamic-id"></td>
+        ${rowCells}
+        <td>
+            <button class="btn btn-secondary btn-sm editMemberBtn" data-id="${member.user_id}">Edit</button>
+            <button class="btn btn-danger btn-sm deleteMemberBtn" data-id="${member.user_id}">Delete</button>
+        </td>
+    </tr>
     `;
 };

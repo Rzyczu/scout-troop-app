@@ -1,3 +1,5 @@
+import { updateTableRowIds } from './tableUtils.js';
+
 export function sortTable(tableBody, columnSelector, direction) {
     const rows = Array.from(tableBody.querySelectorAll('tr'));
 
@@ -14,35 +16,33 @@ export function sortTable(tableBody, columnSelector, direction) {
 
     tableBody.innerHTML = '';
     rows.forEach(row => tableBody.appendChild(row));
+
+    updateTableRowIds(tableBody);
 }
 
 export const addSortableClassToHeaders = (tableHeaders) => {
     const headers = tableHeaders.querySelectorAll('th');
 
     headers.forEach((header) => {
-        if (!header.textContent.trim().toLowerCase().includes('actions')) {
+        if (!header.textContent.trim().toLowerCase().includes('actions') && header.textContent.trim().toLowerCase() !== 'id') {
             header.classList.add('sortable');
         }
     });
 };
 
 export const attachSortingToHeaders = (usersTableHeader, usersTableBody, sortTable) => {
-    let sortColumn = 'td:nth-child(1)';
+    let sortColumn = null;
     let sortDirection = 1; // 1 = rosnąco, -1 = malejąco
 
-    sortTable(usersTableBody, sortColumn, sortDirection);
-
     const headers = usersTableHeader.querySelectorAll('.sortable');
+
     headers.forEach((header, index) => {
         const icon = header.querySelector('.sort-icon') || createSortIcon(header);
 
-        if (index === 0) {
-            icon.textContent = sortDirection === 1 ? '▲' : '▼';
-        }
-
         header.addEventListener('click', () => {
-            const columnSelector = `td:nth-child(${index + 1})`;
+            const columnSelector = `td:nth-child(${index + 2})`; // Zaczynamy od 2, bo 1 to ID
 
+            // Jeśli kliknięto na tę samą kolumnę, zmieniamy kierunek sortowania
             if (sortColumn === columnSelector) {
                 sortDirection *= -1;
             } else {
@@ -50,23 +50,29 @@ export const attachSortingToHeaders = (usersTableHeader, usersTableBody, sortTab
                 sortDirection = 1;
             }
 
+            // Resetowanie wszystkich strzałek do domyślnego stanu
             headers.forEach((h) => {
                 const icon = h.querySelector('.sort-icon');
-                if (icon) icon.textContent = '';
+                if (icon) {
+                    icon.textContent = '\u2B06'; // Strzałka w górę
+                }
             });
 
-            icon.textContent = sortDirection === 1 ? '▲' : '▼';
+            // Aktualizacja strzałki w aktualnie sortowanej kolumnie
+            icon.textContent = sortDirection === 1 ? '\u2B06' : '\u2B07'; // ⬆️ lub ⬇️
+            icon.style.color = 'black'; // Czarny kolor dla aktywnej strzałki
 
+            // Sortowanie wierszy
             sortTable(usersTableBody, columnSelector, sortDirection);
         });
-
     });
 };
 
 const createSortIcon = (header) => {
     const sortIcon = document.createElement('span');
     sortIcon.className = 'sort-icon';
-    sortIcon.textContent = '';
+    sortIcon.textContent = '\u2B06'; // Domyślna strzałka w górę
+    sortIcon.style.marginLeft = '5px'; // Dodanie odstępu od tekstu
     header.appendChild(sortIcon);
     return sortIcon;
 };

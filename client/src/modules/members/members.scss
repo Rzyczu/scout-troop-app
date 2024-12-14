@@ -46,3 +46,17 @@
 .hidden {
     display: none !important;
 }
+
+.sort-icon {
+    font-size: 12px;
+    color: rgb(210, 208, 208);
+    /* Domyślny kolor strzałek */
+    margin-left: 5px;
+    transition: color 0.2s ease;
+    /* Płynne przejście koloru */
+}
+
+.sortable:hover .sort-icon {
+    color: black;
+    /* Zmiana koloru na czarny podczas najechania kursorem */
+}
