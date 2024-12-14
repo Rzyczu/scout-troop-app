@@ -1,9 +1,9 @@
 const headersConfig = [
     { label: 'ID', sortable: false },
-    { key: 'name', label: 'Name', sortable: true },
-    { key: 'surname', label: 'Surname', sortable: true },
-    { key: 'email', label: 'Email', sortable: true },
-    { key: 'function', label: 'Function', formatter: (value, gender) => mapEnumFullName(ScoutFunctions, value, gender) || '-', sortable: true },
+    { label: 'Name', sortable: true, key: 'name' },
+    { label: 'Surname', sortable: true, key: 'surname' },
+    { label: 'Email', sortable: true, key: 'email' },
+    { label: 'Function', sortable: true, key: 'function', formatter: (value, gender) => mapEnumFullName(ScoutFunctions, value, gender) || '-' },
     { label: 'Actions', sortable: false },
 ];
 
