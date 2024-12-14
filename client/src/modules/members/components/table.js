@@ -1,6 +1,7 @@
 import membersApi from './api.js';
 import { showToast } from '../../../utils/ui.js';
 import { updateTableRowIds } from '../../../utils/tableUtils.js';
+import headersConfig from '../config/headers.js';
 
 export const loadTable = async (tableBody, getTableRow, view) => {
     try {

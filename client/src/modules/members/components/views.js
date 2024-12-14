@@ -1,30 +1,5 @@
 import { mapEnumFullName, ScoutFunctions, ScoutRanks, InstructorRanks } from "../../../utils/enums";
-
-const viewConfig = {
-    basic: [
-        { key: 'name', label: 'Name' },
-        { key: 'surname', label: 'Surname' },
-        { key: 'date_birth', label: 'Date of Birth', formatter: (value) => new Date(value).toLocaleDateString() }
-    ],
-    contact: [
-        { key: 'name', label: 'Name' },
-        { key: 'surname', label: 'Surname' },
-        { key: 'phone_number', label: 'Phone Number' },
-        { key: 'mother_phone_number', label: "Mother's Phone Number" },
-        { key: 'father_phone_number', label: "Father's Phone Number" },
-        { key: 'parent_email_1', label: 'Email 1' },
-        { key: 'parent_email_2', label: 'Email 2' }
-    ],
-    scout: [
-        { key: 'name', label: 'Name' },
-        { key: 'surname', label: 'Surname' },
-        { key: 'troop_name', label: 'Troop' },
-        { key: 'function', label: 'Function', formatter: (value, gender) => mapEnumFullName(ScoutFunctions, value, gender) || '-' },
-        { key: 'open_rank', label: 'Open Rank', formatter: (value, gender) => mapEnumFullName(ScoutRanks, value, gender) || '-' },
-        { key: 'achieved_rank', label: 'Achieved Rank', formatter: (value, gender) => mapEnumFullName(ScoutRanks, value, gender) || '-' },
-        { key: 'instructor_rank', label: 'Instructor Rank', formatter: (value, gender) => mapEnumFullName(InstructorRanks, value, gender) || '-' }
-    ]
-};
+import headersConfig from '../config/headers.js';
 
 export const filterMembersByView = (members, view, gender, useUnderscore = false) => {
     const formatKey = (key) => {
@@ -103,21 +78,20 @@ export const updateActiveViewButton = (currentView) => {
 };
 
 export const getTableHeaders = (view) => {
-    const columns = viewConfig[view] || [];
-    const headers = columns.map(col => `<th>${col.label}</th>`).join('');
-    return `
-        <th>ID</th> 
-        ${headers}
-        <th>Actions</th>
-    `;
+    return headersConfig[view].map(header =>
+        `<th>${header.label}</th>`
+    ).join('');
 };
 
 export const renderTableRow = (member, _, view, gender) => {
-    const columns = viewConfig[view] || [];
-    const rowCells = columns.map(col => {
-        const value = member[col.key] || '-';
-        return `<td>${col.formatter ? col.formatter(value, gender) : value}</td>`;
-    }).join('');
+    const columns = headersConfig[view] || [];
+    const rowCells = columns
+        .filter(col => col.key)
+        .map(col => {
+            const value = member[col.key] || '-';
+            return `<td>${col.formatter ? col.formatter(value, gender) : value}</td>`;
+        })
+        .join('');
 
     return `
     <tr>

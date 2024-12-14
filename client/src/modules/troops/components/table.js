@@ -49,6 +49,6 @@ export const renderTableRow = (troop, index) => {
 
 export const getTableHeaders = (headersConfig) => {
     return headersConfig.map(header =>
-        `<th class="${header.sortable ? 'sortable' : ''}">${header.label}</th>`
+        `<th>${header.label}</th>`
     ).join('');
 };

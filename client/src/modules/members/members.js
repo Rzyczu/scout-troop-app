@@ -9,11 +9,9 @@ import { resetForm, handleFormSubmit, handleEditMember, handleDeleteMember } fro
 import { setupMemberFormValidation } from './components/formValidation.js';
 import { exportToJson, exportToCsv } from './components/exports.js';
 import { createSelectPopulator } from '../../utils/selectFactory';
-import {
-    showColumnManagerModal,
-    applyColumnPreferences
-} from '../../utils/columnManager.js';
+import { showColumnManagerModal, applyColumnPreferences } from '../../utils/columnManager.js';
 import { updateTableRowIds } from '../../utils/tableUtils.js';
+import headersConfig from './config/headers.js';
 
 // **Populators for selects** 
 const populateTroopSelect = createSelectPopulator({
@@ -46,11 +44,12 @@ const exportViewSelect = document.getElementById('exportViewSelect');
 
 // Global variables
 let currentView = 'basic';
+let gender = null;
 
 // Function: Update table headers dynamically based on the view
 const updateTableHeaders = (view) => {
     tableHeaders.innerHTML = getTableHeaders(view);
-    addSortableClassToHeaders(tableHeaders);
+    addSortableClassToHeaders(tableHeaders, headersConfig[currentView]);
     attachSortingToHeaders(tableHeaders, tableBody, sortTable);
 };
 
@@ -67,7 +66,28 @@ const fetchAndPopulateTroops = async () => {
     }
 };
 
+// Add event listener for form submission
+memberForm.onsubmit = async function (event) {
+    event.preventDefault();
+    if (!this.checkValidity()) {
+        this.classList.add('was-validated');
+        return;
+    }
+    await handleFormSubmit(memberForm, memberModal, reloadMembers);
+};
 
+const reloadMembers = async () => {
+    const view = currentView;
+    if (!gender)
+        gender = await loadTable(tableBody, renderTableRow, view);
+    else
+        await loadTable(tableBody, renderTableRow, view);
+
+    updateTableHeaders(view);
+    addSortableClassToHeaders(tableHeaders, headersConfig[currentView]);
+    attachSortingToHeaders(tableHeaders, tableBody, sortTable);
+    applyColumnPreferences('members', view, tableHeaders, tableBody);
+};
 
 // Initialize event listeners
 document.addEventListener('DOMContentLoaded', async () => {
@@ -83,7 +103,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateTableHeaders(currentView);
     applyColumnPreferences('members', currentView, tableHeaders, tableBody);
 
-    const gender = await loadTable(tableBody, renderTableRow, currentView);
+    await reloadMembers();
 
     updateTableRowIds(tableBody);
 
@@ -122,34 +142,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         memberModal.show();
     });
 
-    // Add event listener for form submission
-    memberForm.onsubmit = async function (event) {
-        event.preventDefault();
-        if (!this.checkValidity()) {
-            this.classList.add('was-validated');
-            return;
-        }
-        await handleFormSubmit(memberForm, memberModal, async () =>
-            loadTable(tableBody, renderTableRow, currentView)
-        );
-    };
-
     // Add event listener for view buttons
     document.querySelectorAll('.view-btn').forEach((btn) => {
         btn.addEventListener('click', async () => {
             currentView = btn.dataset.view;
             updateActiveViewButton(currentView);
             updateTableHeaders(currentView);
-            await loadTable(tableBody, renderTableRow, currentView);
+            await reloadMembers();
             applyColumnPreferences('members', currentView, tableHeaders, tableBody); // Stosowanie preferencji po załadowaniu widoku
         });
     });
 
 
     document.getElementById('setColumnsBtn')?.addEventListener('click', () => {
-        const view = currentView;
         const columns = Array.from(tableHeaders.querySelectorAll('th')).map(th => th.textContent.trim());
-        showColumnManagerModal('members', view, columns, tableHeaders, tableBody);
+        showColumnManagerModal('members', currentView, columns, tableHeaders, tableBody);
     });
 
     // Add event listener for table actions (edit/delete)
