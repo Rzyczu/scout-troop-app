@@ -18,7 +18,7 @@ export const loadTroops = async (tableBody) => {
             return;
         };
 
-        const tableHeaders = getTableHeaders(headersConfig);
+        const tableHeaders = getTableHeaders();
         troopsTableHeader.innerHTML = `<tr>${tableHeaders}</tr>`;
         tableBody.innerHTML = renderTableRows(troops);
         updateTableRowIds(tableBody);
@@ -28,26 +28,30 @@ export const loadTroops = async (tableBody) => {
 };
 
 export const renderTableRows = (troops) => {
-    return troops
-        .map((troop, index) => renderTableRow(troop, index))
-        .join('');
-};
+    return troops.map((troop) => {
+        const rowCells = headersConfig
+            .filter(header => header.key)
+            .map(header => {
+                const value = troop[header.key] || '-';
+                return `<td>${header.formatter ? header.formatter(value) : value}</td>`;
+            })
+            .join('');
 
-export const renderTableRow = (troop, index) => {
-    return `
+        return `
         <tr>
             <td class="dynamic-id"></td>
-            <td>${troop.name}</td>
-            <td>${troop.leader ? `${troop.leader.name} ${troop.leader.surname}` : '-'}</td>
+            ${rowCells}
             <td>
                 <button class="btn btn-secondary btn-sm editTroopBtn" data-id="${troop.id}">Edit</button>
                 <button class="btn btn-danger btn-sm deleteTroopBtn" data-id="${troop.id}">Delete</button>
             </td>
         </tr>
-    `;
+        `;
+    }).join('');
 };
 
-export const getTableHeaders = (headersConfig) => {
+
+export const getTableHeaders = () => {
     return headersConfig.map(header =>
         `<th>${header.label}</th>`
     ).join('');
