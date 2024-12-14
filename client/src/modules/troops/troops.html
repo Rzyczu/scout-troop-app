@@ -12,14 +12,19 @@
     <div id="toast-messages" class="toast-container position-fixed bottom-0 end-0 p-3"></div>
     <main class="container mt-4">
         <h1 class="mb-4">Troops</h1>
-        <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#troopModal" id="addTroopBtn">Add
-            Troop</button>
+        <div class="btn-group mb-3">
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#troopModal" id="addTroopBtn">Add
+                Troop
+            </button>
+            <button class="btn btn-outline-secondary" id="setColumnsBtn">Set Columns</button>
+
+        </div>
         <table class="table table-striped">
             <thead>
                 <tr>
-                    <th class="sortable" data-sort="id">ID <span class="sort-icon"></span></th>
-                    <th class="sortable" data-sort="name">Name <span class="sort-icon"></span></th>
-                    <th class="sortable" data-sort="leader">Leader <span class="sort-icon"></span></th>
+                    <th class=>ID</th>
+                    <th>Name</th>
+                    <th>Leader</th>
                     <th>Actions</th>
                 </tr>
             </thead>

@@ -2,56 +2,71 @@ import './troops.scss';
 import { loadTroops } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditTroop, handleDeleteTroop } from './components/form.js';
 import { sortTable, addSortableClassToHeaders, attachSortingToHeaders } from '../../utils/sortTable.js';
+import { showColumnManagerModal, applyColumnPreferences } from '../../utils/columnManager.js';
 import initializeFormValidation from '../../utils/formValidation.js';
+import headersConfig from './config/headers.js';
 
-// DOM Elements
+// ** DOM Elements **
 const troopsTableBody = document.getElementById('troopsTableBody');
 const troopsTableHeader = document.querySelector('thead');
 const troopForm = document.getElementById('troopForm');
 const troopModalLabel = document.getElementById('troopModalLabel');
 const troopModal = new bootstrap.Modal(document.getElementById('troopModal'));
 
-// Handle form submission
+const reloadTable = async () => {
+    await loadTroops(troopsTableBody);
+    addSortableClassToHeaders(troopsTableHeader, headersConfig);
+    attachSortingToHeaders(troopsTableHeader, troopsTableBody, sortTable);
+};
+
+// ** Handle form submission **
 troopForm.onsubmit = async function (event) {
     event.preventDefault();
     if (!this.checkValidity()) {
         this.classList.add('was-validated');
         return;
     }
-    await handleFormSubmit(troopForm, troopModal, async () => loadTroops(troopsTableBody));
+    await handleFormSubmit(troopForm, troopModal, reloadTable);
 };
 
-// Initialize module
+// ** Initialize module **
 document.addEventListener('DOMContentLoaded', async () => {
     initializeFormValidation();
 
     try {
-        // Load troops into the table
+        // ** Load troops into the table **
         await loadTroops(troopsTableBody);
 
-        addSortableClassToHeaders(troopsTableHeader);
+        // ** Add sorting to headers **
+        addSortableClassToHeaders(troopsTableHeader, headersConfig);
         attachSortingToHeaders(troopsTableHeader, troopsTableBody, sortTable);
 
-        // Add event listener for "Add Troop" button
+        // ** Apply column preferences **
+        applyColumnPreferences('troops', 'default', troopsTableHeader, troopsTableBody);
+
+        // ** Event listener for Add Troop button **
         document.getElementById('addTroopBtn').addEventListener('click', async () => {
             await resetForm(troopForm, troopModalLabel, ['troopId', 'troopName'], 'troopLeader');
             troopModal.show();
         });
 
-        // Add event listener for table actions (edit/delete)
+        // ** Event listener for Set Columns button **
+        document.getElementById('setColumnsBtn')?.addEventListener('click', () => {
+            const columns = Array.from(troopsTableHeader.querySelectorAll('th')).map(th => th.textContent.trim());
+            showColumnManagerModal('troops', 'default', columns, troopsTableHeader, troopsTableBody);
+        });
+
+        // ** Event listener for table actions (edit/delete) **
         troopsTableBody.addEventListener('click', async (event) => {
             const target = event.target;
 
-            // Handle Edit button
             if (target.classList.contains('editTroopBtn')) {
                 await handleEditTroop(target, troopModalLabel, troopModal);
-            }
-
-            // Handle Delete button
-            else if (target.classList.contains('deleteTroopBtn')) {
-                await handleDeleteTroop(target, async () => loadTroops(troopsTableBody));
+            } else if (target.classList.contains('deleteTroopBtn')) {
+                await handleDeleteTroop(target, reloadTable);
             }
         });
+
     } catch (error) {
         console.error('Error initializing troops module:', error);
     }

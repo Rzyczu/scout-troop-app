@@ -20,15 +20,16 @@ export function sortTable(tableBody, columnSelector, direction) {
     updateTableRowIds(tableBody);
 }
 
-export const addSortableClassToHeaders = (tableHeaders) => {
+export const addSortableClassToHeaders = (tableHeaders, headersConfig) => {
     const headers = tableHeaders.querySelectorAll('th');
-
-    headers.forEach((header) => {
-        if (!header.textContent.trim().toLowerCase().includes('actions') && header.textContent.trim().toLowerCase() !== 'id') {
+    console.log(headers)
+    headers.forEach((header, index) => {
+        if (headersConfig[index] && headersConfig[index].sortable) {
             header.classList.add('sortable');
         }
     });
 };
+
 
 export const attachSortingToHeaders = (usersTableHeader, usersTableBody, sortTable) => {
     let sortColumn = null;

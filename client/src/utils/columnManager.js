@@ -52,79 +52,64 @@ export const resetColumnPreferences = (module, view, tableHeaders, tableBody) =>
 export const showColumnManagerModal = (module, view, columns, tableHeaders, tableBody) => {
     const preferences = getColumnPreferences(module, view) || { columns, visibility: {} };
     const filteredColumns = columns.map(col => col.replace(/[\u2B07\u2B06]/g, '')).filter(col => col.toLowerCase() !== 'actions' && col.toLowerCase() !== 'id');
-    const modal = document.createElement('div');
-    modal.className = 'modal fade';
-    modal.id = 'columnManagerModal';
-    modal.innerHTML = `
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Manage Columns</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body">
-                    <table class="table table-bordered table-hover">
-                        <thead>
-                            <tr>
-                                <th>Column</th>
-                                <th>Visible</th>
-                            </tr>
-                        </thead>
-                        <tbody id="columnCheckboxList">
-                            ${filteredColumns.map(col => `
-                                <tr class="draggable-item" draggable="true">
-                                    <td>${col}</td>
-                                    <td class="text-center">
-                                        <label class="switch">
-                                            <input type="checkbox" id="col_${col}" data-column="${col}" ${preferences.visibility[col] !== false ? 'checked' : ''}>
-                                            <span class="slider round"></span>
-                                        </label>
-                                    </td>
+    let modal = document.getElementById('columnManagerModal');
+
+    // Sprawdzamy, czy modal już istnieje
+    if (!modal) {
+        modal = document.createElement('div');
+        modal.className = 'modal fade';
+        modal.id = 'columnManagerModal';
+        modal.innerHTML = `
+            <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Manage Columns</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <table class="table table-bordered table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Column</th>
+                                    <th>Visible</th>
                                 </tr>
-                            `).join('')}
-                        </tbody>
-                    </table>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-warning" id="resetColumnsBtn">Reset to Default</button>
-                    <button type="button" class="btn btn-primary" id="saveColumnChanges">Save Changes</button>
+                            </thead>
+                            <tbody id="columnCheckboxList"></tbody>
+                        </table>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="button" class="btn btn-warning" id="resetColumnsBtn">Reset to Default</button>
+                        <button type="button" class="btn btn-primary" id="saveColumnChanges">Save Changes</button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
+        `;
+        document.body.appendChild(modal);
+    }
 
-    document.body.appendChild(modal);
     const modalInstance = new bootstrap.Modal(modal);
     modalInstance.show();
 
     const columnList = document.getElementById('columnCheckboxList');
+    columnList.innerHTML = '';
 
-    let draggedItem = null;
+    filteredColumns.forEach((col) => {
+        const uniqueId = `col_${col.replace(/\s+/g, '_')}_${Math.random().toString(36).substr(2, 5)}`; // Unikalne id
+        const row = document.createElement('tr');
+        row.classList.add('draggable-item');
+        row.setAttribute('draggable', 'true');
 
-    document.querySelectorAll('.draggable-item').forEach(item => {
-        item.addEventListener('dragstart', (e) => {
-            draggedItem = item;
-            setTimeout(() => item.classList.add('hidden'), 0); // Dodaj klasę ukrywania
-        });
-
-        item.addEventListener('dragend', () => {
-            draggedItem.classList.remove('hidden');
-            draggedItem = null;
-        });
-
-        item.addEventListener('dragover', (e) => {
-            e.preventDefault();
-        });
-
-        item.addEventListener('drop', (e) => {
-            e.preventDefault();
-            if (item !== draggedItem && draggedItem && item.parentElement === columnList) {
-                const allItems = Array.from(columnList.querySelectorAll('.draggable-item'));
-                const dropIndex = allItems.indexOf(item);
-                columnList.insertBefore(draggedItem, dropIndex > allItems.indexOf(draggedItem) ? item.nextSibling : item);
-            }
-        });
+        row.innerHTML = `
+            <td>${col}</td>
+            <td class="text-center">
+                <label class="switch">
+                    <input type="checkbox" id="${uniqueId}" data-column="${col}" ${preferences.visibility[col] !== false ? 'checked' : ''}>
+                    <span class="slider round"></span>
+                </label>
+            </td>
+        `;
+        columnList.appendChild(row);
     });
 
     document.getElementById('saveColumnChanges').addEventListener('click', () => {
@@ -140,7 +125,6 @@ export const showColumnManagerModal = (module, view, columns, tableHeaders, tabl
         saveColumnPreferences(module, view, preferences);
         applyColumnPreferences(module, view, tableHeaders, tableBody);
         modalInstance.hide();
-        modal.remove();
     });
 
     document.getElementById('resetColumnsBtn').addEventListener('click', () => {
@@ -151,6 +135,5 @@ export const showColumnManagerModal = (module, view, columns, tableHeaders, tabl
             checkbox.checked = true;
         });
         modalInstance.hide();
-        modal.remove();
     });
 };
