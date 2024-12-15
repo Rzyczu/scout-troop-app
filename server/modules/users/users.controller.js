@@ -9,7 +9,12 @@ const usersController = {
             const gender = req.user.gender;
             const users = await usersService.fetchUsers(teamId);
 
-            res.status(200).json({ success: true, data: { users: users, gender: gender } });
+            const usersWithGender = users.map(user => ({
+                ...user,
+                gender: gender
+            }));
+
+            res.status(200).json({ success: true, data: usersWithGender });
         } catch (err) {
             sendError(res, errorMessages.users.fetchAll);
         }
@@ -39,18 +44,18 @@ const usersController = {
     },
 
     async createUser(req, res) {
-        const { user_id, email, password } = req.body;
+        const { id, email, password } = req.body;
         console.log("body")
-        console.log(user_id, email, password)
+        console.log(id, email, password)
 
 
-        if (!user_id || !email || !password || password.length < 6) {
+        if (!id || !email || !password || password.length < 6) {
             return sendError(res, errorMessages.users.create.validation);
         }
 
         try {
             const hashedPassword = await bcrypt.hash(password, 10);
-            await usersService.createUser(user_id, email, hashedPassword);
+            await usersService.createUser(id, email, hashedPassword);
             res.status(200).json({ success: true, message: 'User created successfully.' });
         } catch (err) {
             const error = err.code === '23505' ? errorMessages.users.create.duplicate : errorMessages.users.create.default;
@@ -59,11 +64,11 @@ const usersController = {
     },
 
     async updateUser(req, res) {
-        const { email, password } = req.body;
+        const { id, email, password } = req.body;
 
         try {
             const hashedPassword = password ? await bcrypt.hash(password, 10) : null;
-            await usersService.updateUser(req.params.id, email, hashedPassword);
+            await usersService.updateUser(id, email, hashedPassword);
             res.status(200).json({ success: true, message: 'User updated successfully.' });
         } catch (err) {
             sendError(res, errorMessages.users.update.default);
@@ -71,13 +76,17 @@ const usersController = {
     },
 
     async deleteUser(req, res) {
+        const userIdToDelete = req.params.id;
+        const currentUserId = req.user.user_id;
+        console.log(currentUserId)
+        console.log(userIdToDelete)
 
         try {
-            if (req.user.user_id === parseInt(req.params.id)) {
+            if (currentUserId === userIdToDelete) {
                 return sendError(res, errorMessages.users.delete.ownAccountDelete);
             }
 
-            const deleted = await usersService.deleteUser(req.params.id);
+            const deleted = await usersService.deleteUser(userIdToDelete);
             if (!deleted) {
                 return sendError(res, errorMessages.users.delete.notFound);
             }

@@ -49,6 +49,11 @@ module.exports = {
                     from: path.resolve(__dirname, 'src/components/navbar.html'), // Skąd kopiujemy
                     to: path.resolve(__dirname, 'dist/components'), // Dokąd kopiujemy
                 },
+                {
+                    from: path.resolve(__dirname, 'src/components/table/table.html'),
+                    to: path.resolve(__dirname, 'dist/components')
+                },
+
             ],
         }),
         new MiniCssExtractPlugin({

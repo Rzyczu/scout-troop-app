@@ -3,7 +3,7 @@ import { showToast, showConfirmationModal } from '../../../utils/ui.js';
 import { createSelectPopulator } from '../../../utils/selectFactory';
 
 export const populateUserSelect = createSelectPopulator({
-    valueField: 'user_id',
+    valueField: 'id',
     textField: (user) => `${user.name} ${user.surname}`,
     addNone: true,
 });
@@ -18,14 +18,14 @@ export const resetForm = async (form, modalLabel, fieldsToClear, selectUserField
 
     try {
         // Wypełnianie pola select
-        const response = await usersApi.fetchAllUsers();
+        const response = await usersApi.fetchAllMembers();
         const selectUser = selectUserField.querySelector('select');
         if (!selectUser) {
             console.warn(`Select element with ID '${selectUser.id}' not found.`);
             return;
         }
 
-        const members = Array.isArray(response.members) ? response.members : Object.values(response.members);
+        const members = Array.isArray(response) ? response : Object.values(response);
         await populateUserSelect(selectUser.id, members);
 
         selectUserField.classList.remove('d-none');
@@ -46,7 +46,7 @@ export const handleFormSubmit = async (form, modal, reloadUsers) => {
 
     const payload = {
 
-        user_id: userIdValue || null,
+        id: userIdValue || null,
         email: formData.get('email'),
     };
 
@@ -54,17 +54,14 @@ export const handleFormSubmit = async (form, modal, reloadUsers) => {
         payload.password = passwordValue;
     }
 
-
-    console.log(payload)
-
     try {
         if (userIdFromHiddenField) {
             // Aktualizacja użytkownika
-            await usersApi.updateUser(userIdFromHiddenField, payload);
+            await usersApi.update(userIdFromHiddenField, payload);
             showToast('User updated successfully!', 'success');
         } else {
             // Tworzenie nowego użytkownika
-            await usersApi.createUser(payload);
+            await usersApi.create(payload);
             showToast('User created successfully!', 'success');
         }
         modal.hide();
@@ -76,13 +73,12 @@ export const handleFormSubmit = async (form, modal, reloadUsers) => {
 
 export const handleEditUser = async (target, modalLabel, modal, selectUserField) => {
     const userId = target.dataset.id;
-
     try {
-        const user = await usersApi.fetchUser(userId);
+        const user = await usersApi.fetchById(userId);
         if (!user) throw new Error('User not found.');
 
         Object.entries({
-            userId: user.user_id,
+            userId: user.id,
             email: user.email,
         }).forEach(([key, value]) => {
             const field = document.getElementById(key);
@@ -110,7 +106,7 @@ export const handleDeleteUser = async (target, reloadUsers) => {
         );
 
         if (confirmed) {
-            await usersApi.deleteUser(userId);
+            await usersApi.delete(userId);
             showToast('User deleted successfully!', 'success');
             await reloadUsers();
         }

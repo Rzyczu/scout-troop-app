@@ -3,7 +3,7 @@ const pool = require('../../utils/db');
 const fetchAllMembers = async (teamId) => {
     const result = await pool.query(`
         SELECT 
-            u.id AS user_id,
+            u.id AS id,
             u.name,
             u.surname,
             u.date_birth,
@@ -34,7 +34,7 @@ const fetchAllMembers = async (teamId) => {
 const fetchMemberById = async (id, teamId) => {
     const result = await pool.query(`
         SELECT 
-            u.id AS user_id,
+            u.id AS id,
             u.name,
             u.surname,
             u.date_birth,

@@ -9,7 +9,13 @@ const membersController = {
             const teamId = req.user.team_id;
             const gender = req.user.gender;
             const members = await membersService.fetchAllMembers(teamId);
-            res.status(200).json({ success: true, data: { members: members, gender: gender } });
+
+            const membersWithGender = members.map(member => ({
+                ...member,
+                gender: gender
+            }));
+
+            res.status(200).json({ success: true, data: membersWithGender });
         } catch (err) {
             console.error('Error fetching members:', err);
             sendError(res, errorMessages.users.fetchAll);

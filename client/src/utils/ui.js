@@ -93,18 +93,16 @@ customAllowList.td = [];
 customAllowList.tbody = [];
 
 
-export function showTooltip(targetElement, generateMessageFn, position = "top") {
+export function showTooltip(targetElement, message, position = "top") {
     if (!targetElement) return;
-
-    // Dynamically generate tooltip message
-    const message = generateMessageFn();
 
     // Attach tooltip attributes
     targetElement.setAttribute('data-bs-toggle', 'tooltip');
     targetElement.setAttribute('data-bs-html', 'true'); // Allow HTML for better formatting
-    targetElement.setAttribute('title', message);
+    targetElement.setAttribute('title', typeof generateMessageFn === 'function' ? generateMessageFn() : generateMessageFn);
     targetElement.setAttribute('data-bs-placement', position);
     targetElement.setAttribute('allowList', customAllowList);
+    tooltip.className = 'custom-tooltip';
 
     const tooltip = new bootstrap.Tooltip(targetElement);
 

@@ -1,6 +1,11 @@
 import { ScoutRanks } from './enums';
 
-export const checkRankAdequacy = (achievedRank, openRank, dateOfBirth, gender) => {
+export const checkRankAdequacy = (member) => {
+    let achievedRank = member.achieved_rank;
+    let openRank = member.open_rank;
+    let dateOfBirth = member.date_birth;
+    let gender = member.gender;
+
     if (!achievedRank || !dateOfBirth) return 'red';
 
     const age = calculateAge(dateOfBirth);
