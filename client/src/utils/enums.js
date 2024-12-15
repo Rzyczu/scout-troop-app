@@ -19,28 +19,29 @@ export const ScoutFunctions = {
 };
 
 export const ScoutRanks = {
-    0: { short: '-', full: '-' },
+    0: { short: '-', full: '-', ageRange: { min: 0, max: 0 } },
     1: {
-        male: { short: 'mł.', full: 'Młodzik' },
-        female: { short: 'och.', full: 'Ochotniczka' }
+        male: { short: 'mł.', full: 'Młodzik', ageRange: { min: 11, max: 13 } },
+        female: { short: 'och.', full: 'Ochotniczka', ageRange: { min: 11, max: 13 } }
     },
     2: {
-        male: { short: 'wyw.', full: 'Wywiadowca' },
-        female: { short: 'trop.', full: 'Tropicielka' }
+        male: { short: 'wyw.', full: 'Wywiadowca', ageRange: { min: 12, max: 14 } },
+        female: { short: 'trop.', full: 'Tropicielka', ageRange: { min: 13, max: 15 } }
     },
     3: {
-        male: { short: 'ćw.', full: 'Ćwik' },
-        female: { short: 'sam.', full: 'Samarytanka' }
+        male: { short: 'ćw.', full: 'Ćwik', ageRange: { min: 13, max: 16 } },
+        female: { short: 'sam.', full: 'Samarytanka', ageRange: { min: 14, max: 17 } }
     },
     4: {
-        male: { short: 'HO.', full: 'Harcerz Orli' },
-        female: { short: 'wędr.', full: 'Wędrowniczka' }
+        male: { short: 'HO.', full: 'Harcerz Orli', ageRange: { min: 15, max: 18 } },
+        female: { short: 'wędr.', full: 'Wędrowniczka', ageRange: { min: 16, max: 20 } }
     },
     5: {
-        male: { short: 'HR', full: 'Harcerz Rzeczypospolitej' },
-        female: { short: 'HR', full: 'Harcerka Rzeczypospolitej' }
-    },
+        male: { short: 'HR', full: 'Harcerz Rzeczypospolitej', ageRange: { min: 18, max: 99 } },
+        female: { short: 'HR', full: 'Harcerka Rzeczypospolitej', ageRange: { min: 18, max: 99 } }
+    }
 };
+
 
 export const InstructorRanks = {
     0: { short: '-', full: '-' },

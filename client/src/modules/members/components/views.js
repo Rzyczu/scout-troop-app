@@ -79,22 +79,23 @@ export const updateActiveViewButton = (currentView) => {
 
 export const getTableHeaders = (view) => {
     return headersConfig[view].map(header =>
-        `<th>${header.label}</th>`
+        `<th data-key="${header.key || ''}">${header.label}</th>`
     ).join('');
 };
 
 export const renderTableRow = (member, _, view, gender) => {
     const columns = headersConfig[view] || [];
+    const rowClass = member.rankAdequacy;
     const rowCells = columns
         .filter(col => col.key)
         .map(col => {
             const value = member[col.key] || '-';
-            return `<td>${col.formatter ? col.formatter(value, gender) : value}</td>`;
+            return `<td data-key="${col.key}">${col.formatter ? col.formatter(value, gender) : value}</td>`;
         })
         .join('');
 
     return `
-    <tr>
+    <tr data-rank-adequacy="${member.rankAdequacy}">
         <td class="dynamic-id"></td>
         ${rowCells}
         <td>

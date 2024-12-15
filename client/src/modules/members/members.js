@@ -35,7 +35,7 @@ const populateRanks = createSelectPopulator({
 });
 
 // DOM elements
-const tableBody = document.getElementById('membersTableBody');
+const tableBody = document.getElementById('tableBody');
 const tableHeaders = document.getElementById('tableHeaders');
 const memberForm = document.getElementById('memberForm');
 const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
@@ -45,6 +45,7 @@ const exportViewSelect = document.getElementById('exportViewSelect');
 // Global variables
 let currentView = 'basic';
 let gender = null;
+let isAdequacyHighlighted = false;
 
 // Function: Update table headers dynamically based on the view
 const updateTableHeaders = (view) => {
@@ -84,6 +85,25 @@ const reloadMembers = async () => {
     updateTableHeaders(view);
     applyColumnPreferences('members', view, tableHeaders, tableBody);
 };
+
+const toggleAdequacyColors = () => {
+    const rows = document.querySelectorAll('#tableBody tr');
+    isAdequacyHighlighted = !isAdequacyHighlighted; // Przełączanie stanu (true <-> false)
+    rows.forEach(row => {
+        row.classList.remove('row-green', 'row-light-green', 'row-red');
+
+        if (isAdequacyHighlighted) {
+            const rankAdequacy = row.getAttribute('data-rank-adequacy');
+            if (rankAdequacy) {
+                row.classList.add(`row-${rankAdequacy}`);
+            }
+        }
+    });
+};
+
+document.getElementById('checkAdequacyBtn')?.addEventListener('click', () => {
+    toggleAdequacyColors();
+});
 
 
 // Initialize event listeners
@@ -147,6 +167,10 @@ document.addEventListener('DOMContentLoaded', async () => {
             updateTableHeaders(currentView);
             await reloadMembers();
             applyColumnPreferences('members', currentView, tableHeaders, tableBody); // Stosowanie preferencji po załadowaniu widoku
+            if (isAdequacyHighlighted) {
+                isAdequacyHighlighted = !isAdequacyHighlighted
+                toggleAdequacyColors();
+            }
         });
     });
 

@@ -1,7 +1,7 @@
 import membersApi from './api.js';
 import { showToast } from '../../../utils/ui.js';
 import { updateTableRowIds } from '../../../utils/tableUtils.js';
-import headersConfig from '../config/headers.js';
+import { checkRankAdequacy } from '../../../utils/adequacy.js';
 
 export const loadTable = async (tableBody, getTableRow, view) => {
     try {
@@ -19,6 +19,10 @@ export const loadTable = async (tableBody, getTableRow, view) => {
             `;
             return;
         };
+
+        members.forEach(member => {
+            member.rankAdequacy = checkRankAdequacy(member.achieved_rank, member.open_rank, member.date_birth, gender);
+        });
 
         tableBody.innerHTML = members.map((member, index) => getTableRow(member, index, view, gender)).join('');
         updateTableRowIds(tableBody);

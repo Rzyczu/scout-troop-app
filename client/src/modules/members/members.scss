@@ -1,1 +1,19 @@
 @import '../../styles/_table.scss';
+
+#tableBody tr.row-green {
+    --bs-table-bg: #7ebd8d !important;
+    background-color: #7ebd8d !important;
+    /* Zielony */
+}
+
+#tableBody tr.row-light-green {
+    --bs-table-bg: #c3e6cb !important;
+    background-color: #c3e6cb !important;
+    /* Jasnozielony */
+}
+
+#tableBody tr.row-red {
+    --bs-table-bg: #fdb5bb !important;
+    background-color: #fdb5bb !important;
+    /* Czerwony */
+}
