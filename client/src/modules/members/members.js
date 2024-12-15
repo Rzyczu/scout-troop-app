@@ -2,7 +2,7 @@ import './members.scss';
 import { sortTable, addSortableClassToHeaders, attachSortingToHeaders } from '../../utils/sortTable.js';
 import initializeFormValidation from '../../utils/formValidation.js';
 import membersApi from './components/api.js';
-import { showToast } from '../../utils/ui.js';
+import { showToast, showTooltip } from '../../utils/ui.js';
 import { getTableHeaders, renderTableRow, filterMembersByView, updateActiveViewButton } from './components/views.js';
 import { loadTable } from './components/table.js';
 import { resetForm, handleFormSubmit, handleEditMember, handleDeleteMember } from './components/form.js';
@@ -41,6 +41,7 @@ const memberForm = document.getElementById('memberForm');
 const memberModal = new bootstrap.Modal(document.getElementById('memberModal'));
 const modalLabel = document.getElementById('memberModalLabel');
 const exportViewSelect = document.getElementById('exportViewSelect');
+const adequacyInfoIcon = document.getElementById('adequacyInfoIcon');
 
 // Global variables
 let currentView = 'basic';
@@ -66,6 +67,36 @@ const fetchAndPopulateTroops = async () => {
         showToast('Failed to load troops.', 'danger');
     }
 };
+
+const generateRankAdequacyMessage = () => {
+    const roles = { 0: 'male', 1: 'female' };
+    const titles = { male: 'Harcerze', female: 'Harcerki' };
+    const genderRole = roles[gender];
+    let message = `<strong> ${titles[genderRole]}</strong>`;
+    message += `<table class="adequacy-table">
+        <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Age</th>
+            </tr>
+        </thead>
+        <tbody>`;
+
+    Object.values(ScoutRanks).forEach(rank => {
+        if (rank[genderRole]) {
+            const { full, ageRange } = rank[genderRole];
+            message += `
+                <tr>
+                    <td>${full}</td>
+                    <td>${ageRange.min} - ${ageRange.max} lat</td>
+                </tr>`;
+        }
+    });
+
+    message += `</tbody></table>`;
+    return message;
+};
+
 
 // Add event listener for form submission
 memberForm.onsubmit = async function (event) {
@@ -120,7 +151,12 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateTableHeaders(currentView);
     applyColumnPreferences('members', currentView, tableHeaders, tableBody);
 
+    console.log("xd")
+
     await reloadMembers();
+
+    console.log(generateRankAdequacyMessage())
+    showTooltip(adequacyInfoIcon, generateRankAdequacyMessage, "bottom");
 
     updateTableRowIds(tableBody);
 

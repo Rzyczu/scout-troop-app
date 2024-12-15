@@ -52,7 +52,7 @@ table {
         left: 0;
         right: 0;
         bottom: 0;
-        background-color: #ccc;
+        background-color: lighten($primary, 50%);
         transition: 0.4s;
         border-radius: 34px;
 
@@ -70,7 +70,7 @@ table {
     }
 
     input:checked+.slider {
-        background-color: #2196F3;
+        background-color: $primary;
     }
 
     input:checked+.slider:before {
@@ -82,8 +82,8 @@ table {
     display: none !important;
 }
 
-$default-arrow-color: rgb(112, 183, 255);
-$active-arrow-color: black;
+$default-arrow-color: lighten($primary, 30%);
+$active-arrow-color: darken($primary, 30%);
 
 .sortable {
     position: relative;

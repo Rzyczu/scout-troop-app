@@ -81,3 +81,32 @@ export function showConfirmationModal(title, message) {
         bootstrapModal.show();
     });
 }
+
+const customAllowList = bootstrap.Tooltip.Default.allowList;
+
+// Dodaj obsługę tabelki oraz jej elementów
+customAllowList.table = [];
+customAllowList.thead = [];
+customAllowList.tr = [];
+customAllowList.th = [];
+customAllowList.td = [];
+customAllowList.tbody = [];
+
+
+export function showTooltip(targetElement, generateMessageFn, position = "top") {
+    if (!targetElement) return;
+
+    // Dynamically generate tooltip message
+    const message = generateMessageFn();
+
+    // Attach tooltip attributes
+    targetElement.setAttribute('data-bs-toggle', 'tooltip');
+    targetElement.setAttribute('data-bs-html', 'true'); // Allow HTML for better formatting
+    targetElement.setAttribute('title', message);
+    targetElement.setAttribute('data-bs-placement', position);
+    targetElement.setAttribute('allowList', customAllowList);
+
+    const tooltip = new bootstrap.Tooltip(targetElement);
+
+    return tooltip;
+}

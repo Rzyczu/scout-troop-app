@@ -17,3 +17,57 @@
     background-color: #fdb5bb !important;
     /* Czerwony */
 }
+
+.info-icon-container {
+    position: relative;
+    display: inline-block;
+    transform: translate(-50%, 25%);
+
+    .info-icon {
+        width: 20px;
+        height: 20px;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        font-size: 14px;
+        font-weight: bold;
+        color: white;
+        background-color: $primary;
+        border-radius: 50%;
+
+        cursor: pointer;
+        user-select: none;
+        transition: background-color 0.2s ease-in-out;
+
+        &:hover {
+            background-color: darken($primary, 10%);
+        }
+
+        .adequacy-table {
+            background-color: transparent !important;
+            border-collapse: collapse;
+            width: 100%;
+        }
+
+        .adequacy-table th,
+        .adequacy-table td {
+            background-color: transparent !important;
+            border: 1px solid rgba(0, 0, 0, 0.1);
+            color: #333;
+            padding: 8px;
+            text-align: center;
+            text-align: left !important;
+        }
+
+        .adequacy-table th {
+            font-weight: bold;
+            background-color: rgba(0, 0, 0, 0.05) !important;
+            text-align: left !important;
+        }
+    }
+
+    &:hover .custom-tooltip {
+        visibility: visible;
+        opacity: 1;
+    }
+}
