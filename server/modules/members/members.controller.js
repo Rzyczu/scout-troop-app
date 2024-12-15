@@ -57,7 +57,14 @@ const membersController = {
                 return sendError(res, errorMessages.users.fetchSingle.notFound);
             }
 
-            if (currentMember.function === 2 && scout.function !== 2) {
+            if (currentMember.function == 2 && scout.function != 2) {
+                console.log("current")
+                console.log(currentMember.function)
+                console.log("change")
+                console.log(scout.function)
+                console.log(currentMember.function !== scout.function)
+                console.log(currentMember.function != scout.function)
+
                 const isLeader = await membersService.checkIfUserIsTroopLeader(req.params.id);
                 if (isLeader) {
                     return sendError(res, errorMessages.users.update.cannotChangeScoutFunction);

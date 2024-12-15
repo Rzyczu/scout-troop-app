@@ -17,7 +17,7 @@ export const resetForm = (form, modalLabel, fieldsToClear, selectFieldsToClear) 
 
 export const handleFormSubmit = async (form, modal, reloadMembers) => {
     const formData = new FormData(form);
-    const troopIdValue = formData.get('troop_id');
+    const troopIdValue = formData.get('troopSelect');
 
     const payload = {
         user_id: formData.get('userId'),
@@ -38,7 +38,7 @@ export const handleFormSubmit = async (form, modal, reloadMembers) => {
             open_rank: formData.get('openRank'),
             achieved_rank: formData.get('achievedRank'),
             instructor_rank: formData.get('instructorRank'),
-            troop_id: troopIdValue === '0' ? null : troopIdValue,
+            troop_id: formData.get('troopSelect'),
         },
     };
 
@@ -79,7 +79,7 @@ export const handleEditMember = async (target, modalLabel, modal) => {
             openRank: member.open_rank || '0',
             achievedRank: member.achieved_rank || '0',
             instructorRank: member.instructor_rank || '0',
-            troop_id: member.troop_id ? member.troop_id : '0',
+            troopSelect: member.troop_id || '0',
             userId: memberId,
         }).forEach(([key, value]) => {
             const field = document.getElementById(key);
