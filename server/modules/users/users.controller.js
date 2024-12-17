@@ -48,7 +48,6 @@ const usersController = {
         console.log("body")
         console.log(id, email, password)
 
-
         if (!id || !email || !password || password.length < 6) {
             return sendError(res, errorMessages.users.create.validation);
         }
@@ -58,8 +57,15 @@ const usersController = {
             await usersService.createUser(id, email, hashedPassword);
             res.status(200).json({ success: true, message: 'User created successfully.' });
         } catch (err) {
-            const error = err.code === '23505' ? errorMessages.users.create.duplicate : errorMessages.users.create.default;
-            sendError(res, error);
+            if (err.code === '23505') {
+                const isLoginDuplicate = err.detail.includes('(user_id)');
+                const error = isLoginDuplicate
+                    ? errorMessages.users.create.duplicateLogin
+                    : errorMessages.users.create.duplicateEmail;
+                sendError(res, error);
+            } else {
+                sendError(res, errorMessages.users.create.default);
+            }
         }
     },
 

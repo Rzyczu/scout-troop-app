@@ -1,13 +1,5 @@
 import usersApi from './api.js';
 import { showToast, showConfirmationModal } from '../../../utils/ui.js';
-import { createSelectPopulator } from '../../../utils/selectFactory';
-
-export const populateUserSelect = createSelectPopulator({
-    valueField: 'id',
-    textField: (user) => `${user.name} ${user.surname}`,
-    addNone: true,
-});
-
 
 export const resetForm = async (form, modalLabel, fieldsToClear, selectUserField) => {
     form.reset();
@@ -16,22 +8,8 @@ export const resetForm = async (form, modalLabel, fieldsToClear, selectUserField
         if (field) field.value = '';
     });
 
-    try {
-        // Wypełnianie pola select
-        const response = await usersApi.fetchAllMembers();
-        const selectUser = selectUserField.querySelector('select');
-        if (!selectUser) {
-            console.warn(`Select element with ID '${selectUser.id}' not found.`);
-            return;
-        }
 
-        const members = Array.isArray(response) ? response : Object.values(response);
-        await populateUserSelect(selectUser.id, members);
-
-        selectUserField.classList.remove('d-none');
-    } catch (error) {
-        showToast(error.message || 'Failed to load users for the select field.', 'danger');
-    }
+    selectUserField.classList.remove('d-none');
 
     modalLabel.textContent = 'Add User';
 };

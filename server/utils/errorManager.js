@@ -32,7 +32,8 @@ export const errorMessages = {
         },
         create: {
             default: { error: 'Failed to create user.', code: 'USER_CREATE_FAILED' },
-            duplicate: { error: 'User already exists.', code: 'USER_DUPLICATE' },
+            duplicateLogin: { error: 'User already exists.', code: 'USER_DUPLICATE' },
+            duplicateEmail: { error: 'Email is already taken.', code: 'EMAIL_DUPLICATE' },
             validation: { error: 'Invalid input data.', code: 'USER_INVALID_DATA' },
         },
         update: {

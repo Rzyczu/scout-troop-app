@@ -12,13 +12,14 @@ const fetchUsers = async (teamId) => {
         FROM 
             users u
         INNER JOIN 
-            users_login ul ON u.id = ul.id
+            users_login ul ON u.id = ul.user_id
         LEFT JOIN 
-            users_scout us ON u.id = us.id
+            users_scout us ON u.id = us.user_id
         LEFT JOIN 
             troops t ON us.troop_id = t.id
         WHERE 
             u.team_id = $1
+            
     `, [teamId]);
     return result.rows;
 };
@@ -55,9 +56,9 @@ const fetchUserById = async (userId, teamId) => {
         LEFT JOIN 
             troops t ON us.troop_id = t.id
         WHERE 
-            ul.id = $1 AND u.team_id = $2
+            u.id = $1 AND u.team_id = $2
     `, [userId, teamId]);
-    return result.rows[0];
+    return result.rows[0] || null;
 };
 
 const createUser = async (userId, email, hashedPassword) => {
@@ -77,7 +78,7 @@ const updateUser = async (userId, email, hashedPassword = null) => {
         : `
             UPDATE users_login
             SET mail = $1
-            WHERE id = $2
+            WHERE user_id = $2
         `;
 
     const values = hashedPassword ? [email, hashedPassword, userId] : [email, userId];

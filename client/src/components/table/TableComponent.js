@@ -79,11 +79,14 @@ class TableComponent {
         try {
             const response = await this.api.fetchAll();
             this.tableHeaders.innerHTML = this.getTableHeaders();
-
+            console.clear()
+            console.log(response)
             if (response.length === 0) {
                 this.tableBody.innerHTML = `<tr><td colspan="${this.headersConfig.length}" class="text-center">No items to display.</td></tr>`;
                 return;
             }
+
+            this.gender = response[0].gender || null;
 
             if (this.enableAdequacy) {
                 response.forEach(item => {
@@ -112,6 +115,10 @@ class TableComponent {
         } catch (error) {
             console.error('Failed to reload table:', error);
         }
+    }
+
+    getGender() {
+        return this.gender;
     }
 
     getTableHeaders() {
