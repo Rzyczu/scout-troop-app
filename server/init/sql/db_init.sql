@@ -55,3 +55,22 @@ CREATE TABLE IF NOT EXISTS users_scout (
     instructor_rank INT NOT NULL,
     troop_id INT REFERENCES troops(id) ON DELETE SET NULL
 );
+
+
+
+
+
+
+
+
+
+-- test
+CREATE TABLE IF NOT EXISTS user_counter (
+    id SERIAL PRIMARY KEY,
+    current_number INT NOT NULL DEFAULT 0
+);
+
+-- Ustaw początkowy numer, jeśli tabela jest pusta
+INSERT INTO user_counter (current_number)
+SELECT 0
+WHERE NOT EXISTS (SELECT 1 FROM user_counter);

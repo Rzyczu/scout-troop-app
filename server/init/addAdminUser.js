@@ -13,9 +13,16 @@ const addAdminUser = async () => {
         const client = await pool.connect();
         try {
             const insertTeamSQL = `
-            INSERT INTO teams (name, gender)
-            VALUES ('exampleTeam1', 0)
-            ON CONFLICT DO NOTHING;
+            DO $$ 
+BEGIN 
+  -- Check if the team already exists
+  IF NOT EXISTS (SELECT 1 FROM teams WHERE name = 'exampleTeam1' AND gender = 0) THEN
+    -- Insert the team only if it does not exist
+    INSERT INTO teams (name, gender)
+    VALUES ('exampleTeam1', 0);
+  END IF;
+END $$;
+
         `;
 
             await client.query(insertTeamSQL);
