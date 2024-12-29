@@ -5,10 +5,11 @@ const authController = {
     async login(req, res) {
         try {
             const { email, password } = req.body;
-            const { token } = await authService.login(email, password);
+            const { token, gender } = await authService.login(email, password);
 
             res.cookie('token', token, { httpOnly: true, secure: true });
-            res.status(200).json({ success: true, token: token });
+            console.log(token, gender)
+            res.status(200).json({ success: true, token: token, gender: gender });
         } catch (error) {
             sendError(res, error, error.code === 'LOGIN_INVALID_CREDENTIALS' ? 401 : 400);
         }

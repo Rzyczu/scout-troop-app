@@ -36,6 +36,7 @@ const authService = {
 
         const user = result.rows[0];
 
+        console.log(user)
         if (!user) {
             throwError(errorMessages.login.invalidCredentials);
         }
@@ -50,12 +51,12 @@ const authService = {
         }
 
         const token = jwt.sign(
-            { user_id: user.id, function: user.function, team_id: user.team_id, gender: user.gender },
+            { user_id: user.id, function: user.function, team_id: user.team_id },
             JWT_SECRET,
             { expiresIn: '1h' }
         );
 
-        return { token };
+        return { token, gender: user.gender };
     },
 
 

@@ -7,7 +7,6 @@ export default class ColumnManager {
         this.tableHeaders = tableHeaders;
         this.tableBody = tableBody;
         this.preferences = this.getColumnPreferences() || this.getDefaultPreferences();
-        console.log(this.preferences)
     }
 
     getColumnPreferences() {
@@ -33,8 +32,6 @@ export default class ColumnManager {
 
 
     getDefaultPreferences() {
-        console.log(this.tableHeaders)
-
         const headers = Array.from(this.tableHeaders.querySelectorAll('th.sortable'));
         return headers.map(th => ({
             column: th.textContent.trim(),

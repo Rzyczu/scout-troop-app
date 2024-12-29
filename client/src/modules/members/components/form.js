@@ -38,10 +38,10 @@ export const handleFormSubmit = async (form, modal, reloadMembers) => {
             open_rank: formData.get('openRank'),
             achieved_rank: formData.get('achievedRank'),
             instructor_rank: formData.get('instructorRank'),
-            troop_id: formData.get('troopSelect'),
+            troop_id: formData.get('troopSelect') === '0' ? null : formData.get('troopSelect'),
         },
     };
-
+    console.log(payload)
     try {
         if (payload.user_id) {
             // Aktualizacja członka

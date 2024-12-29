@@ -7,6 +7,10 @@ export const handleLoginSubmit = async (form, onSuccess) => {
 
     try {
         const result = await api.login(payload);
+        if (result.gender) {
+            localStorage.setItem('gender', String(result.gender));
+        }
+
         onSuccess();
     } catch (error) {
         showToast(error.message || 'Failed to login.', 'danger');

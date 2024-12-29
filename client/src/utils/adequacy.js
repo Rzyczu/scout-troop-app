@@ -4,7 +4,7 @@ export const checkRankAdequacy = (member) => {
     let achievedRank = member.achieved_rank;
     let openRank = member.open_rank;
     let dateOfBirth = member.date_birth;
-    let gender = member.gender;
+    let gender = Number(localStorage.getItem('gender'));
 
     if (!achievedRank || !dateOfBirth) return 'red';
 

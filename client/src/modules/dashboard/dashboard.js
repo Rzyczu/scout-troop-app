@@ -1,7 +1,5 @@
 import './dashboard.scss';
 
-const token = localStorage.getItem('token');
-
 // Pobieranie danych z nowego endpointu /api/dashboard
 // fetch('/api/dashboard', {
 //     method: 'GET',

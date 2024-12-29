@@ -16,10 +16,9 @@ class TableComponent {
         this.exportEnabled = exportEnabled;
         this.columnManagerEnabled = columnManagerEnabled;
         this.enableAdequacy = enableAdequacy;
-
+        this.gender = Number(localStorage.getItem('gender'));
         this.currentView = 'default';
         this.isAdequacyHighlighted = false;
-
         if (Array.isArray(headersConfig)) {
             this.headersConfig = { default: headersConfig }; this.views = [];
             this.views = ['default'];
@@ -32,7 +31,6 @@ class TableComponent {
 
 
         console.clear()
-        console.log(this.views)
 
         this.container = document.getElementById(containerId);
         if (!this.container) {
@@ -78,8 +76,10 @@ class TableComponent {
                 });
             }
 
-            if (this.views > 1)
+
+            if (this.views.length > 1) {
                 this.generateViewButtons();
+            }
 
             if (this.enableAdequacy) {
                 this.generateAdequacyControls();
@@ -101,13 +101,11 @@ class TableComponent {
     async loadTable() {
         try {
             const response = await this.api.fetchAll();
-            console.log(response)
+            //console.log(response)
             if (response.length === 0) {
                 this.tableBody.innerHTML = `<tr><td colspan="${this.headersConfig.length}" class="text-center">No items to display.</td></tr>`;
                 return;
             }
-
-            this.gender = response[0].gender || null;
 
             if (this.enableAdequacy) {
                 response.forEach(item => {
@@ -137,14 +135,11 @@ class TableComponent {
         }
     }
 
-    getGender() {
-        return this.gender;
-    }
-
     getTableHeaders() {
         const headers = this.headersConfig[this.currentView] || this.headersConfig['default'];
+        //console.log(headers)
         return headers.map(header => `
-            <th data-key="${header.key || ''}}">
+            <th data-key="${header.key || ''}">
                 ${header.label}
             </th>`).join('');
     }
@@ -158,7 +153,7 @@ class TableComponent {
         const rowCells = headers.filter(col => col.key).map(col => {
             const value = item[col.key];
             const formattedValue = value !== undefined && value !== null
-                ? (col.formatter ? col.formatter(value, item.gender) : value)
+                ? (col.formatter ? col.formatter(value, this.gender) : value)
                 : '-';
             return `<td>${formattedValue}</td>`;
         }).join('');
@@ -175,6 +170,8 @@ class TableComponent {
     }
 
     generateViewButtons() {
+        const tableControls = this.container.querySelector('.table-controls');
+
         const viewButtonsContainer = document.createElement('div');
         viewButtonsContainer.classList.add('btn-group', 'view-buttons-group');
         viewButtonsContainer.setAttribute('role', 'group');
@@ -190,22 +187,29 @@ class TableComponent {
             button.addEventListener('click', async () => {
                 this.currentView = view;
                 this.updateActiveViewButton(view);
+                this.tableHeaders.innerHTML = this.getTableHeaders();
                 await this.reloadTable();
-                if (this.columnManagerEnabled && this.columnManager) {
+                this.tableSorter = new TableSorter({
+                    tableHeaders: this.tableHeaders,
+                    tableBody: this.tableBody,
+                    headersConfig: this.headersConfig[this.currentView] || this.headersConfig['default']
+                });
+
+                if (this.columnManagerEnabled) {
                     this.columnManager = new ColumnManager({
                         module: this.containerId,
-                        view: view,
+                        view: this.currentView,
                         tableHeaders: this.tableHeaders,
                         tableBody: this.tableBody,
                     });
+                    this.columnManager.applyColumnPreferences(); // Zastosowanie preferencji kolumn
                 }
             });
-
             viewButtonsContainer.appendChild(button);
         });
 
-        const tableControls = this.container.querySelector('.table-controls');
         tableControls.prepend(viewButtonsContainer);
+        this.updateActiveViewButton(this.currentView);
     }
 
     generateAdequacyControls() {

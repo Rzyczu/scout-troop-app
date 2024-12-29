@@ -16,8 +16,9 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        await handleLoginSubmit(this, () => {
+        await handleLoginSubmit(this, (response) => {
             window.location.href = '/dashboard';
         });
     };
+
 });

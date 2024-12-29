@@ -6,15 +6,9 @@ const usersController = {
     async fetchUsers(req, res) {
         try {
             const teamId = req.user.team_id;
-            const gender = req.user.gender;
             const users = await usersService.fetchUsers(teamId);
 
-            const usersWithGender = users.map(user => ({
-                ...user,
-                gender: gender
-            }));
-
-            res.status(200).json({ success: true, data: usersWithGender });
+            res.status(200).json({ success: true, data: users });
         } catch (err) {
             sendError(res, errorMessages.users.fetchAll);
         }
